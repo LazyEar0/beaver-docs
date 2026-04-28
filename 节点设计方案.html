@@ -2155,7 +2155,9 @@ body {
 // ===== Tab Switch =====
 function switchTab(idx) {
   document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', i===idx));
-  document.querySelectorAll('.page-section').forEach((s,i) => s.classList.toggle('active', i===idx));
+  document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+  var target = document.getElementById('sec' + idx);
+  if (target) target.classList.add('active');
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
