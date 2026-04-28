@@ -1612,16 +1612,19 @@ body {
     </div>
     <div class="config-help" style="margin-bottom:10px">独立于触发方式，始终可配置。下游通过 <code>${trigger_1.参数名}</code> 引用</div>
     <div id="triggerParamList">
-      <!-- 已配置参数卡片（只读态）-->
-      <div class="tparam-card" onclick="expandTriggerParam(this)" style="cursor:pointer">
-        <div class="tparam-card-header">
+      <!-- 已配置参数卡片（默认折叠）-->
+      <div class="tparam-card">
+        <div class="tparam-card-header" onclick="expandTriggerParam(this.closest('.tparam-card'))" style="cursor:pointer">
           <div style="display:flex;align-items:center;gap:6px">
             <span class="tparam-index">1</span>
             <span class="tparam-label">orderId</span>
             <span class="badge badge-primary" style="font-size:10px">String</span>
             <span class="tparam-required-tag">必填</span>
           </div>
-          <button onclick="event.stopPropagation();removeTriggerParam(this)" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:14px;padding:2px 4px">×</button>
+          <div style="display:flex;align-items:center;gap:4px">
+            <span class="tparam-chevron" style="font-size:10px;color:var(--text-muted);transition:transform .2s">▼</span>
+            <button onclick="event.stopPropagation();removeTriggerParam(this)" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:14px;padding:2px 4px">×</button>
+          </div>
         </div>
         <div class="tparam-ref">${trigger_1.orderId}</div>
         <!-- 展开编辑区（默认收起）-->
@@ -2583,10 +2586,14 @@ function addParam(containerId, nodeCode) {
 // 开始节点参数卡片交互
 function expandTriggerParam(card) {
   const body = card.querySelector('.tparam-edit-body');
+  const chevron = card.querySelector('.tparam-chevron');
+  const ref = card.querySelector('.tparam-ref');
   if (!body) return;
   const isOpen = body.style.display !== 'none';
   body.style.display = isOpen ? 'none' : 'block';
   card.style.borderColor = isOpen ? '' : 'var(--primary)';
+  if (chevron) chevron.style.transform = isOpen ? '' : 'rotate(180deg)';
+  if (ref) ref.style.display = isOpen ? '' : 'none';
 }
 
 function removeTriggerParam(btn) {
