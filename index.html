@@ -300,6 +300,40 @@ body {
 .param-name { font-size: 13px; font-weight: 600; color: var(--text); font-family: var(--font-mono); }
 .param-ref  { font-size: 11px; color: var(--text-muted); font-family: var(--font-mono); }
 
+/* ===== trigger param card ===== */
+.tparam-card {
+  border: 1px solid var(--border); border-radius: 8px;
+  padding: 10px 13px; margin-bottom: 8px;
+  transition: var(--transition); background: var(--surface);
+}
+.tparam-card:hover { border-color: var(--primary); }
+.tparam-card-new { border-color: rgba(103,80,164,0.35); border-style: dashed; background: rgba(103,80,164,0.02); }
+.tparam-card-header {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;
+}
+.tparam-index {
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--primary); color: #fff;
+  font-size: 10px; font-weight: 700;
+  display: inline-flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.tparam-label { font-size: 13px; font-weight: 600; color: var(--text); font-family: var(--font-mono); }
+.tparam-required-tag {
+  font-size: 10px; color: #e53935; border: 1px solid #e53935;
+  border-radius: 3px; padding: 0 4px; line-height: 16px;
+}
+.tparam-ref { font-size: 11px; color: var(--text-muted); font-family: var(--font-mono); padding-left: 24px; }
+.tparam-row {
+  display: flex; gap: 10px; margin-bottom: 8px;
+}
+.tparam-field {
+  flex: 1; display: flex; flex-direction: column; gap: 3px;
+}
+.tparam-label-text {
+  font-size: 11px; color: var(--text-secondary); font-weight: 500;
+}
+
 .add-link {
   font-size: 12px; color: var(--primary); font-weight: 600;
   cursor: pointer; padding: 5px 0;
@@ -1082,7 +1116,7 @@ body {
 <!-- ====== TAB 1: Connection System ====== -->
 <div class="page-section" id="sec1">
 <h2 class="section-title">连线与端口系统</h2>
-<p class="section-desc">节点通过端口和连线实现流程编排。不同节点类型有不同的端口布局和连线语义。<br>异常分支在节点高级配置中开启后，节点右侧增加橙色异常出口端口。</p>
+<p class="section-desc">节点通过端口和连线实现流程编排。不同节点类型有不同的端口布局和连线语义。<br>异常出口（橙色虚线端口）默认存在于节点右侧，无需手动开启；连接异常出口到统一的错误处理节点即可。</p>
 
 <div class="category-label">端口布局规则</div>
 <table class="spec-table">
@@ -1090,10 +1124,10 @@ body {
 <tbody>
 <tr><td>⚡ 开始节点</td><td>无</td><td>1 个</td><td>—</td></tr>
 <tr><td>🏁 结束节点</td><td>1 个</td><td>无</td><td>—</td></tr>
-<tr><td>🔀 IF 条件</td><td>1 个</td><td>2 个（TRUE绿/FALSE红）</td><td>开启异常分支后：+1 异常出口（橙色虚线）</td></tr>
-<tr><td>🔃 Switch</td><td>1 个</td><td>N 个（最多50，各带分支名）</td><td>开启异常分支后：+1 异常出口（橙色虚线）</td></tr>
-<tr><td>🔄 循环</td><td>1 个</td><td>完成 + 中断</td><td>底部：循环体端口（蓝色）；开启异常分支后：+1 异常出口（橙色虚线）</td></tr>
-<tr><td>其余节点</td><td>1 个</td><td>1 个</td><td>开启异常分支后：+1 异常出口（橙色虚线）</td></tr>
+<tr><td>🔀 IF 条件</td><td>1 个</td><td>2 个（TRUE绿/FALSE红）</td><td>右侧：+1 异常出口（橙色虚线，默认存在）</td></tr>
+<tr><td>🔃 Switch</td><td>1 个</td><td>N 个（最多50，各带分支名）</td><td>右侧：+1 异常出口（橙色虚线，默认存在）</td></tr>
+<tr><td>🔄 循环</td><td>1 个</td><td>完成 + 中断</td><td>底部：循环体端口（蓝色）；右侧：+1 异常出口（橙色虚线，默认存在）</td></tr>
+<tr><td>其余节点</td><td>1 个</td><td>1 个</td><td>右侧：+1 异常出口（橙色虚线，默认存在）</td></tr>
 </tbody>
 </table>
 
@@ -1105,7 +1139,7 @@ body {
 <tr><td>TRUE 分支</td><td><span class="line-demo" style="background:var(--success)"></span> 实线 绿色 + 标签</td><td>IF 条件成立时的分支路径</td></tr>
 <tr><td>FALSE 分支</td><td><span class="line-demo" style="background:var(--danger)"></span> 实线 红色 + 标签</td><td>IF 条件不成立时的分支路径</td></tr>
 <tr><td>Switch 分支</td><td><span class="line-demo" style="background:var(--primary)"></span> 实线 紫色 + 分支名标签</td><td>Switch 每个分支的路径</td></tr>
-<tr><td>异常连线</td><td><span class="line-demo-dashed" style="border-color:var(--warning)"></span> 虚线 橙色</td><td>节点异常时流向异常处理分支；不需要异常策略配置，所有异常适用统一的错误处理节点</td></tr>
+<tr><td>异常连线</td><td><span class="line-demo-dashed" style="border-color:var(--warning)"></span> 虚线 橙色</td><td>节点发生异常时流向异常处理分支；所有异常统一路由到连接的错误处理节点，无需额外配置策略</td></tr>
 <tr><td>循环体连线</td><td><span class="line-demo" style="background:var(--info)"></span> 实线 蓝色</td><td>循环节点底部端口到循环体节点的连线</td></tr>
 </tbody>
 </table>
@@ -1133,18 +1167,8 @@ body {
 </div>
 </div>
 
-<div class="category-label">异常策略配置说明</div>
-<p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px">异常策略在节点高级配置区“错误处理”区块中配置。共有五种策略：</p>
-<table class="spec-table">
-<thead><tr><th>策略</th><th>关键字</th><th>说明</th></tr></thead>
-<tbody>
-<tr><td>终止流程</td><td><code>stop</code></td><td>立即停止整条流程，记录错误（默认）</td></tr>
-<tr><td>忽略并继续</td><td><code>continue</code></td><td>跳过异常，流程继续往下执行</td></tr>
-<tr><td>自动重试</td><td><code>retry</code></td><td>按配置的次数（默认3）和间隔（默认5秒）重试；重试耗尽后降级为：终止流程 / 忽略并继续 / 转人工处理</td></tr>
-<tr><td>转人工处理</td><td><code>manual</code></td><td>流程挂起，通知人工介入处理；需配置挂起等待超时（默认24小时）</td></tr>
-<tr><td>挂起等待回调</td><td><code>callback</code></td><td>流程挂起，等待外部系统主动回调恢复；适合异步处理场景；需配置挂起等待超时（默认24小时）</td></tr>
-</tbody>
-</table>
+<div class="category-label">异常连线说明</div>
+<p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px">所有节点右侧默认带有橙色虚线异常出口端口，节点发生异常时自动路由到该端口连接的错误处理节点。无需在节点内配置异常策略，异常处理逻辑完全由连线结构决定。</p>
 <div class="canvas-bg">
 <div class="flow-demo" style="flex-wrap:wrap;gap:8px">
   <!-- HTTP节点带异常出口 -->
@@ -1183,7 +1207,7 @@ body {
     </div>
   </div>
 </div>
-<div style="font-size:11px;color:var(--text-muted);margin-top:8px">异常策略在节点「高级配置」区的「错误处理」中配置</div>
+<div style="font-size:11px;color:var(--text-muted);margin-top:8px">节点异常时自动经异常出口转到错误处理节点；无异常连线时异常将终止整个流程</div>
 </div><!-- canvas-bg end -->
 
 <div class="canvas-bg">
@@ -1205,9 +1229,10 @@ body {
 </div>
 
 <div class="category-label">并行汇合连线示意</div>
-<p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px">多条连线汇合到同一节点时，在该节点的<strong>高级配置区</strong>设置汇合策略（仅当节点有 2 条及以上输入连线时该字段生效）。</p>
+<p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px">多条连线汇合到同一节点时，该节点左上角会自动出现<strong>汇合策略角标</strong>，点击角标可弹出策略选择弹窗（仅当节点有 2 条及以上输入连线时显示）。</p>
 <div class="merge-demo-box">
   <div class="merge-demo-canvas">
+    <!-- 画布示意：带角标的汇合节点 -->
     <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
       <div class="mini-node"><div class="mini-node-icon" style="background:var(--node-trigger);color:var(--node-trigger-fg)">⚡</div>开始</div>
       <div style="display:flex;flex-direction:column;gap:12px;margin:0 8px">
@@ -1224,25 +1249,100 @@ body {
         <span style="color:var(--text-muted);font-size:18px">⟶</span>
         <span style="color:var(--text-muted);font-size:18px">⟶</span>
       </div>
-      <div class="mini-node" style="border-color:var(--primary);background:rgba(103,80,164,0.04)">
-        <div class="mini-node-icon" style="background:var(--node-data);color:var(--node-data-fg)">📝</div>汇合节点
+      <!-- 汇合节点：带角标，点击弹出弹窗 -->
+      <div style="position:relative;display:inline-block" title="点击角标可更改汇合策略">
+        <div class="mini-node" style="border-color:var(--primary);background:rgba(103,80,164,0.04);cursor:default">
+          <div class="mini-node-icon" style="background:var(--node-data);color:var(--node-data-fg)">📝</div>汇合节点
+        </div>
+        <!-- 汇合策略角标 -->
+        <div id="mergeBadge" onclick="toggleMergeModal()" title="汇合策略：等待全部" style="position:absolute;top:-8px;left:-8px;background:var(--primary);color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:10px;cursor:pointer;user-select:none;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,0.18);transition:opacity 0.15s">全部</div>
       </div>
       <span style="color:var(--text-muted)">→</span>
       <div class="mini-node"><div class="mini-node-icon" style="background:var(--node-end);color:var(--node-end-fg)">🏁</div>结束</div>
     </div>
+    <p style="font-size:11px;color:var(--text-muted);margin-top:12px;margin-bottom:0">💡 点击节点左上角<strong>「全部」角标</strong>体验弹窗交互</p>
   </div>
-  <div class="merge-demo-config">
-    <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:10px">汇合节点 · 高级配置区（有多条入线时显示）</div>
-    <div class="config-field">
-      <div class="config-label">汇合策略</div>
-      <select class="config-input" style="font-size:12px" id="mergeSelect" onchange="updateMergeDesc()">
-        <option value="all">等待全部完成 (Wait All)</option>
-        <option value="any">任一完成即继续 (Any)</option>
-      </select>
-      <div class="config-help" id="mergeDesc">所有入线分支均到达后，该节点才开始执行。可引用所有分支的输出变量。</div>
+
+  <!-- 汇合策略弹窗（内联演示） -->
+  <div id="mergeModalOverlay" onclick="closeMergeModal(event)" style="display:none;position:absolute;inset:0;z-index:100;background:rgba(0,0,0,0.28);border-radius:var(--radius-lg);align-items:center;justify-content:center">
+    <div style="background:#fff;border-radius:12px;width:340px;box-shadow:0 8px 32px rgba(0,0,0,0.18);overflow:hidden" onclick="event.stopPropagation()">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px 12px;border-bottom:1px solid var(--border)">
+        <span style="font-size:15px;font-weight:700;color:var(--text)">🔀 汇合策略</span>
+        <button onclick="closeMergeModal()" style="background:none;border:none;cursor:pointer;font-size:18px;color:var(--text-muted);line-height:1">×</button>
+      </div>
+      <div style="padding:16px 20px">
+        <p style="font-size:13px;color:var(--text-secondary);line-height:1.6;margin-bottom:14px">节点「汇合节点」有多条输入连线，请选择汇合策略：</p>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <label id="mergeOptAll" onclick="selectMergeOpt('all')" style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border:1.5px solid var(--primary);border-radius:8px;cursor:pointer;background:rgba(103,80,164,0.04);transition:border-color 0.15s">
+            <input type="radio" name="mergeStrategyDemo" value="all" checked style="margin-top:2px;accent-color:var(--primary)" />
+            <div>
+              <div style="font-size:13px;font-weight:600;color:var(--text)">等待全部 (Wait All)</div>
+              <div style="font-size:12px;color:var(--text-secondary);margin-top:2px">所有上游节点完成后再执行</div>
+            </div>
+          </label>
+          <label id="mergeOptAny" onclick="selectMergeOpt('any')" style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;transition:border-color 0.15s">
+            <input type="radio" name="mergeStrategyDemo" value="any" style="margin-top:2px;accent-color:var(--primary)" />
+            <div>
+              <div style="font-size:13px;font-weight:600;color:var(--text)">任一完成 (Any)</div>
+              <div style="font-size:12px;color:var(--text-secondary);margin-top:2px">任一上游节点完成后立即执行</div>
+            </div>
+          </label>
+        </div>
+      </div>
+      <div style="padding:12px 20px 16px;display:flex;justify-content:flex-end;border-top:1px solid var(--border)">
+        <button onclick="confirmMergeStrategy()" style="background:var(--primary);color:#fff;border:none;border-radius:8px;padding:8px 24px;font-size:13px;font-weight:600;cursor:pointer">确定</button>
+      </div>
     </div>
   </div>
 </div>
+
+<script>
+(function(){
+  var currentMerge = 'all';
+  var pending = 'all';
+  window.toggleMergeModal = function(){
+    var overlay = document.getElementById('mergeModalOverlay');
+    if(!overlay) return;
+    pending = currentMerge;
+    selectMergeOpt(currentMerge, true);
+    overlay.style.display = 'flex';
+  };
+  window.closeMergeModal = function(e){
+    var overlay = document.getElementById('mergeModalOverlay');
+    if(overlay) overlay.style.display = 'none';
+  };
+  window.selectMergeOpt = function(val, silent){
+    pending = val;
+    var allEl = document.getElementById('mergeOptAll');
+    var anyEl = document.getElementById('mergeOptAny');
+    if(!allEl || !anyEl) return;
+    if(val === 'all'){
+      allEl.style.borderColor = 'var(--primary)';
+      allEl.style.background = 'rgba(103,80,164,0.04)';
+      allEl.querySelector('input').checked = true;
+      anyEl.style.borderColor = 'var(--border)';
+      anyEl.style.background = '';
+      anyEl.querySelector('input').checked = false;
+    } else {
+      anyEl.style.borderColor = 'var(--primary)';
+      anyEl.style.background = 'rgba(103,80,164,0.04)';
+      anyEl.querySelector('input').checked = true;
+      allEl.style.borderColor = 'var(--border)';
+      allEl.style.background = '';
+      allEl.querySelector('input').checked = false;
+    }
+  };
+  window.confirmMergeStrategy = function(){
+    currentMerge = pending;
+    var badge = document.getElementById('mergeBadge');
+    if(badge) badge.textContent = currentMerge === 'all' ? '全部' : '任一';
+    closeMergeModal();
+  };
+  // position overlay relative to demo box
+  var box = document.querySelector('.merge-demo-box');
+  if(box) box.style.position = 'relative';
+})();
+</script>
 
 <div class="category-label">通用连线规则</div>
 <table class="spec-table">
@@ -1272,7 +1372,7 @@ body {
 <tr><td>节点说明</td><td>折叠</td><td>点击 ? 图标展开，说明节点用途和使用场景</td></tr>
 <tr><td>AI 引导条</td><td>展开（未配置时）</td><td>引导用户用自然语言描述需求，AI 自动填充表单</td></tr>
 <tr><td>基础配置区</td><td>展开</td><td>必填项 + 80% 场景都会用到的配置</td></tr>
-<tr><td>高级配置区</td><td>折叠</td><td>超时、认证、异常策略、汇合策略等技术性配置；有非默认值时标题旁显示蓝色圆点</td></tr>
+<tr><td>高级配置区</td><td>默认折叠</td><td>超时、认证、汇合策略等技术性配置；有非默认值时标题旁显示蓝色圆点</td></tr>
 </tbody>
 </table>
 
@@ -1351,7 +1451,7 @@ body {
 
   <!-- 高级配置（折叠） -->
   <div class="config-advanced-toggle" onclick="toggleAdvanced('http')" id="advToggleHttp">
-    <span>▶ 高级配置（超时 / 认证 / 异常策略 / 汇合策略）</span>
+    <span>▶ 高级配置（超时 / 认证 / 汇合策略）</span>
     <span class="toggle-dot" id="dotHttp"></span>
   </div>
   <div class="config-advanced-body" id="advBodyHttp">
@@ -1371,46 +1471,6 @@ body {
         <div class="config-help">有多条输入连线时生效，决定何时执行此节点</div>
       </div>
     </div>
-    <div class="config-section">
-      <div class="config-section-title">异常策略</div>
-      <div class="config-field">
-        <div class="config-label">发生异常时</div>
-        <select class="config-input" id="errorStrategy" onchange="toggleErrorBranch()" style="font-size:12px">
-          <option value="terminate">终止流程（默认）</option>
-          <option value="ignore">忽略并继续</option>
-          <option value="retry">自动重试</option>
-          <option value="manual">转人工处理</option>
-          <option value="callback">挂起等待回调</option>
-        </select>
-        <div class="config-help" id="errorStrategyHelp">节点异常时立即终止整个工作流实例</div>
-      </div>
-      <div id="retryOptions" style="display:none">
-        <div class="config-field">
-          <div class="config-label">重试次数</div>
-          <input class="config-input" type="number" value="3" min="1" max="10" style="width:80px">
-        </div>
-        <div class="config-field">
-          <div class="config-label">重试间隔（秒）</div>
-          <input class="config-input" type="number" value="5" min="1" max="300" style="width:80px">
-        </div>
-        <div class="config-field">
-          <div class="config-label">重试用尽后降级</div>
-          <select class="config-input" style="font-size:12px">
-            <option>终止流程</option><option>忽略并继续</option><option>转人工处理</option>
-          </select>
-        </div>
-      </div>
-      <div id="suspendOptions" style="display:none">
-        <div class="config-field">
-          <div class="config-label">挂起等待超时（小时）</div>
-          <input class="config-input" type="number" value="24" min="1" max="720" style="width:80px">
-          <div class="config-help">等待外部回调或人工处理的最大时长，超时后触发异常策略（默认 24 小时）</div>
-        </div>
-      </div>
-      <div id="branchTip" style="display:none;margin-top:8px;padding:9px 12px;background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.2);border-radius:6px;font-size:12px;color:var(--warning)">
-        ⚠ 已在节点右侧增加橙色异常出口端口，请在画布上连接异常处理节点。
-      </div>
-    </div>
   </div>
 </div>
 </div>
@@ -1424,14 +1484,12 @@ body {
   <thead><tr><th>层次</th><th>展开状态</th><th>放什么字段</th></tr></thead>
   <tbody>
   <tr><td>基础配置区</td><td>默认展开</td><td>必填项、80% 场景都会用到的配置</td></tr>
-  <tr><td>高级配置区</td><td>默认折叠</td><td>超时、认证、异常策略、汇合策略等低频技术性配置</td></tr>
+  <tr><td>高级配置区</td><td>默认折叠</td><td>超时、认证、汇合策略等低频技术性配置</td></tr>
   </tbody>
   </table>
   <p style="margin-top:12px;margin-bottom:12px"><strong>条件展示规则（字段级联动）：</strong></p>
   <ul style="padding-left:20px;line-height:2">
     <li>HTTP 节点：选 POST/PUT/PATCH 后才显示 Body 字段</li>
-    <li>异常策略选「自动重试」后展示重试次数、间隔及降级策略字段</li>
-    <li>异常策略选「转人工处理」或「挂起等待回调」后展示挂起等待超时字段</li>
     <li>延迟节点：选「到指定时间」模式后，时长输入换为日期时间选择器</li>
     <li>循环节点：ForEach/While 切换时，集合变量与循环条件字段互相切换</li>
   </ul>
@@ -1545,19 +1603,138 @@ body {
     <button onclick="toggleNodeDesc2('triggerDesc')" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:16px;padding:4px" title="节点说明">?</button>
   </div>
   <div class="node-desc-box" id="triggerDesc">开始节点是工作流的唯一入口，定义流程启动时传入的输入参数。下游节点通过 <code>${trigger_1.参数名}</code> 引用。支持手动触发（默认）、定时触发（可选）、Webhook（可选）三种启动方式；对话流中额外注入 query、files、conversation_id、user_id 等内置变量。</div>
+
+  <!-- 📥 输入参数 -->
   <div class="config-section">
-    <div class="config-section-title">📥 输入参数</div>
+    <div class="config-section-title" style="display:flex;align-items:center;justify-content:space-between">
+      <span>📥 输入参数</span>
+      <button onclick="addTriggerParamCard()" style="font-size:11px;padding:2px 10px;border:1px solid var(--primary);border-radius:5px;background:none;color:var(--primary);cursor:pointer">+ 添加</button>
+    </div>
     <div class="config-help" style="margin-bottom:10px">独立于触发方式，始终可配置。下游通过 <code>${trigger_1.参数名}</code> 引用</div>
-    <div id="triggerParams">
-      <div class="param-card">
-        <div class="param-card-top"><span class="param-name">orderId</span><span class="badge badge-primary">String</span><span style="font-size:11px;color:var(--text-muted);margin-left:4px">必填</span></div>
-        <div class="param-ref" style="margin-bottom:4px">${trigger_1.orderId}</div>
-        <div style="font-size:11px;color:var(--text-muted)">占位提示：请输入订单编号，如 ORD-2024001</div>
-        <div style="font-size:11px;color:var(--text-muted)">参数说明：用于标识本次处理的订单</div>
+    <div id="triggerParamList">
+      <!-- 已配置参数卡片（只读态）-->
+      <div class="tparam-card" onclick="expandTriggerParam(this)" style="cursor:pointer">
+        <div class="tparam-card-header">
+          <div style="display:flex;align-items:center;gap:6px">
+            <span class="tparam-index">1</span>
+            <span class="tparam-label">orderId</span>
+            <span class="badge badge-primary" style="font-size:10px">String</span>
+            <span class="tparam-required-tag">必填</span>
+          </div>
+          <button onclick="event.stopPropagation();removeTriggerParam(this)" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:14px;padding:2px 4px">×</button>
+        </div>
+        <div class="tparam-ref">${trigger_1.orderId}</div>
+        <!-- 展开编辑区（默认收起）-->
+        <div class="tparam-edit-body" style="display:none;margin-top:10px;border-top:1px solid var(--border);padding-top:10px">
+          <div class="tparam-row">
+            <div class="tparam-field">
+              <label class="tparam-label-text">显示名称</label>
+              <input class="config-input" value="orderId" placeholder="如：订单编号" style="font-size:11px">
+            </div>
+            <div class="tparam-field">
+              <label class="tparam-label-text">字段类型</label>
+              <select class="config-input" style="font-size:11px">
+                <option selected>短文本 → String</option>
+                <option>长文本 → String</option>
+                <option>数字 → Integer</option>
+                <option>开关 → Boolean</option>
+                <option>日期时间 → DateTime</option>
+                <option>文件 → File</option>
+                <option>JSON 对象 → Object</option>
+                <option>数组（字符串）→ Array[String]</option>
+                <option>数组（对象）→ Array[Object]</option>
+              </select>
+            </div>
+          </div>
+          <div class="tparam-row">
+            <div class="tparam-field">
+              <label class="tparam-label-text">变量名 <span style="color:#e53935">*</span></label>
+              <input class="config-input" value="orderId" placeholder="如：customer_name" style="font-size:11px;font-family:var(--font-mono)">
+            </div>
+            <div class="tparam-field">
+              <label class="tparam-label-text">占位提示</label>
+              <input class="config-input" value="请输入订单编号，如 ORD-2024001" placeholder="输入框的提示文字" style="font-size:11px">
+            </div>
+          </div>
+          <div class="tparam-row">
+            <div class="tparam-field" style="flex:1">
+              <label class="tparam-label-text">参数说明</label>
+              <input class="config-input" value="用于标识本次处理的订单" placeholder="对这个参数的用途做简要说明" style="font-size:11px">
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;margin-top:6px">
+            <label style="display:flex;align-items:center;gap:4px;font-size:11px;cursor:pointer">
+              <input type="checkbox" checked style="accent-color:var(--primary);width:12px;height:12px"> 必填
+            </label>
+          </div>
+        </div>
+      </div>
+      <!-- 新增参数卡片（编辑展开态示例）-->
+      <div class="tparam-card tparam-card-new">
+        <div class="tparam-card-header">
+          <div style="display:flex;align-items:center;gap:6px">
+            <span class="tparam-index">2</span>
+            <span class="tparam-label" style="color:var(--text-muted)">新参数</span>
+            <span class="badge badge-primary" style="font-size:10px">String</span>
+          </div>
+          <button onclick="removeTriggerParam(this)" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:14px;padding:2px 4px">×</button>
+        </div>
+        <div class="tparam-row" style="margin-top:10px">
+          <div class="tparam-field">
+            <label class="tparam-label-text">显示名称</label>
+            <input class="config-input" placeholder="如：客户姓名" style="font-size:11px">
+          </div>
+          <div class="tparam-field">
+            <label class="tparam-label-text">字段类型</label>
+            <select class="config-input" style="font-size:11px">
+              <option selected>短文本 → String</option>
+              <option>长文本 → String</option>
+              <option>数字 → Integer</option>
+              <option>开关 → Boolean</option>
+              <option>日期时间 → DateTime</option>
+              <option>文件 → File</option>
+              <option>JSON 对象 → Object</option>
+              <option>数组（字符串）→ Array[String]</option>
+              <option>数组（对象）→ Array[Object]</option>
+            </select>
+          </div>
+        </div>
+        <div class="tparam-row">
+          <div class="tparam-field">
+            <label class="tparam-label-text">变量名 <span style="color:#e53935">*</span></label>
+            <input class="config-input" placeholder="如：customer_name" style="font-size:11px;font-family:var(--font-mono)">
+          </div>
+          <div class="tparam-field">
+            <label class="tparam-label-text">占位提示</label>
+            <input class="config-input" placeholder="输入框的提示文字" style="font-size:11px">
+          </div>
+        </div>
+        <div class="tparam-row">
+          <div class="tparam-field" style="flex:1">
+            <label class="tparam-label-text">参数说明</label>
+            <input class="config-input" placeholder="对这个参数的用途做简要说明" style="font-size:11px">
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;margin-top:6px">
+          <label style="display:flex;align-items:center;gap:4px;font-size:11px;cursor:pointer">
+            <input type="checkbox" style="accent-color:var(--primary);width:12px;height:12px"> 必填
+          </label>
+        </div>
       </div>
     </div>
-    <div class="add-link" onclick="addParam('triggerParams','trigger_1')">+ 添加输入参数</div>
   </div>
+
+  <!-- 💬 对话流内置变量（紧跟输入参数，语义同层）-->
+  <div class="config-section" style="background:rgba(103,80,164,0.02)">
+    <div class="config-section-title" style="font-size:11px;color:var(--text-muted)">💬 对话流内置变量（只读，系统自动注入）</div>
+    <div class="config-help" style="margin-bottom:8px">仅对话流可见，无需配置，可直接在下游节点引用</div>
+    <div class="param-card"><div class="param-card-top"><span class="param-name">query</span><span class="badge badge-primary">String</span></div><div class="param-ref">用户当前输入的消息内容</div></div>
+    <div class="param-card"><div class="param-card-top"><span class="param-name">files</span><span class="badge badge-info">Array[File]</span></div><div class="param-ref">用户上传的文件列表</div></div>
+    <div class="param-card"><div class="param-card-top"><span class="param-name">conversation_id</span><span class="badge badge-primary">String</span></div><div class="param-ref">当前会话唯一标识</div></div>
+    <div class="param-card"><div class="param-card-top"><span class="param-name">user_id</span><span class="badge badge-primary">String</span></div><div class="param-ref">当前对话用户唯一标识</div></div>
+  </div>
+
+  <!-- ⚙️ 高级配置（放最后，可选功能）-->
   <div class="config-advanced-toggle" onclick="toggleAdvanced('trigger')">
     <span>▶ 高级配置（定时触发 / Webhook）</span>
     <span class="toggle-dot" id="dotTrigger"></span>
@@ -1588,13 +1765,6 @@ body {
         <div class="config-help">自定义别名路径，便于识别该 Webhook 的业务含义</div>
       </div>
     </div>
-  </div>
-  <div class="config-section" style="background:rgba(103,80,164,0.02)">
-    <div class="config-section-title" style="font-size:11px;color:var(--text-muted)">💬 对话流内置变量（只读，系统自动注入）</div>
-    <div class="param-card"><div class="param-card-top"><span class="param-name">query</span><span class="badge badge-primary">String</span></div><div class="param-ref">用户当前输入的消息内容</div></div>
-    <div class="param-card"><div class="param-card-top"><span class="param-name">files</span><span class="badge badge-info">Array[File]</span></div><div class="param-ref">用户上传的文件列表</div></div>
-    <div class="param-card"><div class="param-card-top"><span class="param-name">conversation_id</span><span class="badge badge-primary">String</span></div><div class="param-ref">当前会话唯一标识</div></div>
-    <div class="param-card"><div class="param-card-top"><span class="param-name">user_id</span><span class="badge badge-primary">String</span></div><div class="param-ref">当前对话用户唯一标识</div></div>
   </div>
 </div>
 
@@ -1677,21 +1847,13 @@ body {
     </div>
   </div>
   <div class="config-advanced-toggle" onclick="toggleAdvanced('if')">
-    <span>▶ 高级配置（分支标签 / 异常策略）</span>
+    <span>▶ 高级配置（分支标签）</span>
     <span class="toggle-dot" id="dotIf"></span>
   </div>
   <div class="config-advanced-body" id="advBodyIf">
     <div class="config-section">
       <div class="config-field"><div class="config-label">TRUE 分支标签</div><input class="config-input" value="TRUE"></div>
       <div class="config-field"><div class="config-label">FALSE 分支标签</div><input class="config-input" value="FALSE"></div>
-    </div>
-    <div class="config-section">
-      <div class="config-field">
-        <div class="config-label">异常策略</div>
-        <select class="config-input" style="font-size:12px">
-          <option>终止流程（默认）</option><option>忽略并继续</option><option>自动重试</option><option>转人工处理</option><option>挂起等待回调</option>
-        </select>
-      </div>
     </div>
   </div>
 </div>
@@ -1782,7 +1944,7 @@ body {
     </div>
   </div>
   <div class="config-advanced-toggle" onclick="toggleAdvanced('loop')">
-    <span>▶ 高级配置（超时 / 异常策略 / 汇合策略）</span>
+    <span>▶ 高级配置（超时 / 汇合策略）</span>
     <span class="toggle-dot" id="dotLoop"></span>
   </div>
   <div class="config-advanced-body" id="advBodyLoop">
@@ -1793,12 +1955,6 @@ body {
         <div class="config-label">汇合策略</div>
         <select class="config-input" style="font-size:12px"><option>等待全部完成 (Wait All)</option><option>任一完成即继续 (Any)</option></select>
         <div class="config-help">有多条输入连线时生效</div>
-      </div>
-    </div>
-    <div class="config-section">
-      <div class="config-field">
-        <div class="config-label">异常策略</div>
-        <select class="config-input" style="font-size:12px"><option>终止流程（默认）</option><option>忽略并继续</option><option>自动重试</option><option>转人工处理</option><option>挂起等待回调</option></select>
       </div>
     </div>
   </div>
@@ -1935,14 +2091,13 @@ body {
     <div class="add-link">+ 添加输出变量</div>
   </div>
   <div class="config-advanced-toggle" onclick="toggleAdvanced('code')">
-    <span>▶ 高级配置（超时 / 异常策略 / 汇合策略）</span>
+    <span>▶ 高级配置（超时 / 汇合策略）</span>
     <span class="toggle-dot" id="dotCode"></span>
   </div>
   <div class="config-advanced-body" id="advBodyCode">
     <div class="config-section">
       <div class="config-field"><div class="config-label">超时时间（秒）</div><input class="config-input" type="number" value="30" style="width:100px"></div>
       <div class="config-field"><div class="config-label">汇合策略</div><select class="config-input" style="font-size:12px"><option>等待全部完成</option><option>任一完成即继续</option></select></div>
-      <div class="config-field"><div class="config-label">异常策略</div><select class="config-input" style="font-size:12px"><option>终止流程（默认）</option><option>忽略并继续</option><option>自动重试</option><option>转人工处理</option><option>挂起等待回调</option></select></div>
     </div>
   </div>
 </div>
@@ -1964,12 +2119,11 @@ body {
     <div class="config-field"><div class="config-label">请求方法 <span class="req">*</span></div><div class="method-chips"><div class="method-chip" onclick="toggleChip(this)">GET</div><div class="method-chip" onclick="toggleChip(this)">POST</div><div class="method-chip" onclick="toggleChip(this)">PUT</div><div class="method-chip" onclick="toggleChip(this)">DELETE</div><div class="method-chip" onclick="toggleChip(this)">PATCH</div></div></div>
     <div class="config-field"><div class="config-label">Headers</div><input class="config-input" placeholder="Content-Type: application/json"></div>
   </div>
-  <div class="config-advanced-toggle" onclick="toggleAdvanced('http2')"><span>▶ 高级配置（超时 / 认证 / 异常策略 / 汇合策略）</span><span class="toggle-dot" id="dotHttp2"></span></div>
+  <div class="config-advanced-toggle" onclick="toggleAdvanced('http2')"><span>▶ 高级配置（超时 / 认证 / 汇合策略）</span><span class="toggle-dot" id="dotHttp2"></span></div>
   <div class="config-advanced-body" id="advBodyHttp2">
     <div class="config-section">
       <div class="config-field"><div class="config-label">超时时间（秒）</div><input class="config-input" type="number" value="30" style="width:100px"></div>
       <div class="config-field"><div class="config-label">汇合策略</div><select class="config-input" style="font-size:12px"><option>等待全部完成 (Wait All)</option><option>任一完成即继续 (Any)</option></select></div>
-      <div class="config-field"><div class="config-label">异常策略</div><select class="config-input" style="font-size:12px"><option>终止流程（默认）</option><option>忽略并继续</option><option>自动重试</option><option>转人工处理</option><option>挂起等待回调</option></select></div>
     </div>
   </div>
 </div>
@@ -1989,14 +2143,13 @@ body {
     <div class="config-field"><div class="config-label">消息内容 <span class="req">*</span></div><textarea class="config-input" rows="3" placeholder='{"orderId": "...", "status": "..."}'></textarea></div>
   </div>
   <div class="config-advanced-toggle" onclick="toggleAdvanced('mq')">
-    <span>▶ 高级配置（超时 / 异常策略 / 汇合策略）</span>
+    <span>▶ 高级配置（超时 / 汇合策略）</span>
     <span class="toggle-dot" id="dotMq"></span>
   </div>
   <div class="config-advanced-body" id="advBodyMq">
     <div class="config-section">
       <div class="config-field"><div class="config-label">超时时间（秒）</div><input class="config-input" type="number" value="30" style="width:100px"></div>
       <div class="config-field"><div class="config-label">汇合策略</div><select class="config-input" style="font-size:12px"><option>等待全部完成</option><option>任一完成即继续</option></select></div>
-      <div class="config-field"><div class="config-label">异常策略</div><select class="config-input" style="font-size:12px"><option>终止流程（默认）</option><option>忽略并继续</option><option>自动重试</option><option>转人工处理</option><option>挂起等待回调</option></select></div>
     </div>
   </div>
 </div>
@@ -2029,14 +2182,13 @@ body {
     <div class="add-link">+ 添加输出变量</div>
   </div>
   <div class="config-advanced-toggle" onclick="toggleAdvanced('wf')">
-    <span>▶ 高级配置（超时 / 异常策略 / 汇合策略）</span>
+    <span>▶ 高级配置（超时 / 汇合策略）</span>
     <span class="toggle-dot" id="dotWf"></span>
   </div>
   <div class="config-advanced-body" id="advBodyWf">
     <div class="config-section">
       <div class="config-field"><div class="config-label">子流程执行超时（秒）</div><input class="config-input" type="number" value="300" style="width:100px"></div>
       <div class="config-field"><div class="config-label">汇合策略</div><select class="config-input" style="font-size:12px"><option>等待全部完成</option><option>任一完成即继续</option></select></div>
-      <div class="config-field"><div class="config-label">异常策略</div><select class="config-input" style="font-size:12px"><option>终止流程（默认）</option><option>忽略并继续</option><option>自动重试</option><option>转人工处理</option><option>挂起等待回调</option></select></div>
     </div>
   </div>
 </div>
@@ -2299,40 +2451,6 @@ function resetAiGuide() {
   document.getElementById('aiInput').value = '';
 }
 
-// ===== Error Strategy Select =====
-function toggleErrorBranch() {
-  const sel = document.getElementById('errorStrategy');
-  if (!sel) return;
-  const val = sel.value;
-  const retryOpts = document.getElementById('retryOptions');
-  const branchTip = document.getElementById('branchTip');
-  const helpEl = document.getElementById('errorStrategyHelp');
-  const helps = {
-    terminate: '节点异常时立即终止整个工作流实例',
-    ignore: '跳过异常，流程继续往下执行',
-    retry: '按配置的次数和间隔重试，重试耗尽后降级为终止流程',
-    branch: '节点有专属异常出口连线时，路由到异常分支处理'
-  };
-  if (helpEl) helpEl.textContent = helps[val] || '';
-  if (retryOpts) retryOpts.style.display = val === 'retry' ? 'block' : 'none';
-  if (branchTip) branchTip.style.display = val === 'branch' ? 'block' : 'none';
-  // show blue dot if non-default
-  const dot = document.getElementById('dotHttp');
-  if (dot) dot.classList.toggle('show', val !== 'terminate');
-}
-
-// ===== Merge Strategy Demo =====
-function updateMergeDesc() {
-  const sel = document.getElementById('mergeSelect');
-  const desc = document.getElementById('mergeDesc');
-  if (!sel || !desc) return;
-  const descs = {
-    all: '所有入线分支均到达后，该节点才开始执行。可引用所有分支的输出变量。',
-    any: '任一入线分支到达后，该节点即刻开始执行。只能引用已到达分支的输出，未到达分支的变量为空。'
-  };
-  desc.textContent = descs[sel.value] || '';
-}
-
 // ===== IF View Switch =====
 function switchIfView(mode, btn) {
   document.querySelectorAll('.view-toggle-btn').forEach(b => b.classList.remove('active'));
@@ -2460,6 +2578,79 @@ function addParam(containerId, nodeCode) {
   </div>
   <div class="param-ref">${nodeCode}.参数名</div>`;
   container.appendChild(card);
+}
+
+// 开始节点参数卡片交互
+function expandTriggerParam(card) {
+  const body = card.querySelector('.tparam-edit-body');
+  if (!body) return;
+  const isOpen = body.style.display !== 'none';
+  body.style.display = isOpen ? 'none' : 'block';
+  card.style.borderColor = isOpen ? '' : 'var(--primary)';
+}
+
+function removeTriggerParam(btn) {
+  btn.closest('.tparam-card').remove();
+  // 重新编号
+  document.querySelectorAll('#triggerParamList .tparam-card').forEach((c, i) => {
+    const idx = c.querySelector('.tparam-index');
+    if (idx) idx.textContent = i + 1;
+  });
+}
+
+function addTriggerParamCard() {
+  const list = document.getElementById('triggerParamList');
+  if (!list) return;
+  const idx = list.querySelectorAll('.tparam-card').length + 1;
+  const card = document.createElement('div');
+  card.className = 'tparam-card tparam-card-new';
+  card.innerHTML = `
+    <div class="tparam-card-header">
+      <div style="display:flex;align-items:center;gap:6px">
+        <span class="tparam-index">${idx}</span>
+        <span class="tparam-label" style="color:var(--text-muted)">新参数</span>
+        <span class="badge badge-primary" style="font-size:10px">String</span>
+      </div>
+      <button onclick="removeTriggerParam(this)" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:14px;padding:2px 4px">×</button>
+    </div>
+    <div class="tparam-row" style="margin-top:10px">
+      <div class="tparam-field">
+        <label class="tparam-label-text">显示名称</label>
+        <input class="config-input" placeholder="如：客户姓名" style="font-size:11px">
+      </div>
+      <div class="tparam-field">
+        <label class="tparam-label-text">字段类型</label>
+        <select class="config-input" style="font-size:11px" onchange="this.closest('.tparam-card').querySelector('.tparam-label+.badge,.badge.badge-primary').textContent=this.options[this.selectedIndex].text.split('→')[1]?.trim()||'String'">
+          <option>短文本 → String</option><option>长文本 → String</option>
+          <option>数字 → Integer</option><option>开关 → Boolean</option>
+          <option>日期时间 → DateTime</option><option>文件 → File</option>
+          <option>JSON 对象 → Object</option><option>数组（字符串）→ Array[String]</option><option>数组（对象）→ Array[Object]</option>
+        </select>
+      </div>
+    </div>
+    <div class="tparam-row">
+      <div class="tparam-field">
+        <label class="tparam-label-text">变量名 <span style="color:#e53935">*</span></label>
+        <input class="config-input" placeholder="如：customer_name" style="font-size:11px;font-family:var(--font-mono)">
+      </div>
+      <div class="tparam-field">
+        <label class="tparam-label-text">占位提示</label>
+        <input class="config-input" placeholder="输入框的提示文字" style="font-size:11px">
+      </div>
+    </div>
+    <div class="tparam-row">
+      <div class="tparam-field" style="flex:1">
+        <label class="tparam-label-text">参数说明</label>
+        <input class="config-input" placeholder="对这个参数的用途做简要说明" style="font-size:11px">
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px;margin-top:6px">
+      <label style="display:flex;align-items:center;gap:4px;font-size:11px;cursor:pointer">
+        <input type="checkbox" style="accent-color:var(--primary);width:12px;height:12px"> 必填
+      </label>
+    </div>`;
+  list.appendChild(card);
+  card.querySelector('input.config-input').focus();
 }
 </script>
 </body>
