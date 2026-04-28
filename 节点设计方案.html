@@ -1,0 +1,2423 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Beaver 节点设计方案</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ========== Reset & Foundations ========== */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 14px; line-height: 1.6;
+  color: #1a1a2e; background: #f8f9fc;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ========== Design Tokens ========== */
+:root {
+  --node-trigger: #E8F5E9; --node-trigger-fg: #2E7D32; --node-trigger-border: #81C784;
+  --node-end: #FFEBEE; --node-end-fg: #C62828; --node-end-border: #EF9A9A;
+  --node-logic: #FFF3E0; --node-logic-fg: #E65100; --node-logic-border: #FFB74D;
+  --node-data: #E3F2FD; --node-data-fg: #1565C0; --node-data-border: #64B5F6;
+  --node-integration: #F3E5F5; --node-integration-fg: #6A1B9A; --node-integration-border: #BA68C8;
+  --node-flow: #E0F2F1; --node-flow-fg: #00695C; --node-flow-border: #4DB6AC;
+  --node-placeholder: #F5F5F5; --node-placeholder-fg: #9E9E9E; --node-placeholder-border: #BDBDBD;
+  --surface: #FFFFFF; --surface-dim: #F5F6FA;
+  --border: #E2E5F1; --border-strong: #C8CCE0;
+  --text: #1a1a2e; --text-secondary: #6B7294; --text-muted: #9BA1C0;
+  --primary: #6750A4; --primary-light: rgba(103,80,164,0.08);
+  --success: #16A34A; --warning: #F59E0B; --danger: #DC2626; --info: #2563EB;
+  --radius-sm: 4px; --radius-md: 8px; --radius-lg: 12px; --radius-xl: 16px;
+  --font-mono: 'JetBrains Mono', 'Consolas', monospace;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.1);
+  --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ========== Page Layout ========== */
+.page-header {
+  background: var(--surface); border-bottom: 1px solid var(--border);
+  padding: 20px 0; position: sticky; top: 0; z-index: 100;
+}
+.page-header-inner {
+  max-width: 1280px; margin: 0 auto; padding: 0 32px;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+}
+.page-title { display: flex; align-items: center; gap: 12px; }
+.page-title h1 { font-size: 20px; font-weight: 700; color: var(--text); white-space: nowrap; }
+.page-title .logo {
+  width: 34px; height: 34px; border-radius: 10px;
+  background: linear-gradient(135deg, #6750A4, #9C27B0);
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-size: 17px; font-weight: 700; flex-shrink: 0;
+}
+.page-subtitle { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+
+/* Tabs */
+.tabs-nav {
+  display: flex; gap: 2px; overflow-x: auto;
+  background: var(--surface-dim); border-radius: 10px; padding: 4px;
+}
+.tab-btn {
+  padding: 7px 16px; border-radius: 7px;
+  font-size: 13px; font-weight: 500;
+  color: var(--text-secondary); cursor: pointer;
+  border: none; background: transparent;
+  white-space: nowrap; transition: var(--transition);
+}
+.tab-btn:hover { background: rgba(103,80,164,0.06); color: var(--text); }
+.tab-btn.active { background: var(--surface); color: var(--primary); box-shadow: var(--shadow-sm); font-weight: 600; }
+
+/* Main Content */
+.main { max-width: 1280px; margin: 0 auto; padding: 32px; }
+.page-section { display: none; }
+.page-section.active { display: block; }
+.section-title { font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+.section-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.7; margin-bottom: 24px; }
+.category-label {
+  font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px;
+  font-weight: 700; color: var(--text-muted);
+  margin: 28px 0 16px; padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.category-label:first-of-type { margin-top: 0; }
+
+/* ========== Canvas Background ========== */
+.canvas-bg {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-xl); padding: 32px;
+  position: relative; overflow: hidden; margin-bottom: 24px;
+}
+.canvas-bg::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image: radial-gradient(circle, #D8DBE8 1px, transparent 1px);
+  background-size: 20px 20px;
+  opacity: 0.5; pointer-events: none;
+}
+.canvas-bg > * { position: relative; z-index: 1; }
+
+/* ========== Node Card (Canvas) ========== */
+.nodes-row { display: flex; gap: 20px; flex-wrap: wrap; }
+.node-wrap { position: relative; }
+
+.canvas-node {
+  min-width: 180px; max-width: 220px;
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  cursor: default; user-select: none;
+  transition: var(--transition);
+}
+.canvas-node:hover { box-shadow: var(--shadow-md); border-color: var(--border-strong); }
+.canvas-node.selected { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(103,80,164,0.15); }
+.canvas-node.state-running { border-color: var(--info); animation: runPulse 1.5s ease-in-out infinite; }
+.canvas-node.state-success { border-color: var(--success); }
+.canvas-node.state-failed { border-color: var(--danger); }
+.canvas-node.state-paused { border-color: var(--warning); animation: pausePulse 1.5s ease-in-out infinite; }
+.canvas-node.placeholder-node { border-style: dashed; opacity: 0.72; }
+
+.canvas-node-header { display: flex; align-items: center; gap: 8px; padding: 10px 12px 6px; }
+.canvas-node-icon {
+  width: 28px; height: 28px; border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; flex-shrink: 0;
+}
+/* 节点名称悬浮编辑 */
+.canvas-node-title {
+  font-size: 13px; font-weight: 600; color: var(--text);
+  flex: 1; min-width: 0;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  cursor: text; border-radius: 4px; padding: 1px 4px; margin: -1px -4px;
+  transition: var(--transition);
+}
+.canvas-node-title:hover {
+  background: var(--surface-dim);
+  box-shadow: inset 0 0 0 1px var(--border-strong);
+}
+.canvas-node-title.editing {
+  background: var(--surface);
+  box-shadow: inset 0 0 0 2px var(--primary);
+  outline: none; overflow: visible; white-space: normal;
+  cursor: text;
+}
+.canvas-node-warning {
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--danger); color: white;
+  font-size: 10px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.canvas-node-body {
+  padding: 0 12px 10px;
+  font-size: 11px; color: var(--text-secondary); line-height: 1.5;
+}
+.node-code-tag {
+  font-family: var(--font-mono); font-size: 10px;
+  color: var(--text-muted); background: var(--surface-dim);
+  padding: 1px 6px; border-radius: 3px;
+  display: inline-block; margin-bottom: 4px;
+}
+.node-summary-text { font-size: 11px; color: var(--text); line-height: 1.4;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.node-summary-warn { font-size: 11px; color: var(--warning); }
+.node-summary-err { font-size: 11px; color: var(--danger); }
+
+/* Ports */
+.port {
+  position: absolute; width: 12px; height: 12px; border-radius: 50%;
+  background: var(--surface); border: 2px solid var(--border-strong);
+  z-index: 2; transition: var(--transition);
+}
+.port:hover { border-color: var(--primary); background: rgba(103,80,164,0.1); transform: scale(1.4); }
+.port-in  { left: -7px; top: 50%; margin-top: -6px; }
+.port-out { right: -7px; top: 50%; margin-top: -6px; }
+.port-error { border-color: var(--warning) !important; background: rgba(245,158,11,0.1) !important; }
+.port-label-r { position: absolute; right: -50px; font-size: 9px; font-weight: 600; white-space: nowrap; }
+.port-label-b { position: absolute; bottom: -18px; left: 50%; transform: translateX(-50%); font-size: 9px; font-weight: 600; color: var(--text-muted); white-space: nowrap; }
+
+@keyframes runPulse {
+  0%,100% { box-shadow: 0 0 0 3px rgba(37,99,235,0.15); }
+  50%     { box-shadow: 0 0 0 7px rgba(37,99,235,0.05); }
+}
+@keyframes pausePulse {
+  0%,100% { box-shadow: 0 0 0 3px rgba(245,158,11,0.2); }
+  50%     { box-shadow: 0 0 0 7px rgba(245,158,11,0.06); }
+}
+
+/* ========== Config Panel ========== */
+.panel-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+@media (max-width: 900px) { .panel-grid { grid-template-columns: 1fr; } }
+.panel-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; }
+@media (max-width: 1100px) { .panel-grid-3 { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 700px) { .panel-grid-3 { grid-template-columns: 1fr; } }
+
+.config-panel {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); overflow: hidden;
+}
+.config-panel-header {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 18px; border-bottom: 1px solid var(--border);
+  position: relative;
+}
+.config-panel-icon {
+  width: 34px; height: 34px; border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; flex-shrink: 0;
+}
+.config-panel-title { font-size: 15px; font-weight: 700; color: var(--text); }
+.config-panel-code { font-size: 11px; color: var(--text-muted); font-family: var(--font-mono); }
+
+/* 节点名称编辑框（配置面板内）*/
+.config-node-name-input {
+  font-size: 15px; font-weight: 700; color: var(--text);
+  border: none; background: transparent; outline: none;
+  width: 100%; padding: 0;
+  border-bottom: 1px solid transparent;
+  transition: var(--transition);
+}
+.config-node-name-input:hover { border-bottom-color: var(--border-strong); }
+.config-node-name-input:focus { border-bottom-color: var(--primary); }
+
+/* AI 引导按钮（右上角）*/
+.ai-guide-recall-btn {
+  position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+  padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600;
+  background: var(--primary-light); color: var(--primary);
+  border: 1px solid rgba(103,80,164,0.2);
+  cursor: pointer; transition: var(--transition); white-space: nowrap;
+}
+.ai-guide-recall-btn:hover { background: rgba(103,80,164,0.15); }
+
+.config-section { padding: 14px 18px; border-bottom: 1px solid var(--border); }
+.config-section:last-child { border-bottom: none; }
+.config-section-title {
+  font-size: 12px; font-weight: 700; color: var(--text);
+  margin-bottom: 12px; display: flex; align-items: center; gap: 6px;
+}
+.config-field { margin-bottom: 12px; }
+.config-field:last-child { margin-bottom: 0; }
+.config-label {
+  font-size: 11px; font-weight: 600; color: var(--text-secondary);
+  margin-bottom: 5px; display: flex; align-items: center; gap: 4px;
+}
+.config-label .req { color: var(--danger); font-size: 13px; line-height: 1; }
+.config-input {
+  width: 100%; padding: 7px 11px;
+  background: var(--surface-dim); border: 1px solid var(--border);
+  border-radius: 6px; color: var(--text); font-size: 13px;
+  outline: none; transition: var(--transition);
+  font-family: inherit;
+}
+.config-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(103,80,164,0.1); }
+.config-input.error { border-color: var(--danger); box-shadow: 0 0 0 3px rgba(220,38,38,0.08); }
+.config-help { font-size: 11px; color: var(--text-muted); margin-top: 4px; line-height: 1.5; }
+.config-error-tip { font-size: 11px; color: var(--danger); margin-top: 4px; }
+
+/* 折叠高级配置 */
+.config-advanced-toggle {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 18px; border-bottom: 1px solid var(--border);
+  cursor: pointer; font-size: 12px; font-weight: 600; color: var(--text-secondary);
+  transition: var(--transition); user-select: none;
+}
+.config-advanced-toggle:hover { background: var(--surface-dim); }
+.config-advanced-toggle:last-child { border-bottom: none; }
+.config-advanced-body { display: none; }
+.config-advanced-body.open { display: block; }
+.toggle-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--info); margin-left: 6px; display: none;
+}
+.toggle-dot.show { display: inline-block; }
+
+/* Badges */
+.badge {
+  display: inline-block; padding: 2px 8px;
+  border-radius: 20px; font-size: 11px; font-weight: 600;
+}
+.badge-primary  { background: rgba(103,80,164,0.1); color: var(--primary); }
+.badge-success  { background: rgba(22,163,74,0.1); color: var(--success); }
+.badge-warning  { background: rgba(245,158,11,0.1); color: var(--warning); }
+.badge-danger   { background: rgba(220,38,38,0.1); color: var(--danger); }
+.badge-info     { background: rgba(37,99,235,0.1); color: var(--info); }
+.badge-muted    { background: var(--surface-dim); color: var(--text-muted); }
+
+/* Param Card */
+.param-card {
+  border: 1px solid var(--border); border-radius: 7px;
+  padding: 9px 13px; margin-bottom: 7px; transition: var(--transition);
+}
+.param-card:hover { border-color: var(--border-strong); }
+.param-card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px; }
+.param-name { font-size: 13px; font-weight: 600; color: var(--text); font-family: var(--font-mono); }
+.param-ref  { font-size: 11px; color: var(--text-muted); font-family: var(--font-mono); }
+
+.add-link {
+  font-size: 12px; color: var(--primary); font-weight: 600;
+  cursor: pointer; padding: 5px 0;
+  display: inline-flex; align-items: center; gap: 4px;
+}
+.add-link:hover { text-decoration: underline; }
+
+/* ========== AI Guide Bar ========== */
+.ai-guide-bar {
+  margin: 0 18px 0;
+  padding: 12px 14px;
+  background: linear-gradient(135deg, rgba(103,80,164,0.05), rgba(37,99,235,0.04));
+  border: 1px solid rgba(103,80,164,0.12);
+  border-radius: var(--radius-md);
+  font-size: 12px; color: var(--text-secondary); line-height: 1.6;
+  transition: var(--transition);
+}
+.ai-guide-bar.hidden { display: none; }
+.ai-guide-bar.configured {
+  background: rgba(22,163,74,0.04); border-color: rgba(22,163,74,0.15);
+  cursor: pointer;
+}
+.ai-guide-bar strong { color: var(--primary); }
+.ai-guide-bar.configured strong { color: var(--success); }
+.ai-btn-row { display: flex; gap: 8px; margin-top: 10px; }
+.ai-btn {
+  padding: 5px 13px; border-radius: 6px;
+  font-size: 12px; font-weight: 600; cursor: pointer; border: none;
+  transition: var(--transition);
+}
+.ai-btn-primary { background: var(--primary); color: white; }
+.ai-btn-primary:hover { opacity: 0.9; }
+.ai-btn-ghost { background: var(--surface); color: var(--text-secondary); border: 1px solid var(--border); }
+.ai-btn-ghost:hover { background: var(--surface-dim); }
+
+/* Filling animation */
+@keyframes fieldFill {
+  0% { background-color: rgba(103,80,164,0.12); }
+  100% { background-color: var(--surface-dim); }
+}
+.filling { animation: fieldFill 0.5s ease-out; }
+
+/* ========== Method Chips ========== */
+.method-chips { display: flex; gap: 4px; flex-wrap: wrap; }
+.method-chip {
+  padding: 5px 11px; border-radius: 6px;
+  font-size: 12px; font-weight: 600; cursor: pointer;
+  background: var(--surface-dim); color: var(--text-muted);
+  transition: var(--transition); border: 1.5px solid transparent;
+}
+.method-chip:hover { background: var(--border); color: var(--text); }
+.method-chip.active { background: rgba(103,80,164,0.1); color: var(--primary); border-color: rgba(103,80,164,0.25); }
+.method-chip.active-get { background: rgba(22,163,74,0.1); color: var(--success); border-color: rgba(22,163,74,0.25); }
+.method-chip.active-post { background: rgba(37,99,235,0.1); color: var(--info); border-color: rgba(37,99,235,0.25); }
+
+/* ========== Code Block ========== */
+.code-block {
+  background: #1E1E2E; border-radius: 7px;
+  padding: 12px 14px; font-family: var(--font-mono);
+  font-size: 12px; color: #CDD6F4; line-height: 1.7;
+  min-height: 60px;
+}
+.code-kw  { color: #CBA6F7; }
+.code-var { color: #89B4FA; }
+.code-fn  { color: #A6E3A1; }
+.code-num { color: #FAB387; }
+.code-str { color: #F9E2AF; }
+.code-ret { color: #F38BA8; }
+.code-expand {
+  text-align: right; margin-top: 6px;
+  font-size: 11px; color: var(--primary); cursor: pointer; font-weight: 600;
+}
+
+/* ========== IF Condition Builder ========== */
+.cond-builder {
+  border: 1px solid var(--border); border-radius: var(--radius-md);
+  padding: 14px; background: var(--surface);
+}
+.cond-row {
+  display: flex; align-items: center; gap: 6px;
+  margin-bottom: 8px; flex-wrap: wrap;
+}
+.cond-row:last-child { margin-bottom: 0; }
+.cond-chip {
+  padding: 5px 11px; border: 1px solid var(--border);
+  border-radius: 6px; font-size: 12px;
+  background: var(--surface-dim); color: var(--text);
+  min-width: 44px; text-align: center;
+}
+.cond-chip.var-chip {
+  background: rgba(103,80,164,0.06); border-color: rgba(103,80,164,0.2);
+  color: var(--primary); font-family: var(--font-mono); font-size: 11px;
+}
+.cond-chip.op-chip {
+  background: rgba(245,158,11,0.06); border-color: rgba(245,158,11,0.2);
+  color: var(--warning); font-weight: 700; min-width: 34px;
+}
+.cond-del-btn {
+  width: 24px; height: 24px; border-radius: 5px;
+  border: 1px solid var(--border); background: var(--surface);
+  color: var(--text-muted); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; transition: var(--transition);
+}
+.cond-del-btn:hover { background: rgba(220,38,38,0.06); color: var(--danger); border-color: rgba(220,38,38,0.2); }
+.cond-subgroup {
+  margin: 10px 0 6px; padding: 11px 13px;
+  border: 1px dashed var(--border-strong); border-radius: 7px;
+  background: rgba(103,80,164,0.02);
+}
+.cond-subgroup-header {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 9px;
+}
+.cond-subgroup-label {
+  font-size: 11px; font-weight: 700; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+
+/* ========== Spec Table ========== */
+.spec-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 20px; }
+.spec-table th {
+  text-align: left; font-weight: 700; color: var(--text-muted); font-size: 11px;
+  text-transform: uppercase; letter-spacing: 0.5px; padding: 9px 13px;
+  border-bottom: 2px solid var(--border); background: var(--surface-dim);
+}
+.spec-table td {
+  padding: 9px 13px; color: var(--text); border-bottom: 1px solid var(--border); vertical-align: top;
+}
+.spec-table tr:last-child td { border-bottom: none; }
+.spec-table tr:hover td { background: rgba(103,80,164,0.02); }
+
+/* ========== Flow Demo ========== */
+.flow-demo {
+  display: flex; align-items: center; gap: 0;
+  justify-content: flex-start; flex-wrap: wrap; padding: 20px 0;
+}
+.flow-arrow {
+  width: 36px; height: 2px; position: relative; margin: 0 2px; flex-shrink: 0;
+}
+.flow-arrow::after {
+  content: '→'; position: absolute; top: -10px; left: 50%;
+  transform: translateX(-50%); font-size: 18px; color: var(--text-muted);
+}
+.flow-arrow.error-arrow::after { color: var(--warning); }
+.branch-block { display: flex; flex-direction: column; gap: 12px; margin-left: 8px; }
+.branch-row { display: flex; align-items: center; gap: 8px; }
+.branch-tag {
+  font-size: 10px; font-weight: 700; padding: 2px 8px;
+  border-radius: 10px; min-width: 44px; text-align: center;
+}
+.branch-tag.true-tag  { background: rgba(22,163,74,0.1); color: var(--success); }
+.branch-tag.false-tag { background: rgba(220,38,38,0.1); color: var(--danger); }
+.branch-tag.error-tag { background: rgba(245,158,11,0.1); color: var(--warning); }
+.branch-tag.normal-tag { background: var(--surface-dim); color: var(--text-secondary); }
+
+.mini-node {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 11px; background: var(--surface);
+  border: 1.5px solid var(--border); border-radius: 6px;
+  font-size: 11px; font-weight: 600; color: var(--text);
+}
+.mini-node-icon {
+  width: 20px; height: 20px; border-radius: 4px;
+  display: flex; align-items: center; justify-content: center; font-size: 10px;
+}
+.mini-node.error-handler { border-color: var(--warning); background: rgba(245,158,11,0.04); }
+
+/* ========== Loop Demo ========== */
+.loop-demo { display: flex; flex-direction: column; align-items: flex-start; gap: 14px; padding: 20px 0; }
+.loop-body-box {
+  border: 2px dashed var(--border-strong); border-radius: 10px;
+  padding: 14px 20px; display: flex; gap: 14px; align-items: center;
+  background: rgba(37,99,235,0.02);
+}
+.loop-port-label {
+  font-size: 10px; font-weight: 700; color: var(--text-muted);
+  background: var(--surface-dim); padding: 3px 9px; border-radius: 5px;
+}
+
+/* ========== Color Chips ========== */
+.color-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; margin-bottom: 20px; }
+.color-chip-card { display: flex; align-items: center; gap: 10px; padding: 9px 13px; border-radius: var(--radius-md); font-size: 12px; font-weight: 600; }
+
+/* Output var card */
+.output-var-card {
+  border: 1px solid var(--border); border-radius: 7px;
+  padding: 9px 13px; margin-bottom: 7px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.output-var-name { font-family: var(--font-mono); font-size: 12px; font-weight: 600; color: var(--text); }
+.output-var-expr { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.assign-eq { color: var(--text-muted); font-size: 14px; font-weight: 700; margin: 0 6px; }
+
+/* Tab Toggle */
+.view-toggle { display: flex; border-bottom: 2px solid var(--border); margin-bottom: 14px; }
+.view-toggle-btn {
+  padding: 7px 16px; font-size: 12px; font-weight: 600;
+  color: var(--text-muted); cursor: pointer;
+  border-bottom: 2px solid transparent; margin-bottom: -2px;
+  transition: var(--transition);
+}
+.view-toggle-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+/* Switch Branches */
+.switch-branch-card {
+  border: 1px solid var(--border); border-radius: 7px;
+  padding: 11px 13px; margin-bottom: 7px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.switch-branch-name { font-size: 13px; font-weight: 600; color: var(--text); }
+.switch-branch-cond { font-family: var(--font-mono); font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+.switch-default {
+  border: 1px dashed var(--border-strong); border-radius: 7px;
+  padding: 11px 13px; text-align: center;
+  font-size: 12px; color: var(--text-muted); font-weight: 600;
+}
+
+/* Node description box */
+.node-desc-box {
+  margin: 0 18px 0;
+  padding: 12px 14px;
+  background: var(--surface-dim);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font-size: 12px; color: var(--text-secondary); line-height: 1.7;
+  display: none;
+}
+.node-desc-box.open { display: block; }
+
+/* State demo */
+.states-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 14px; margin-bottom: 24px; }
+.state-card {
+  padding: 14px; border-radius: var(--radius-lg);
+  border: 2px solid var(--border); background: var(--surface); text-align: center;
+}
+.state-card-label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+.state-node {
+  display: inline-flex; flex-direction: column;
+  min-width: 120px; background: var(--surface);
+  border: 2px solid var(--border); border-radius: var(--radius-md); text-align: left; margin: 0 auto;
+}
+.state-node .canvas-node-header { padding: 7px 9px 4px; }
+.state-node .canvas-node-icon { width: 20px; height: 20px; font-size: 10px; border-radius: 4px; }
+.state-node .canvas-node-title { font-size: 11px; cursor: default; }
+.state-desc { font-size: 10px; color: var(--text-muted); margin-top: 7px; font-family: var(--font-mono); }
+
+/* Merge strategy demo box */
+.merge-demo-box {
+  border: 1px solid var(--border); border-radius: var(--radius-lg);
+  overflow: hidden; max-width: 600px;
+}
+.merge-demo-canvas {
+  padding: 24px; background: var(--surface);
+  position: relative; overflow: hidden;
+}
+.merge-demo-canvas::before {
+  content: ''; position: absolute; inset: 0;
+  background-image: radial-gradient(circle, #D8DBE8 1px, transparent 1px);
+  background-size: 20px 20px; opacity: 0.5; pointer-events: none;
+}
+.merge-demo-canvas > * { position: relative; z-index: 1; }
+.merge-demo-config { padding: 14px 18px; border-top: 1px solid var(--border); background: var(--surface); }
+
+/* Priority chain */
+.priority-chain { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+.priority-item { padding: 7px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; border: 1.5px solid; }
+.priority-arrow { font-size: 18px; color: var(--text-muted); }
+
+/* Inline connection line demos */
+.line-demo { display: inline-block; width: 60px; height: 2px; border-radius: 1px; vertical-align: middle; }
+.line-demo-dashed { display: inline-block; width: 60px; height: 0; border-top: 2px dashed; vertical-align: middle; }
+
+/* Tooltip */
+.has-tooltip { position: relative; cursor: pointer; }
+.has-tooltip::after {
+  content: attr(data-tip);
+  position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%);
+  background: #1a1a2e; color: white; font-size: 11px; white-space: nowrap;
+  padding: 4px 10px; border-radius: 5px; pointer-events: none;
+  opacity: 0; transition: opacity 0.15s;
+}
+.has-tooltip:hover::after { opacity: 1; }
+
+@media (max-width: 600px) {
+  .main { padding: 16px; }
+  .canvas-bg { padding: 18px; }
+  .nodes-row { gap: 14px; }
+  .page-header-inner { flex-direction: column; gap: 12px; align-items: flex-start; }
+}
+
+/* ========== Node Config Two-Column Layout ========== */
+.node-config-layout {
+  display: flex;
+  gap: 0;
+  min-height: 600px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.node-nav {
+  width: 196px;
+  flex-shrink: 0;
+  background: var(--surface-dim);
+  border-right: 1px solid var(--border);
+  padding: 12px 0;
+  overflow-y: auto;
+}
+
+.node-nav-group-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--text-muted);
+  padding: 10px 14px 5px;
+}
+
+.node-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  cursor: pointer;
+  border-left: 2px solid transparent;
+  transition: var(--transition);
+  border-radius: 0;
+}
+.node-nav-item:hover {
+  background: rgba(103,80,164,0.06);
+  border-left-color: rgba(103,80,164,0.25);
+}
+.node-nav-item.active {
+  background: rgba(103,80,164,0.08);
+  border-left-color: var(--primary);
+}
+.node-nav-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+.node-nav-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  flex: 1;
+  min-width: 0;
+}
+.node-nav-item.active .node-nav-name { font-weight: 600; color: var(--primary); }
+.node-nav-code {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  background: var(--border);
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+
+.node-panel-area {
+  flex: 1;
+  min-width: 0;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+.node-panel { animation: panelFadeIn 0.15s ease-out; }
+@keyframes panelFadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 700px) {
+  .node-config-layout { flex-direction: column; }
+  .node-nav { width: 100%; border-right: none; border-bottom: 1px solid var(--border); display: flex; flex-wrap: wrap; padding: 8px; gap: 4px; }
+  .node-nav-group-label { display: none; }
+  .node-nav-item { padding: 6px 10px; border-radius: 6px; border-left: none; border: 1.5px solid transparent; }
+  .node-nav-item.active { border-color: var(--primary); }
+  .node-nav-code { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============ Page Header ============ -->
+<div class="page-header">
+  <div class="page-header-inner">
+    <div class="page-title">
+      <div class="logo">B</div>
+      <div>
+        <h1>Beaver 节点设计方案</h1>
+        <div class="page-subtitle">基于节点PRD · 流程编排场景 · 可交互演示</div>
+      </div>
+    </div>
+    <nav class="tabs-nav" id="tabsNav">
+      <button class="tab-btn active" onclick="switchTab(0)">🎨 画布卡片</button>
+      <button class="tab-btn" onclick="switchTab(1)">🔗 连线系统</button>
+      <button class="tab-btn" onclick="switchTab(2)">📋 配置面板通用</button>
+      <button class="tab-btn" onclick="switchTab(3)">⚙️ 各节点配置</button>
+      <button class="tab-btn" onclick="switchTab(4)">📐 规范速查</button>
+    </nav>
+  </div>
+</div>
+
+<div class="main">
+
+<!-- ====== TAB 0: Canvas Cards ====== -->
+<div class="page-section active" id="sec0">
+<h2 class="section-title">画布节点卡片</h2>
+<p class="section-desc">每个节点在画布上呈现为统一结构卡片：<strong>类型图标 + 节点名称（悬浮可编辑）+ 节点编码 + 配置摘要</strong>。<br>存在校验错误时右上角显示红色数字徽标。节点名称 hover 即可直接编辑，无需打开配置面板。</p>
+
+<div class="category-label">流程控制类节点</div>
+<div class="canvas-bg">
+<div class="nodes-row">
+
+  <!-- Trigger -->
+  <div class="node-wrap">
+    <div class="canvas-node">
+      <div class="canvas-node-header">
+        <div class="canvas-node-icon" style="background:var(--node-trigger);color:var(--node-trigger-fg)">⚡</div>
+        <div class="canvas-node-title" contenteditable="false" title="点击编辑节点名称" onclick="startEditTitle(this)">开始节点</div>
+      </div>
+      <div class="canvas-node-body">
+        <div class="node-code-tag">trigger_1</div>
+        <div class="node-summary-text">手动触发</div>
+      </div>
+      <div class="port port-out"></div>
+    </div>
+  </div>
+
+  <!-- End -->
+  <div class="node-wrap">
+    <div class="canvas-node">
+      <div class="canvas-node-header">
+        <div class="canvas-node-icon" style="background:var(--node-end);color:var(--node-end-fg)">🏁</div>
+        <div class="canvas-node-title" contenteditable="false" onclick="startEditTitle(this)">结束节点</div>
+      </div>
+      <div class="canvas-node-body">
+        <div class="node-code-tag">end_1</div>
+        <div class="node-summary-text">输出 orderResult, status</div>
+      </div>
+      <div class="port port-in"></div>
+    </div>
+  </div>
+
+  <!-- IF -->
+  <div class="node-wrap">
+    <div class="canvas-node">
+      <div class="canvas-node-header">
+        <div class="canvas-node-icon" style="background:var(--node-logic);color:var(--node-logic-fg)">🔀</div>
+        <div class="canvas-node-title" contenteditable="false" onclick="startEditTitle(this)">IF 条件</div>
+      </div>
+      <div class="canvas-node-body">
+        <div class="node-code-tag">if_1</div>
+        <div class="node-summary-text">判断 订单金额 &gt; 1000</div>
+      </div>
+      <div class="port port-in"></div>
+      <div class="port" style="position:absolute;right:-7px;top:32%;border-color:var(--success)"></div>
+      <div class="port-label-r" style="top:28%;color:var(--success)">TRUE</div>
+      <div class="port" style="position:absolute;right:-7px;top:62%;border-color:var(--danger)"></div>
+      <div class="port-label-r" style="top:58%;color:var(--danger)">FALSE</div>
+    </div>
+  </div>
+
+  <!-- Switch -->
+  <div class="node-wrap">
+    <div class="canvas-node">
+      <div class="canvas-node-header">
+        <div class="canvas-node-icon" style="background:var(--node-logic);color:var(--node-logic-fg)">🔃</div>
+        <div class="canvas-node-title" contenteditable="false" onclick="startEditTitle(this)">Switch</div>
+      </div>
+      <div class="canvas-node-body">
+        <div class="node-code-tag">switch_1</div>
+        <div class="node-summary-text">3 个分支 · 首次匹配</div>
+      </div>
+      <div class="port port-in"></div>
+      <div class="port" style="position:absolute;right:-7px;top:22%"></div>
+      <div class="port" style="position:absolute;right:-7px;top:45%"></div>
+      <div class="port" style="position:absolute;right:-7px;top:68%"></div>
+    </div>
+  </div>
+
+  <!-- Loop -->
+  <div class="node-wrap">
+    <div class="canvas-node">
+      <div class="canvas-node-header">
+        <div class="canvas-node-icon" style="background:var(--node-logic);color:var(--node-logic-fg)">🔄</div>
+        <div class="canvas-node-title" contenteditable="false" onclick="startEditTitle(this)">循环</div>
+      </div>
+      <div class="canvas-node-body">
+        <div class="node-code-tag">loop_1</div>
+        <div class="node-summary-text">ForEach 遍历 订单列表</div>
+      </div>
+      <div class="port port-in"></div>
+      <div class="port" style="position:absolute;right:-7px;top:33%"></div>
+      <div class="port-label-r" style="top:29%;color:var(--text-muted)">完成</div>
+      <div class="port" style="position:absolute;right:-7px;top:60%"></div>
+      <div class="port-label-r" style="top:56%;color:var(--warning)">中断</div>
+      <div class="port" style="position:absolute;bottom:-7px;left:50%;margin-left:-6px;width:12px;height:12px;border-radius:50%;background:var(--surface);border:2px solid var(--info)"></div>
+      <div class="port-label-b">循环体</div>
+    </div>
+  </div>
+
+  <!-- Delay -->
+  <div class="node-wrap">
+    <div class="canvas-node">
+      <div class="canvas-node-header">
+        <div class="canvas-node-icon" style="background:var(--node-logic);color:var(--node-logic-fg)">⏱️</div>
+        <div class="canvas-node-title" contenteditable="false" onclick="startEditTitle(this)">延迟</div>
+      </div>
+      <div class="canvas-node-body">
+        <div class="node-code-tag">delay_1</div>
+        <div class="node-summary-text">等待 30 分钟</div>
+      </div>
+      <div class="port port-in"></div>
+      <div class="port port-out"></div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<div class="category-label">数据与执行类节点</div>
+<div class="canvas-bg">
+<div class="nodes-row">
+
+  <!-- Assign -->
+  <div class="node-wrap">
+    <div class="canvas-node">
+      <div class="canvas-node-header">
+        <div class="canvas-node-icon" style="background:var(--node-data);color:var(--node-data-fg)">📝</div>
+        <div class="canvas-node-title" contenteditable="false" onclick="startEditTitle(this)">赋值</div>
+      </div>
+      <div class="canvas-node-body">
+        <div class="node-code-tag">assign_1</div>
+        <div class="node-summary-text">totalAmount = 金额 × 数量</div>
+      </div>
+      <div class="port port-in"></div>
+      <div class="port port-out"></div>
+    </div>
+  </div>
+
+  <!-- Output -->
+  <div class="node-wrap">
+    <div class="canvas-node">
+      <div class="canvas-node-header">
+        <div class="canvas-node-icon" style="background:var(--node-data);color:var(--node-data-fg)">📤</div>
+        <div class="canvas-node-title" contenteditable="false" onclick="startEditTitle(this)">输出</div>
+      </div>
+      <div class="canvas-node-body">
+        <div class="node-code-tag">output_1</div>
+        <div class="node-summary-text">INFO · 处理进度 50%</div>
+      </div>
+      <div class="port port-in"></div>
+      <div class="port port-out"></div>
+    </div>
+  </div>
+
+  <!-- Code -->
+  <div class="node-wrap">
+    <div class="canvas-node">
+      <div class="canvas-node-header">
+        <div class="canvas-node-icon" style="background:var(--node-data);color:var(--node-data-fg)">💻</div>
+        <div class="canvas-node-title" contenteditable="false" onclick="startEditTitle(this)">代码</div>
+      </div>
+      <div class="canvas-node-body">
+        <div class="node-code-tag">code_1</div>
+        <div class="node-summary-text">JavaScript · 数据转换</div>
+      </div>
+      <div class="port port-in"></div>
+      <div class="port port-out"></div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<div class="category-label">集成 & 扩展类节点</div>
+<div class="canvas-bg">
+<div class="nodes-row">
+
+  <!-- HTTP -->
+  <div class="node-wrap">
+    <div class="canvas-node">
+      <div class="canvas-node-header">
+        <div class="canvas-node-icon" style="background:var(--node-integration);color:var(--node-integration-fg)">🌐</div>
+        <div class="canvas-node-title" contenteditable="false" onclick="startEditTitle(this)">HTTP 请求</div>
+      </div>
+      <div class="canvas-node-body">
+        <div class="node-code-tag">http_1</div>
+        <div class="node-summary-text">GET /api/orders/{id}</div>
+      </div>
+      <div class="port port-in"></div>
+      <div class="port port-out"></div>
+    </div>
+  </div>
+
+  <!-- MQ -->
+  <div class="node-wrap">
+    <div class="canvas-node">
+      <div class="canvas-node-header">
+        <div class="canvas-node-icon" style="background:var(--node-integration);color:var(--node-integration-fg)">📨</div>
+        <div class="canvas-node-title" contenteditable="false" onclick="startEditTitle(this)">MQ 发送</div>
+      </div>
+      <div class="canvas-node-body">
+        <div class="node-code-tag">mq_1</div>
+        <div class="node-summary-text">Topic: order-events</div>
+      </div>
+      <div class="port port-in"></div>
+      <div class="port port-out"></div>
+    </div>
+  </div>
+
+  <!-- Workflow -->
+  <div class="node-wrap">
+    <div class="canvas-node">
+      <div class="canvas-node-header">
+        <div class="canvas-node-icon" style="background:var(--node-flow);color:var(--node-flow-fg)">🔗</div>
+        <div class="canvas-node-title" contenteditable="false" onclick="startEditTitle(this)">工作流</div>
+      </div>
+      <div class="canvas-node-body">
+        <div class="node-code-tag">workflow_1</div>
+        <div class="node-summary-text">调用 发送通知流程 (v2)</div>
+      </div>
+      <div class="port port-in"></div>
+      <div class="port port-out"></div>
+    </div>
+  </div>
+
+  <!-- Placeholder -->
+  <div class="node-wrap">
+    <div class="canvas-node placeholder-node">
+      <div class="canvas-node-header">
+        <div class="canvas-node-icon" style="background:var(--node-placeholder);color:var(--node-placeholder-fg)">⬜</div>
+        <div class="canvas-node-title" contenteditable="false" onclick="startEditTitle(this)">占位节点</div>
+        <div class="canvas-node-warning">!</div>
+      </div>
+      <div class="canvas-node-body">
+        <div class="node-code-tag">placeholder_1</div>
+        <div class="node-summary-warn">⚠ 未完成配置</div>
+      </div>
+      <div class="port port-in"></div>
+      <div class="port port-out"></div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<div class="category-label">节点名称交互说明（悬浮即可编辑，无需打开配置面板）</div>
+<div class="canvas-bg">
+<div style="display:flex;gap:32px;flex-wrap:wrap;align-items:flex-start">
+  <!-- 默认状态 -->
+  <div>
+    <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">默认状态</div>
+    <div class="canvas-node" style="min-width:160px;pointer-events:none">
+      <div class="canvas-node-header">
+        <div class="canvas-node-icon" style="background:var(--node-integration);color:var(--node-integration-fg)">🌐</div>
+        <div class="canvas-node-title" style="cursor:default">HTTP 请求</div>
+      </div>
+      <div class="canvas-node-body"><div class="node-code-tag">http_1</div></div>
+    </div>
+    <div style="font-size:11px;color:var(--text-muted);margin-top:6px">节点名称为纯文字</div>
+  </div>
+  <!-- Hover 状态 -->
+  <div>
+    <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">Hover 状态</div>
+    <div class="canvas-node" style="min-width:160px;pointer-events:none">
+      <div class="canvas-node-header">
+        <div class="canvas-node-icon" style="background:var(--node-integration);color:var(--node-integration-fg)">🌐</div>
+        <div class="canvas-node-title" style="background:var(--surface-dim);box-shadow:inset 0 0 0 1px var(--border-strong);cursor:text">HTTP 请求</div>
+      </div>
+      <div class="canvas-node-body"><div class="node-code-tag">http_1</div></div>
+    </div>
+    <div style="font-size:11px;color:var(--text-muted);margin-top:6px">名称区域出现输入框外观</div>
+  </div>
+  <!-- 编辑中 -->
+  <div>
+    <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">编辑中</div>
+    <div class="canvas-node" style="min-width:160px;pointer-events:none">
+      <div class="canvas-node-header">
+        <div class="canvas-node-icon" style="background:var(--node-integration);color:var(--node-integration-fg)">🌐</div>
+        <div class="canvas-node-title" style="background:var(--surface);box-shadow:inset 0 0 0 2px var(--primary);cursor:text">查询订单接口<span style="display:inline-block;width:1px;height:13px;background:var(--primary);margin-left:1px;animation:blink 1s step-end infinite;vertical-align:middle"></span></div>
+      </div>
+      <div class="canvas-node-body"><div class="node-code-tag">http_1</div></div>
+    </div>
+    <div style="font-size:11px;color:var(--text-muted);margin-top:6px">Enter 确认，Esc 取消</div>
+  </div>
+  <!-- 超长名称 -->
+  <div>
+    <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">名称超长截断</div>
+    <div class="canvas-node" style="min-width:160px;pointer-events:none">
+      <div class="canvas-node-header">
+        <div class="canvas-node-icon" style="background:var(--node-integration);color:var(--node-integration-fg)">🌐</div>
+        <div class="canvas-node-title has-tooltip" data-tip="查询订单支付状态接口调用节点" style="cursor:default">查询订单支付状态接口…</div>
+      </div>
+      <div class="canvas-node-body"><div class="node-code-tag">http_1</div></div>
+    </div>
+    <div style="font-size:11px;color:var(--text-muted);margin-top:6px">省略号截断，hover 显示完整名称</div>
+  </div>
+</div>
+</div>
+
+<style>
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+</style>
+
+<div class="category-label">错误状态与选中态</div>
+<div class="canvas-bg">
+<div class="nodes-row">
+  <div class="node-wrap">
+    <div class="canvas-node">
+      <div class="canvas-node-header">
+        <div class="canvas-node-icon" style="background:var(--node-integration);color:var(--node-integration-fg)">🌐</div>
+        <div class="canvas-node-title" contenteditable="false" onclick="startEditTitle(this)">HTTP 请求</div>
+        <div class="canvas-node-warning">2</div>
+      </div>
+      <div class="canvas-node-body">
+        <div class="node-code-tag">http_2</div>
+        <div class="node-summary-err">⚠ URL 未填写、请求方法未选</div>
+      </div>
+    </div>
+  </div>
+  <div class="node-wrap">
+    <div class="canvas-node selected">
+      <div class="canvas-node-header">
+        <div class="canvas-node-icon" style="background:var(--node-data);color:var(--node-data-fg)">📝</div>
+        <div class="canvas-node-title" contenteditable="false" onclick="startEditTitle(this)">赋值（选中态）</div>
+      </div>
+      <div class="canvas-node-body">
+        <div class="node-code-tag">assign_1</div>
+        <div class="node-summary-text">count = count + 1</div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="category-label">运行态（调试时的节点状态）</div>
+<div class="states-grid">
+  <div class="state-card">
+    <div class="state-card-label">默认</div>
+    <div class="state-node"><div class="canvas-node-header"><div class="canvas-node-icon" style="background:var(--node-integration);color:var(--node-integration-fg)">🌐</div><div class="canvas-node-title" style="cursor:default">HTTP 请求</div></div></div>
+    <div class="state-desc">border: default</div>
+  </div>
+  <div class="state-card" style="border-color:var(--primary)">
+    <div class="state-card-label">选中</div>
+    <div class="state-node" style="border-color:var(--primary);box-shadow:0 0 0 3px rgba(103,80,164,0.15)"><div class="canvas-node-header"><div class="canvas-node-icon" style="background:var(--node-integration);color:var(--node-integration-fg)">🌐</div><div class="canvas-node-title" style="cursor:default">HTTP 请求</div></div></div>
+    <div class="state-desc">border: primary</div>
+  </div>
+  <div class="state-card" style="border-color:var(--info)">
+    <div class="state-card-label">执行中</div>
+    <div class="state-node" style="border-color:var(--info);animation:runPulse 1.5s ease-in-out infinite"><div class="canvas-node-header"><div class="canvas-node-icon" style="background:var(--node-integration);color:var(--node-integration-fg)">🌐</div><div class="canvas-node-title" style="cursor:default">HTTP 请求</div></div></div>
+    <div class="state-desc">border: info + pulse</div>
+  </div>
+  <div class="state-card" style="border-color:var(--success)">
+    <div class="state-card-label">执行成功</div>
+    <div class="state-node" style="border-color:var(--success)"><div class="canvas-node-header"><div class="canvas-node-icon" style="background:var(--node-integration);color:var(--node-integration-fg)">🌐</div><div class="canvas-node-title" style="cursor:default">HTTP 请求</div></div></div>
+    <div class="state-desc">border: success</div>
+  </div>
+  <div class="state-card" style="border-color:var(--danger)">
+    <div class="state-card-label">执行失败</div>
+    <div class="state-node" style="border-color:var(--danger)"><div class="canvas-node-header"><div class="canvas-node-icon" style="background:var(--node-integration);color:var(--node-integration-fg)">🌐</div><div class="canvas-node-title" style="cursor:default">HTTP 请求</div></div></div>
+    <div class="state-desc">border: danger</div>
+  </div>
+  <div class="state-card" style="border-color:var(--warning)">
+    <div class="state-card-label">暂停/断点</div>
+    <div class="state-node" style="border-color:var(--warning);animation:pausePulse 1.5s ease-in-out infinite"><div class="canvas-node-header"><div class="canvas-node-icon" style="background:var(--node-integration);color:var(--node-integration-fg)">🌐</div><div class="canvas-node-title" style="cursor:default">HTTP 请求</div></div></div>
+    <div class="state-desc">border: warning + pulse</div>
+  </div>
+</div>
+
+</div><!-- sec0 end -->
+
+<!-- ====== TAB 1: Connection System ====== -->
+<div class="page-section" id="sec1">
+<h2 class="section-title">连线与端口系统</h2>
+<p class="section-desc">节点通过端口和连线实现流程编排。不同节点类型有不同的端口布局和连线语义。<br>异常分支在节点高级配置中开启后，节点右侧增加橙色异常出口端口。</p>
+
+<div class="category-label">端口布局规则</div>
+<table class="spec-table">
+<thead><tr><th>节点类型</th><th>输入端口（左侧）</th><th>普通输出（右侧）</th><th>特殊端口</th></tr></thead>
+<tbody>
+<tr><td>⚡ 开始节点</td><td>无</td><td>1 个</td><td>—</td></tr>
+<tr><td>🏁 结束节点</td><td>1 个</td><td>无</td><td>—</td></tr>
+<tr><td>🔀 IF 条件</td><td>1 个</td><td>2 个（TRUE绿/FALSE红）</td><td>开启异常分支后：+1 异常出口（橙色虚线）</td></tr>
+<tr><td>🔃 Switch</td><td>1 个</td><td>N 个（最多50，各带分支名）</td><td>开启异常分支后：+1 异常出口（橙色虚线）</td></tr>
+<tr><td>🔄 循环</td><td>1 个</td><td>完成 + 中断</td><td>底部：循环体端口（蓝色）；开启异常分支后：+1 异常出口（橙色虚线）</td></tr>
+<tr><td>其余节点</td><td>1 个</td><td>1 个</td><td>开启异常分支后：+1 异常出口（橙色虚线）</td></tr>
+</tbody>
+</table>
+
+<div class="category-label">连线视觉类型</div>
+<table class="spec-table">
+<thead><tr><th>连线类型</th><th>样式</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td>普通连线</td><td><span class="line-demo" style="background:var(--border-strong)"></span> 实线 灰色</td><td>节点执行完成后流向下游</td></tr>
+<tr><td>TRUE 分支</td><td><span class="line-demo" style="background:var(--success)"></span> 实线 绿色 + 标签</td><td>IF 条件成立时的分支路径</td></tr>
+<tr><td>FALSE 分支</td><td><span class="line-demo" style="background:var(--danger)"></span> 实线 红色 + 标签</td><td>IF 条件不成立时的分支路径</td></tr>
+<tr><td>Switch 分支</td><td><span class="line-demo" style="background:var(--primary)"></span> 实线 紫色 + 分支名标签</td><td>Switch 每个分支的路径</td></tr>
+<tr><td>异常连线</td><td><span class="line-demo-dashed" style="border-color:var(--warning)"></span> 虚线 橙色</td><td>节点异常时流向异常处理分支；由节点异常策略配置"走异常分支"后启用</td></tr>
+<tr><td>循环体连线</td><td><span class="line-demo" style="background:var(--info)"></span> 实线 蓝色</td><td>循环节点底部端口到循环体节点的连线</td></tr>
+</tbody>
+</table>
+
+<div class="category-label">IF 分支连线示意</div>
+<div class="canvas-bg">
+<div class="flow-demo">
+  <div class="mini-node"><div class="mini-node-icon" style="background:var(--node-trigger);color:var(--node-trigger-fg)">⚡</div>开始节点</div>
+  <div class="flow-arrow"></div>
+  <div class="mini-node"><div class="mini-node-icon" style="background:var(--node-logic);color:var(--node-logic-fg)">🔀</div>IF 金额&gt;1000</div>
+  <div class="branch-block">
+    <div class="branch-row">
+      <div class="branch-tag true-tag">TRUE</div>
+      <span style="font-size:16px;color:var(--success)">→</span>
+      <div class="mini-node"><div class="mini-node-icon" style="background:var(--node-integration);color:var(--node-integration-fg)">🌐</div>人工审核</div>
+      <div class="flow-arrow"></div>
+      <div class="mini-node"><div class="mini-node-icon" style="background:var(--node-end);color:var(--node-end-fg)">🏁</div>结束</div>
+    </div>
+    <div class="branch-row">
+      <div class="branch-tag false-tag">FALSE</div>
+      <span style="font-size:16px;color:var(--danger)">→</span>
+      <div class="mini-node"><div class="mini-node-icon" style="background:var(--node-data);color:var(--node-data-fg)">📤</div>自动通过</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="category-label">异常分支连线示意</div>
+<p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px">在节点高级配置中将异常策略设为「走异常分支」后，节点右侧增加橙色虚线出口端口，可连接异常处理节点。</p>
+<div class="canvas-bg">
+<div class="flow-demo" style="flex-wrap:wrap;gap:8px">
+  <!-- HTTP节点带异常出口 -->
+  <div class="node-wrap" style="position:relative">
+    <div class="canvas-node" style="min-width:150px">
+      <div class="canvas-node-header">
+        <div class="canvas-node-icon" style="background:var(--node-integration);color:var(--node-integration-fg)">🌐</div>
+        <div class="canvas-node-title" style="cursor:default">HTTP 请求</div>
+      </div>
+      <div class="canvas-node-body">
+        <div class="node-code-tag">http_1</div>
+        <div class="node-summary-text">GET /api/orders</div>
+      </div>
+      <div class="port port-in"></div>
+      <!-- 正常出口 -->
+      <div class="port" style="position:absolute;right:-7px;top:30%"></div>
+      <div class="port-label-r" style="top:26%;color:var(--text-muted)">成功</div>
+      <!-- 异常出口 -->
+      <div class="port port-error" style="position:absolute;right:-7px;top:65%"></div>
+      <div class="port-label-r" style="top:61%;color:var(--warning)">异常</div>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:16px;margin-left:48px">
+    <div class="branch-row">
+      <div class="branch-tag normal-tag">成功</div>
+      <span style="font-size:16px;color:var(--text-muted)">→</span>
+      <div class="mini-node"><div class="mini-node-icon" style="background:var(--node-data);color:var(--node-data-fg)">📝</div>处理响应</div>
+      <div class="flow-arrow"></div>
+      <div class="mini-node"><div class="mini-node-icon" style="background:var(--node-end);color:var(--node-end-fg)">🏁</div>结束</div>
+    </div>
+    <div class="branch-row">
+      <div class="branch-tag error-tag">异常</div>
+      <span style="font-size:16px;color:var(--warning)">⤳</span>
+      <div class="mini-node error-handler"><div class="mini-node-icon" style="background:rgba(245,158,11,0.1);color:var(--warning)">⚠️</div>错误处理节点</div>
+    </div>
+  </div>
+</div>
+<div style="font-size:11px;color:var(--text-muted);margin-top:8px">⤳ 表示虚线橙色异常连线；异常策略在节点「高级配置」区的「异常策略」字段中设置为「走异常分支」后生效</div>
+</div>
+
+<div class="category-label">循环节点连线示意</div>
+<div class="canvas-bg">
+<div class="loop-demo">
+  <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+    <div class="mini-node"><div class="mini-node-icon" style="background:var(--node-logic);color:var(--node-logic-fg)">🔄</div>循环 · 遍历订单</div>
+    <span style="font-size:13px;color:var(--text-muted)">完成 →</span>
+    <div class="mini-node"><div class="mini-node-icon" style="background:var(--node-end);color:var(--node-end-fg)">🏁</div>结束</div>
+  </div>
+  <div class="loop-port-label">↓ 循环体端口（蓝色，每轮迭代执行）</div>
+  <div class="loop-body-box">
+    <div class="mini-node"><div class="mini-node-icon" style="background:var(--node-integration);color:var(--node-integration-fg)">🌐</div>查询订单</div>
+    <span style="font-size:14px;color:var(--info)">→</span>
+    <div class="mini-node"><div class="mini-node-icon" style="background:var(--node-logic);color:var(--node-logic-fg)">🔀</div>IF 成功?</div>
+    <span style="font-size:14px;color:var(--info)">→</span>
+    <div class="mini-node"><div class="mini-node-icon" style="background:var(--node-data);color:var(--node-data-fg)">📝</div>赋值</div>
+  </div>
+</div>
+</div>
+
+<div class="category-label">并行汇合连线示意</div>
+<p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px">多条连线汇合到同一节点时，在该节点的<strong>高级配置区</strong>设置汇合策略（仅当节点有 2 条及以上输入连线时该字段生效）。</p>
+<div class="merge-demo-box">
+  <div class="merge-demo-canvas">
+    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+      <div class="mini-node"><div class="mini-node-icon" style="background:var(--node-trigger);color:var(--node-trigger-fg)">⚡</div>开始</div>
+      <div style="display:flex;flex-direction:column;gap:12px;margin:0 8px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="color:var(--text-muted)">→</span>
+          <div class="mini-node"><div class="mini-node-icon" style="background:var(--node-integration);color:var(--node-integration-fg)">🌐</div>查询库存</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="color:var(--text-muted)">→</span>
+          <div class="mini-node"><div class="mini-node-icon" style="background:var(--node-integration);color:var(--node-integration-fg)">🌐</div>查询价格</div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;margin:0 2px">
+        <span style="color:var(--text-muted);font-size:18px">⟶</span>
+        <span style="color:var(--text-muted);font-size:18px">⟶</span>
+      </div>
+      <div class="mini-node" style="border-color:var(--primary);background:rgba(103,80,164,0.04)">
+        <div class="mini-node-icon" style="background:var(--node-data);color:var(--node-data-fg)">📝</div>汇合节点
+      </div>
+      <span style="color:var(--text-muted)">→</span>
+      <div class="mini-node"><div class="mini-node-icon" style="background:var(--node-end);color:var(--node-end-fg)">🏁</div>结束</div>
+    </div>
+  </div>
+  <div class="merge-demo-config">
+    <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:10px">汇合节点 · 高级配置区（有多条入线时显示）</div>
+    <div class="config-field">
+      <div class="config-label">汇合策略</div>
+      <select class="config-input" style="font-size:12px" id="mergeSelect" onchange="updateMergeDesc()">
+        <option value="all">等待全部完成 (Wait All)</option>
+        <option value="any">任一完成即继续 (Any)</option>
+      </select>
+      <div class="config-help" id="mergeDesc">所有入线分支均到达后，该节点才开始执行。可引用所有分支的输出变量。</div>
+    </div>
+  </div>
+</div>
+
+<div class="category-label">通用连线规则</div>
+<table class="spec-table">
+<thead><tr><th>规则</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td>输入要求</td><td>除开始节点外，所有节点必须有至少一条输入连线</td></tr>
+<tr><td>输出要求</td><td>除结束节点外，所有节点必须有至少一条输出连线（异常出口不计入）</td></tr>
+<tr><td>环路检测</td><td>连线不能形成环路；循环节点内部体为合法环路</td></tr>
+<tr><td>同源端口限制</td><td>同一源端口到同一目标端口只能有一条连线</td></tr>
+<tr><td>自连限制</td><td>节点不能连接到自身</td></tr>
+</tbody>
+</table>
+
+</div><!-- sec1 end -->
+
+<!-- ====== TAB 2: Config Panel Common ====== -->
+<div class="page-section" id="sec2">
+<h2 class="section-title">配置面板通用设计</h2>
+<p class="section-desc">所有节点配置面板遵循统一框架，以下演示通用交互行为。点击各控件体验真实交互效果。</p>
+
+<div class="category-label">面板布局框架</div>
+<p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px">所有节点配置面板的结构层次固定如下（渐进式披露原则）：</p>
+<table class="spec-table" style="max-width:560px">
+<thead><tr><th>区域</th><th>默认状态</th><th>内容</th></tr></thead>
+<tbody>
+<tr><td>面板头部</td><td>始终显示</td><td>节点图标 + 节点名称（可编辑）+ 节点编码 + AI引导按钮（可选）</td></tr>
+<tr><td>节点说明</td><td>折叠</td><td>点击 ? 图标展开，说明节点用途和使用场景</td></tr>
+<tr><td>AI 引导条</td><td>展开（未配置时）</td><td>引导用户用自然语言描述需求，AI 自动填充表单</td></tr>
+<tr><td>基础配置区</td><td>展开</td><td>必填项 + 80% 场景都会用到的配置</td></tr>
+<tr><td>高级配置区</td><td>折叠</td><td>超时、认证、异常策略、汇合策略等技术性配置；有非默认值时标题旁显示蓝色圆点</td></tr>
+</tbody>
+</table>
+
+<div class="panel-grid" style="margin-top:24px">
+<!-- 演示面板 -->
+<div>
+<div class="category-label" style="margin-top:0">完整交互演示（HTTP 请求节点）</div>
+<div class="config-panel" id="demoPanel">
+  <!-- 面板头部 -->
+  <div class="config-panel-header">
+    <div class="config-panel-icon" style="background:var(--node-integration);color:var(--node-integration-fg)">🌐</div>
+    <div style="flex:1;min-width:0">
+      <input class="config-node-name-input" id="nodeNameInput" value="HTTP 请求" maxlength="50" oninput="checkNameLength(this)">
+      <div class="config-panel-code">http_1</div>
+    </div>
+    <button class="ai-guide-recall-btn" id="aiRecallBtn" style="display:none" onclick="showAiGuide()" title="重新展开 AI 引导">✦ AI 引导</button>
+    <button onclick="toggleNodeDesc()" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:16px;padding:4px;margin-left:4px" title="节点说明">?</button>
+  </div>
+  <!-- 节点说明 -->
+  <div class="node-desc-box" id="nodeDescBox">
+    <strong>HTTP 请求节点</strong>：向外部或内部系统发送 HTTP 请求，支持 GET/POST/PUT/DELETE/PATCH 方法。<br>
+    <strong>适用场景：</strong>调用第三方 API、查询内部服务、触发 WebHook 等。<br>
+    <strong>注意：</strong>挂起等待回调模式下，节点发出请求后会挂起等待外部系统回调，适合异步处理场景。
+  </div>
+  <!-- AI 引导条：未配置状态 -->
+  <div class="ai-guide-bar" id="aiGuideBar" style="margin-top:14px;margin-bottom:4px">
+    <strong>🤖 AI 引导</strong> — 描述你想调用的接口，AI 帮你自动填写配置<br>
+    <span style="opacity:.65;font-size:11px">例如：「调用订单服务的查询接口，传入 orderId，GET 请求」</span>
+    <div style="margin-top:8px;display:flex;gap:8px">
+      <input class="config-input" id="aiInput" placeholder="描述你的需求..." style="flex:1;font-size:12px">
+    </div>
+    <div class="ai-btn-row">
+      <button class="ai-btn ai-btn-primary" onclick="simulateAiFill()">生成配置</button>
+      <button class="ai-btn ai-btn-ghost" onclick="skipAiGuide()">跳过</button>
+    </div>
+  </div>
+  <!-- AI 填充中状态（隐藏） -->
+  <div class="ai-guide-bar hidden" id="aiFillingBar" style="margin-top:14px;margin-bottom:4px">
+    <strong>🤖 AI 正在填写配置...</strong><br>
+    <span style="opacity:.65;font-size:11px">正在解析你的描述并映射字段</span>
+  </div>
+  <!-- AI 已配置状态（隐藏） -->
+  <div class="ai-guide-bar configured hidden" id="aiConfiguredBar" style="margin-top:14px;margin-bottom:4px" onclick="resetAiGuide()">
+    <strong>✦ AI 已完成配置</strong> — 点击此处重新引导
+  </div>
+
+  <!-- 基础配置 -->
+  <div class="config-section" id="basicSection">
+    <div class="config-section-title">基础配置</div>
+    <div class="config-field">
+      <div class="config-label">请求 URL <span class="req">*</span></div>
+      <input class="config-input" id="demoUrl" placeholder="https://api.example.com/orders/{id}" oninput="updateSummary()">
+      <div class="config-help">支持变量引用，如 https://api.example.com/orders/${trigger_1.orderId}</div>
+    </div>
+    <div class="config-field">
+      <div class="config-label">请求方法 <span class="req">*</span></div>
+      <div class="method-chips" id="methodChips">
+        <div class="method-chip" onclick="selectMethod(this,'GET')">GET</div>
+        <div class="method-chip" onclick="selectMethod(this,'POST')">POST</div>
+        <div class="method-chip" onclick="selectMethod(this,'PUT')">PUT</div>
+        <div class="method-chip" onclick="selectMethod(this,'DELETE')">DELETE</div>
+        <div class="method-chip" onclick="selectMethod(this,'PATCH')">PATCH</div>
+      </div>
+    </div>
+    <div class="config-field">
+      <div class="config-label">Headers</div>
+      <input class="config-input" placeholder='Content-Type: application/json'>
+    </div>
+    <!-- Body 字段：仅 POST/PUT/PATCH 时显示 -->
+    <div class="config-field" id="bodyField" style="display:none">
+      <div class="config-label">Body</div>
+      <textarea class="config-input" rows="3" placeholder='{"orderId": "${trigger_1.orderId"}'></textarea>
+      <div class="config-help">支持 JSON / 表单 / 原始文本；仅 POST / PUT / PATCH 请求可用</div>
+    </div>
+  </div>
+
+  <!-- 高级配置（折叠） -->
+  <div class="config-advanced-toggle" onclick="toggleAdvanced('http')" id="advToggleHttp">
+    <span>▶ 高级配置（超时 / 认证 / 异常策略 / 汇合策略）</span>
+    <span class="toggle-dot" id="dotHttp"></span>
+  </div>
+  <div class="config-advanced-body" id="advBodyHttp">
+    <div class="config-section">
+      <div class="config-section-title">执行策略</div>
+      <div class="config-field">
+        <div class="config-label">超时时间（秒）</div>
+        <input class="config-input" type="number" value="30" min="1" max="3600" style="width:100px">
+        <div class="config-help">HTTP 请求的最大等待时间（默认 30 秒）</div>
+      </div>
+      <div class="config-field">
+        <div class="config-label">汇合策略</div>
+        <select class="config-input" style="font-size:12px">
+          <option>等待全部完成 (Wait All)</option>
+          <option>任一完成即继续 (Any)</option>
+        </select>
+        <div class="config-help">有多条输入连线时生效，决定何时执行此节点</div>
+      </div>
+    </div>
+    <div class="config-section">
+      <div class="config-section-title">异常策略</div>
+      <div class="config-field">
+        <div class="config-label">发生异常时</div>
+        <select class="config-input" id="errorStrategy" onchange="toggleErrorBranch()" style="font-size:12px">
+          <option value="terminate">终止流程（默认）</option>
+          <option value="ignore">忽略错误继续</option>
+          <option value="retry">重试</option>
+          <option value="branch">走异常分支</option>
+        </select>
+        <div class="config-help" id="errorStrategyHelp">节点异常时立即终止整个工作流实例</div>
+      </div>
+      <div id="retryOptions" style="display:none">
+        <div class="config-field">
+          <div class="config-label">重试次数</div>
+          <input class="config-input" type="number" value="3" min="1" max="10" style="width:80px">
+        </div>
+        <div class="config-field">
+          <div class="config-label">重试间隔（秒）</div>
+          <input class="config-input" type="number" value="5" min="1" max="300" style="width:80px">
+        </div>
+      </div>
+      <div id="branchTip" style="display:none;margin-top:8px;padding:9px 12px;background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.2);border-radius:6px;font-size:12px;color:var(--warning)">
+        ⚠ 已在节点右侧增加橙色异常出口端口，请在画布上连接异常处理节点。
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- 说明面板 -->
+<div>
+<div class="category-label" style="margin-top:0">渐进式披露原则说明</div>
+<div style="font-size:13px;color:var(--text-secondary);line-height:1.8">
+  <p style="margin-bottom:12px">配置面板遵循<strong>「先看到最重要的，再按需展开更多」</strong>的原则：</p>
+  <table class="spec-table">
+  <thead><tr><th>层次</th><th>展开状态</th><th>放什么字段</th></tr></thead>
+  <tbody>
+  <tr><td>基础配置区</td><td>默认展开</td><td>必填项、80% 场景都会用到的配置</td></tr>
+  <tr><td>高级配置区</td><td>默认折叠</td><td>超时、认证、异常策略、汇合策略等低频技术性配置</td></tr>
+  </tbody>
+  </table>
+  <p style="margin-top:12px;margin-bottom:12px"><strong>条件展示规则（字段级联动）：</strong></p>
+  <ul style="padding-left:20px;line-height:2">
+    <li>HTTP 节点：选 POST/PUT/PATCH 后才显示 Body 字段</li>
+    <li>异常策略选「重试」后展示重试次数和间隔字段</li>
+    <li>异常策略选「走异常分支」后展示提示信息，节点增加异常出口端口</li>
+    <li>延迟节点：选「到指定时间」模式后，时长输入换为日期时间选择器</li>
+    <li>循环节点：ForEach/While 切换时，集合变量与循环条件字段互相切换</li>
+  </ul>
+  <p style="margin-top:12px"><strong>高级配置有非默认值时：</strong>折叠状态下标题旁显示蓝色圆点标记，提示用户此处有自定义配置。</p>
+</div>
+
+<div class="category-label" style="margin-top:24px">AI 引导条三种状态</div>
+<table class="spec-table">
+<thead><tr><th>状态</th><th>触发条件</th><th>表现</th></tr></thead>
+<tbody>
+<tr><td><span class="badge badge-muted">未配置</span></td><td>节点首次打开配置面板</td><td>展示 AI 引导输入框和引导问题；基于节点 primary 字段自动生成</td></tr>
+<tr><td><span class="badge badge-info">AI 填充中</span></td><td>用户点击「生成配置」</td><td>字段逐项出现填充动画，模拟 AI 填写表单</td></tr>
+<tr><td><span class="badge badge-success">已配置</span></td><td>AI 填充完成</td><td>收起为一行绿色摘要，可点击重新引导</td></tr>
+<tr><td><span class="badge badge-muted">已跳过</span></td><td>用户点击「跳过」</td><td>引导条隐藏；面板右上角保留「✦ AI 引导」小图标可唤回</td></tr>
+</tbody>
+</table>
+<div style="font-size:12px;color:var(--text-secondary);margin-top:8px">哪些节点有 AI 引导条：有 <code>summary_weight = primary</code> 字段的节点均显示；开始节点、结束节点等纯逻辑节点无 primary 字段，不显示引导条。</div>
+
+<div class="category-label" style="margin-top:24px">节点说明入口</div>
+<div style="font-size:13px;color:var(--text-secondary);line-height:1.8">
+  面板头部右侧的 <strong>「?」</strong> 图标，点击展开/折叠节点说明文字。<br>
+  节点说明面向所有用户，说明该节点是什么、适用场景和注意事项。
+</div>
+</div>
+</div><!-- panel-grid end -->
+
+</div><!-- sec2 end -->
+
+<!-- ====== TAB 3: Node Configs ====== -->
+<div class="page-section" id="sec3">
+<h2 class="section-title">各节点配置面板</h2>
+<p class="section-desc">从左侧节点列表选择节点，右侧显示对应配置面板。均为真实可交互演示，高级配置默认折叠。</p>
+
+<div class="node-config-layout">
+  <!-- 左侧节点导航 -->
+  <div class="node-nav">
+    <div class="node-nav-group-label">流程控制</div>
+    <div class="node-nav-item active" data-node="trigger" onclick="switchNodePanel('trigger',this)">
+      <span class="node-nav-icon" style="background:var(--node-trigger);color:var(--node-trigger-fg)">⚡</span>
+      <span class="node-nav-name">开始节点</span>
+      <span class="node-nav-code">trigger</span>
+    </div>
+    <div class="node-nav-item" data-node="end" onclick="switchNodePanel('end',this)">
+      <span class="node-nav-icon" style="background:var(--node-end);color:var(--node-end-fg)">🏁</span>
+      <span class="node-nav-name">结束节点</span>
+      <span class="node-nav-code">end</span>
+    </div>
+    <div class="node-nav-item" data-node="if" onclick="switchNodePanel('if',this)">
+      <span class="node-nav-icon" style="background:var(--node-logic);color:var(--node-logic-fg)">🔀</span>
+      <span class="node-nav-name">IF 条件</span>
+      <span class="node-nav-code">if</span>
+    </div>
+    <div class="node-nav-item" data-node="switch" onclick="switchNodePanel('switch',this)">
+      <span class="node-nav-icon" style="background:var(--node-logic);color:var(--node-logic-fg)">🔃</span>
+      <span class="node-nav-name">Switch</span>
+      <span class="node-nav-code">switch</span>
+    </div>
+    <div class="node-nav-item" data-node="loop" onclick="switchNodePanel('loop',this)">
+      <span class="node-nav-icon" style="background:var(--node-logic);color:var(--node-logic-fg)">🔄</span>
+      <span class="node-nav-name">循环</span>
+      <span class="node-nav-code">loop</span>
+    </div>
+    <div class="node-nav-item" data-node="delay" onclick="switchNodePanel('delay',this)">
+      <span class="node-nav-icon" style="background:var(--node-logic);color:var(--node-logic-fg)">⏱️</span>
+      <span class="node-nav-name">延迟</span>
+      <span class="node-nav-code">delay</span>
+    </div>
+    <div class="node-nav-group-label">数据执行</div>
+    <div class="node-nav-item" data-node="assign" onclick="switchNodePanel('assign',this)">
+      <span class="node-nav-icon" style="background:var(--node-data);color:var(--node-data-fg)">📝</span>
+      <span class="node-nav-name">赋值</span>
+      <span class="node-nav-code">assign</span>
+    </div>
+    <div class="node-nav-item" data-node="output" onclick="switchNodePanel('output',this)">
+      <span class="node-nav-icon" style="background:var(--node-data);color:var(--node-data-fg)">📤</span>
+      <span class="node-nav-name">输出</span>
+      <span class="node-nav-code">output</span>
+    </div>
+    <div class="node-nav-item" data-node="code" onclick="switchNodePanel('code',this)">
+      <span class="node-nav-icon" style="background:var(--node-data);color:var(--node-data-fg)">💻</span>
+      <span class="node-nav-name">代码</span>
+      <span class="node-nav-code">code</span>
+    </div>
+    <div class="node-nav-group-label">集成扩展</div>
+    <div class="node-nav-item" data-node="http" onclick="switchNodePanel('http',this)">
+      <span class="node-nav-icon" style="background:var(--node-integration);color:var(--node-integration-fg)">🌐</span>
+      <span class="node-nav-name">HTTP 请求</span>
+      <span class="node-nav-code">http</span>
+    </div>
+    <div class="node-nav-item" data-node="mq" onclick="switchNodePanel('mq',this)">
+      <span class="node-nav-icon" style="background:var(--node-integration);color:var(--node-integration-fg)">📨</span>
+      <span class="node-nav-name">MQ 发送</span>
+      <span class="node-nav-code">mq</span>
+    </div>
+    <div class="node-nav-item" data-node="workflow" onclick="switchNodePanel('workflow',this)">
+      <span class="node-nav-icon" style="background:var(--node-flow);color:var(--node-flow-fg)">🔗</span>
+      <span class="node-nav-name">工作流</span>
+      <span class="node-nav-code">workflow</span>
+    </div>
+  </div>
+
+  <!-- 右侧配置面板区 -->
+  <div class="node-panel-area">
+
+<!-- ===== 开始节点 ===== -->
+<div class="node-panel" id="panel-trigger">
+<div class="config-panel">
+  <div class="config-panel-header">
+    <div class="config-panel-icon" style="background:var(--node-trigger);color:var(--node-trigger-fg)">⚡</div>
+    <div style="flex:1"><input class="config-node-name-input" value="开始节点" maxlength="50"><div class="config-panel-code">trigger_1</div></div>
+    <button onclick="toggleNodeDesc2('triggerDesc')" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:16px;padding:4px" title="节点说明">?</button>
+  </div>
+  <div class="node-desc-box" id="triggerDesc">开始节点是工作流的唯一入口，定义流程启动时传入的输入参数。下游节点通过 <code>${trigger_1.参数名}</code> 引用。对话流中额外注入 query、files、conversation_id、user_id 等内置变量。</div>
+  <div class="config-section">
+    <div class="config-section-title">📥 输入参数</div>
+    <div class="config-help" style="margin-bottom:10px">定义流程启动时传入的参数，下游通过 <code>${trigger_1.参数名}</code> 引用</div>
+    <div id="triggerParams">
+      <div class="param-card">
+        <div class="param-card-top"><span class="param-name">orderId</span><span class="badge badge-primary">String</span></div>
+        <div class="param-ref">${trigger_1.orderId}</div>
+      </div>
+    </div>
+    <div class="add-link" onclick="addParam('triggerParams','trigger_1')">+ 添加输入参数</div>
+  </div>
+  <div class="config-advanced-toggle" onclick="toggleAdvanced('trigger')">
+    <span>▶ 定时触发配置（默认折叠）</span>
+    <span class="toggle-dot" id="dotTrigger"></span>
+  </div>
+  <div class="config-advanced-body" id="advBodyTrigger">
+    <div class="config-section">
+      <div class="config-field">
+        <div class="config-label">定时触发</div>
+        <select class="config-input" style="font-size:12px">
+          <option>不启用</option>
+          <option>启用 Cron 定时</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  <div class="config-section" style="background:rgba(103,80,164,0.02)">
+    <div class="config-section-title" style="font-size:11px;color:var(--text-muted)">💬 对话流内置变量（只读，系统自动注入）</div>
+    <div class="param-card"><div class="param-card-top"><span class="param-name">query</span><span class="badge badge-primary">String</span></div><div class="param-ref">用户当前输入的消息内容</div></div>
+    <div class="param-card"><div class="param-card-top"><span class="param-name">files</span><span class="badge badge-info">Array[Object]</span></div><div class="param-ref">用户上传的文件列表</div></div>
+    <div class="param-card"><div class="param-card-top"><span class="param-name">conversation_id</span><span class="badge badge-primary">String</span></div><div class="param-ref">当前会话唯一标识</div></div>
+    <div class="param-card"><div class="param-card-top"><span class="param-name">user_id</span><span class="badge badge-primary">String</span></div><div class="param-ref">当前对话用户唯一标识</div></div>
+  </div>
+</div>
+
+</div><!-- panel-trigger end -->
+
+<!-- ===== 结束节点 ===== -->
+<div class="node-panel" id="panel-end" style="display:none">
+<div class="config-panel">
+  <div class="config-panel-header">
+    <div class="config-panel-icon" style="background:var(--node-end);color:var(--node-end-fg)">🏁</div>
+    <div style="flex:1"><input class="config-node-name-input" value="结束节点" maxlength="50"><div class="config-panel-code">end_1</div></div>
+    <button onclick="toggleNodeDesc2('endDesc')" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:16px;padding:4px">?</button>
+  </div>
+  <div class="node-desc-box" id="endDesc">结束节点是工作流的唯一终点，配置工作流的输出变量。应用流中一次性返回最终结果；对话流中仅结束当前轮次，会话保持等待用户下一条消息。</div>
+  <div class="config-section">
+    <div class="config-section-title">📤 输出变量映射</div>
+    <div class="config-help" style="margin-bottom:10px">配置工作流最终输出的变量，调用方将收到这些结果</div>
+    <div class="param-card">
+      <div class="param-card-top"><span class="param-name">orderResult</span><span class="badge badge-primary">Object</span></div>
+      <div class="param-ref">${http_1.response.body}</div>
+    </div>
+    <div class="param-card">
+      <div class="param-card-top"><span class="param-name">status</span><span class="badge badge-primary">String</span></div>
+      <div class="param-ref">"completed"</div>
+    </div>
+    <div class="add-link">+ 添加输出映射</div>
+  </div>
+</div>
+
+<!-- end config-panel for end -->
+</div><!-- panel-end end -->
+
+<!-- ===== IF 条件节点 ===== -->
+<div class="node-panel" id="panel-if" style="display:none">
+<div class="config-panel">
+  <div class="config-panel-header">
+    <div class="config-panel-icon" style="background:var(--node-logic);color:var(--node-logic-fg)">🔀</div>
+    <div style="flex:1"><input class="config-node-name-input" value="IF 条件" maxlength="50"><div class="config-panel-code">if_1</div></div>
+    <button onclick="toggleNodeDesc2('ifDesc')" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:16px;padding:4px">?</button>
+  </div>
+  <div class="node-desc-box" id="ifDesc">IF 节点根据条件表达式走 TRUE 或 FALSE 分支，是互斥选择。支持可视化构建器和表达式编辑器双模式切换，两者双向同步。</div>
+  <div class="config-section">
+    <div class="view-toggle">
+      <div class="view-toggle-btn active" onclick="switchIfView('visual',this)">可视化构建器</div>
+      <div class="view-toggle-btn" onclick="switchIfView('expr',this)">表达式编辑器</div>
+    </div>
+    <div id="ifVisual">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+        <span style="font-size:13px;font-weight:700;color:var(--text)">顶层逻辑</span>
+        <select class="config-input" style="width:auto;padding:5px 12px;font-size:12px;font-weight:600">
+          <option>满足全部 (AND)</option>
+          <option>满足任一 (OR)</option>
+        </select>
+      </div>
+      <div class="cond-builder" id="condBuilder">
+        <div class="cond-row">
+          <div class="cond-chip var-chip">${order.amount}</div>
+          <div class="cond-chip op-chip">&gt;</div>
+          <div class="cond-chip">1000</div>
+          <div class="cond-del-btn" onclick="delCondRow(this)">×</div>
+        </div>
+        <div class="cond-row">
+          <div class="cond-chip var-chip">${order.status}</div>
+          <div class="cond-chip op-chip">==</div>
+          <div class="cond-chip">"pending"</div>
+          <div class="cond-del-btn" onclick="delCondRow(this)">×</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:16px;margin-top:10px">
+        <div class="add-link" onclick="addCondRow()">+ 添加条件</div>
+        <div class="add-link" onclick="addSubGroup()">+ 添加子组</div>
+      </div>
+    </div>
+    <div id="ifExpr" style="display:none">
+      <div class="config-field">
+        <div class="config-label">条件表达式 <span class="req">*</span></div>
+        <textarea class="config-input" rows="3" placeholder="order.amount > 1000 && order.status == 'pending'">${order.amount} > 1000 && ${order.status} == "pending"</textarea>
+        <div class="config-help">布尔表达式，结果为 true 走 TRUE 分支，否则走 FALSE 分支</div>
+      </div>
+    </div>
+  </div>
+  <div class="config-advanced-toggle" onclick="toggleAdvanced('if')">
+    <span>▶ 高级配置（分支标签 / 异常策略）</span>
+    <span class="toggle-dot" id="dotIf"></span>
+  </div>
+  <div class="config-advanced-body" id="advBodyIf">
+    <div class="config-section">
+      <div class="config-field"><div class="config-label">TRUE 分支标签</div><input class="config-input" value="TRUE"></div>
+      <div class="config-field"><div class="config-label">FALSE 分支标签</div><input class="config-input" value="FALSE"></div>
+    </div>
+    <div class="config-section">
+      <div class="config-field">
+        <div class="config-label">异常策略</div>
+        <select class="config-input" style="font-size:12px">
+          <option>终止流程（默认）</option><option>忽略错误继续</option><option>重试</option><option>走异常分支</option>
+        </select>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- end config-panel for if -->
+</div><!-- panel-if end -->
+
+<!-- ===== Switch 节点 ===== -->
+<div class="node-panel" id="panel-switch" style="display:none">
+<div class="config-panel">
+  <div class="config-panel-header">
+    <div class="config-panel-icon" style="background:var(--node-logic);color:var(--node-logic-fg)">🔃</div>
+    <div style="flex:1"><input class="config-node-name-input" value="Switch" maxlength="50"><div class="config-panel-code">switch_1</div></div>
+    <button onclick="toggleNodeDesc2('switchDesc')" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:16px;padding:4px">?</button>
+  </div>
+  <div class="node-desc-box" id="switchDesc">Switch 节点根据匹配变量或表达式的值，选择对应分支执行。支持「首次匹配」（互斥）和「所有匹配」（并行）两种模式。</div>
+  <div class="config-section">
+    <div class="config-field">
+      <div class="config-label">匹配变量/表达式 <span class="req">*</span></div>
+      <input class="config-input" value="${order.status}" style="font-family:var(--font-mono);font-size:12px">
+    </div>
+    <div class="config-field">
+      <div class="config-label">匹配模式</div>
+      <div class="method-chips">
+        <div class="method-chip active" onclick="toggleChip(this)">首次匹配</div>
+        <div class="method-chip" onclick="toggleChip(this)">所有匹配</div>
+      </div>
+      <div class="config-help">首次匹配：命中第一个即停止；所有匹配：命中所有满足条件的分支并行执行</div>
+    </div>
+  </div>
+  <div class="config-section">
+    <div class="config-section-title">分支条件</div>
+    <div id="switchBranches">
+      <div class="switch-branch-card">
+        <div><div class="switch-branch-name">待支付</div><div class="switch-branch-cond">== "pending"</div></div>
+        <span style="cursor:pointer;color:var(--text-muted);font-size:18px" onclick="delBranch(this)">×</span>
+      </div>
+      <div class="switch-branch-card">
+        <div><div class="switch-branch-name">已支付</div><div class="switch-branch-cond">== "paid"</div></div>
+        <span style="cursor:pointer;color:var(--text-muted);font-size:18px" onclick="delBranch(this)">×</span>
+      </div>
+    </div>
+    <div class="switch-default">DEFAULT · 默认分支（不可删除，所有条件不匹配时走此分支）</div>
+    <div class="add-link" style="margin-top:8px" onclick="addSwitchBranch()">+ 添加分支</div>
+  </div>
+</div>
+
+<!-- end config-panel for switch -->
+</div><!-- panel-switch end -->
+
+<!-- ===== 循环节点 ===== -->
+<div class="node-panel" id="panel-loop" style="display:none">
+<div class="config-panel">
+  <div class="config-panel-header">
+    <div class="config-panel-icon" style="background:var(--node-logic);color:var(--node-logic-fg)">🔄</div>
+    <div style="flex:1"><input class="config-node-name-input" value="循环" maxlength="50"><div class="config-panel-code">loop_1</div></div>
+    <button onclick="toggleNodeDesc2('loopDesc')" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:16px;padding:4px">?</button>
+  </div>
+  <div class="node-desc-box" id="loopDesc">循环节点支持 ForEach（遍历数组）和 While（条件循环）两种模式。循环体通过底部蓝色端口连接；循环正常结束走「完成」出口；条件满足时走「中断」出口跳出循环。</div>
+  <div class="config-section">
+    <div class="config-field">
+      <div class="config-label">循环模式 <span class="req">*</span></div>
+      <div class="method-chips">
+        <div class="method-chip active" onclick="switchLoopMode('foreach',this)">ForEach</div>
+        <div class="method-chip" onclick="switchLoopMode('while',this)">While</div>
+      </div>
+    </div>
+    <!-- ForEach 模式 -->
+    <div id="loopForeachFields">
+      <div class="config-field">
+        <div class="config-label">集合变量 <span class="req">*</span></div>
+        <input class="config-input" value="${http_1.response.orders}" style="font-family:var(--font-mono);font-size:12px">
+        <div class="config-help">必须是数组类型的变量</div>
+      </div>
+      <div class="config-field">
+        <div class="config-label">迭代变量名 <span class="req">*</span></div>
+        <input class="config-input" value="item" style="font-family:var(--font-mono);font-size:12px">
+        <div class="config-help">每次迭代通过 <code>${loop_1.item}</code> 引用当前元素</div>
+      </div>
+    </div>
+    <!-- While 模式 -->
+    <div id="loopWhileFields" style="display:none">
+      <div class="config-field">
+        <div class="config-label">循环条件 <span class="req">*</span></div>
+        <input class="config-input" placeholder="${assign_1.count} < 10" style="font-family:var(--font-mono);font-size:12px">
+        <div class="config-help">布尔表达式，为真时继续循环</div>
+      </div>
+    </div>
+  </div>
+  <div class="config-advanced-toggle" onclick="toggleAdvanced('loop')">
+    <span>▶ 高级配置（超时 / 异常策略 / 汇合策略）</span>
+    <span class="toggle-dot" id="dotLoop"></span>
+  </div>
+  <div class="config-advanced-body" id="advBodyLoop">
+    <div class="config-section">
+      <div class="config-field"><div class="config-label">节点超时（秒）</div><input class="config-input" type="number" value="300" style="width:100px"></div>
+      <div class="config-field"><div class="config-label">单次迭代超时（秒）</div><input class="config-input" type="number" value="30" style="width:100px"></div>
+      <div class="config-field">
+        <div class="config-label">汇合策略</div>
+        <select class="config-input" style="font-size:12px"><option>等待全部完成 (Wait All)</option><option>任一完成即继续 (Any)</option></select>
+        <div class="config-help">有多条输入连线时生效</div>
+      </div>
+    </div>
+    <div class="config-section">
+      <div class="config-field">
+        <div class="config-label">异常策略</div>
+        <select class="config-input" style="font-size:12px"><option>终止流程（默认）</option><option>忽略错误继续</option><option>重试</option><option>走异常分支</option></select>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- end config-panel for loop -->
+</div><!-- panel-loop end -->
+
+<!-- ===== 延迟节点 ===== -->
+<div class="node-panel" id="panel-delay" style="display:none">
+<div class="config-panel">
+  <div class="config-panel-header">
+    <div class="config-panel-icon" style="background:var(--node-logic);color:var(--node-logic-fg)">⏱️</div>
+    <div style="flex:1"><input class="config-node-name-input" value="延迟" maxlength="50"><div class="config-panel-code">delay_1</div></div>
+  </div>
+  <div class="config-section">
+    <div class="config-field">
+      <div class="config-label">延迟方式 <span class="req">*</span></div>
+      <div class="method-chips">
+        <div class="method-chip active" onclick="switchDelayMode('fixed',this)">固定时长</div>
+        <div class="method-chip" onclick="switchDelayMode('until',this)">到指定时间</div>
+      </div>
+    </div>
+    <div id="delayFixedFields">
+      <div class="config-field" style="display:flex;gap:8px;align-items:flex-end">
+        <div style="flex:1"><div class="config-label">时长 <span class="req">*</span></div><input class="config-input" value="30" type="number" min="1" style="text-align:right"></div>
+        <div style="width:90px"><select class="config-input" style="padding:7px 6px;cursor:pointer"><option>秒</option><option selected>分钟</option><option>小时</option><option>天</option></select></div>
+      </div>
+    </div>
+    <div id="delayUntilFields" style="display:none">
+      <div class="config-field">
+        <div class="config-label">目标时间 <span class="req">*</span></div>
+        <input class="config-input" type="datetime-local">
+        <div class="config-help">也可引用变量，如 ${trigger_1.targetTime}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- end config-panel for delay -->
+</div><!-- panel-delay end -->
+
+<!-- ===== 赋值节点 ===== -->
+<div class="node-panel" id="panel-assign" style="display:none">
+<div class="config-panel">
+  <div class="config-panel-header">
+    <div class="config-panel-icon" style="background:var(--node-data);color:var(--node-data-fg)">📝</div>
+    <div style="flex:1"><input class="config-node-name-input" value="赋值" maxlength="50"><div class="config-panel-code">assign_1</div></div>
+    <button onclick="toggleNodeDesc2('assignDesc')" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:16px;padding:4px">?</button>
+  </div>
+  <div class="node-desc-box" id="assignDesc">赋值节点按规则顺序执行，将表达式结果写入指定变量。支持引用上游节点输出变量进行计算。</div>
+  <div class="config-section">
+    <div class="config-section-title">赋值规则（按序执行）</div>
+    <div id="assignRules">
+      <div style="border:1px solid var(--border);border-radius:7px;padding:9px 13px;margin-bottom:7px;display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+        <span style="font-family:var(--font-mono);font-size:12px;color:var(--primary);background:rgba(103,80,164,0.06);padding:3px 9px;border-radius:4px;font-weight:600">totalAmount</span>
+        <span class="assign-eq">=</span>
+        <span style="font-family:var(--font-mono);font-size:11px;color:var(--text)">${http_1.amount} * ${trigger_1.qty}</span>
+        <span style="margin-left:auto;cursor:pointer;color:var(--text-muted);font-size:16px" onclick="this.closest('div[style]').remove()">×</span>
+      </div>
+    </div>
+    <div class="add-link" onclick="addAssignRule()">+ 添加规则</div>
+  </div>
+</div>
+
+<!-- end config-panel for assign -->
+</div><!-- panel-assign end -->
+
+<!-- ===== 输出节点 ===== -->
+<div class="node-panel" id="panel-output" style="display:none">
+<div class="config-panel">
+  <div class="config-panel-header">
+    <div class="config-panel-icon" style="background:var(--node-data);color:var(--node-data-fg)">📤</div>
+    <div style="flex:1"><input class="config-node-name-input" value="输出" maxlength="50"><div class="config-panel-code">output_1</div></div>
+    <button onclick="toggleNodeDesc2('outputDesc')" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:16px;padding:4px">?</button>
+  </div>
+  <div class="node-desc-box" id="outputDesc">应用流中记录日志；对话流中向用户发送回复内容（非终止性，流程继续执行）。支持流式回复模式。</div>
+  <div class="config-section">
+    <div class="config-field">
+      <div class="config-label">输出内容 <span class="req">*</span></div>
+      <textarea class="config-input" rows="2" placeholder="支持变量引用，如 处理完成：${assign_1.totalAmount}"></textarea>
+    </div>
+    <div class="config-field">
+      <div class="config-label">输出级别（应用流）</div>
+      <div class="method-chips">
+        <div class="method-chip active" onclick="toggleChip(this)">INFO</div>
+        <div class="method-chip" onclick="toggleChip(this)">WARNING</div>
+        <div class="method-chip" onclick="toggleChip(this)">ERROR</div>
+      </div>
+      <div class="config-help">对话流中改为「回复模式」选择</div>
+    </div>
+  </div>
+</div>
+
+<!-- end config-panel for output -->
+</div><!-- panel-output end -->
+
+<!-- ===== 代码节点 ===== -->
+<div class="node-panel" id="panel-code" style="display:none">
+<div class="config-panel">
+  <div class="config-panel-header">
+    <div class="config-panel-icon" style="background:var(--node-data);color:var(--node-data-fg)">💻</div>
+    <div style="flex:1"><input class="config-node-name-input" value="代码" maxlength="50"><div class="config-panel-code">code_1</div></div>
+    <button onclick="toggleNodeDesc2('codeDesc')" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:16px;padding:4px">?</button>
+  </div>
+  <div class="node-desc-box" id="codeDesc">执行自定义脚本，支持 JavaScript 和 Python。通过 inputs 对象访问上游变量，return 返回输出变量。</div>
+  <div class="config-section">
+    <div class="config-field">
+      <div class="config-label">脚本语言 <span class="req">*</span></div>
+      <div class="method-chips">
+        <div class="method-chip" style="background:rgba(245,158,11,0.1);color:var(--warning);border-color:rgba(245,158,11,0.25)">JavaScript</div>
+        <div class="method-chip">Python</div>
+      </div>
+    </div>
+    <div class="config-field">
+      <div class="config-label">代码 <span class="req">*</span></div>
+      <div class="code-block">
+        <span class="code-kw">const</span> amount = <span class="code-var">inputs</span>.orderAmount;<br>
+        <span class="code-kw">const</span> tax = amount * <span class="code-num">0.13</span>;<br>
+        <span class="code-ret">return</span> { <span class="code-fn">total</span>: amount + tax };
+      </div>
+      <div class="code-expand">↗ 展开全屏编辑器</div>
+    </div>
+  </div>
+  <div class="config-section">
+    <div class="config-section-title">输出变量声明</div>
+    <div class="config-help" style="margin-bottom:8px">声明 return 中的变量，供下游节点引用。设计时声明类型，运行时填充实际值。</div>
+    <div class="output-var-card">
+      <div><div class="output-var-name">total</div><div style="margin-top:2px"><span class="badge badge-info">Integer</span></div></div>
+      <span style="font-size:18px;color:var(--text-muted);cursor:pointer">×</span>
+    </div>
+    <div class="add-link">+ 添加输出变量</div>
+  </div>
+  <div class="config-advanced-toggle" onclick="toggleAdvanced('code')">
+    <span>▶ 高级配置（超时 / 异常策略 / 汇合策略）</span>
+    <span class="toggle-dot" id="dotCode"></span>
+  </div>
+  <div class="config-advanced-body" id="advBodyCode">
+    <div class="config-section">
+      <div class="config-field"><div class="config-label">超时时间（秒）</div><input class="config-input" type="number" value="30" style="width:100px"></div>
+      <div class="config-field"><div class="config-label">汇合策略</div><select class="config-input" style="font-size:12px"><option>等待全部完成</option><option>任一完成即继续</option></select></div>
+      <div class="config-field"><div class="config-label">异常策略</div><select class="config-input" style="font-size:12px"><option>终止流程（默认）</option><option>忽略错误继续</option><option>重试</option><option>走异常分支</option></select></div>
+    </div>
+  </div>
+</div>
+
+<!-- end config-panel for code -->
+</div><!-- panel-code end -->
+
+<!-- ===== HTTP 请求节点 ===== -->
+<div class="node-panel" id="panel-http" style="display:none">
+
+<div style="padding:12px 0 4px;font-size:12px;color:var(--text-muted)">HTTP 请求节点完整交互演示已收录于「<strong>配置面板通用</strong>」Tab，以下为独立面板呈现：</div>
+<div class="config-panel">
+  <div class="config-panel-header">
+    <div class="config-panel-icon" style="background:var(--node-integration);color:var(--node-integration-fg)">🌐</div>
+    <div style="flex:1"><input class="config-node-name-input" value="HTTP 请求" maxlength="50"><div class="config-panel-code">http_1</div></div>
+  </div>
+  <div class="config-section">
+    <div class="config-field"><div class="config-label">请求 URL <span class="req">*</span></div><input class="config-input" placeholder="https://api.example.com/orders/{id}"><div class="config-help">支持变量引用，如 https://api.example.com/orders/${trigger_1.orderId}</div></div>
+    <div class="config-field"><div class="config-label">请求方法 <span class="req">*</span></div><div class="method-chips"><div class="method-chip" onclick="toggleChip(this)">GET</div><div class="method-chip" onclick="toggleChip(this)">POST</div><div class="method-chip" onclick="toggleChip(this)">PUT</div><div class="method-chip" onclick="toggleChip(this)">DELETE</div><div class="method-chip" onclick="toggleChip(this)">PATCH</div></div></div>
+    <div class="config-field"><div class="config-label">Headers</div><input class="config-input" placeholder="Content-Type: application/json"></div>
+  </div>
+  <div class="config-advanced-toggle" onclick="toggleAdvanced('http2')"><span>▶ 高级配置（超时 / 认证 / 异常策略 / 汇合策略）</span><span class="toggle-dot" id="dotHttp2"></span></div>
+  <div class="config-advanced-body" id="advBodyHttp2">
+    <div class="config-section">
+      <div class="config-field"><div class="config-label">超时时间（秒）</div><input class="config-input" type="number" value="30" style="width:100px"></div>
+      <div class="config-field"><div class="config-label">汇合策略</div><select class="config-input" style="font-size:12px"><option>等待全部完成 (Wait All)</option><option>任一完成即继续 (Any)</option></select></div>
+      <div class="config-field"><div class="config-label">异常策略</div><select class="config-input" style="font-size:12px"><option>终止流程（默认）</option><option>忽略错误继续</option><option>重试</option><option>走异常分支</option></select></div>
+    </div>
+  </div>
+</div>
+</div><!-- panel-http end -->
+
+<!-- ===== MQ 节点 ===== -->
+<div class="node-panel" id="panel-mq" style="display:none">
+<div class="config-panel">
+  <div class="config-panel-header">
+    <div class="config-panel-icon" style="background:var(--node-integration);color:var(--node-integration-fg)">📨</div>
+    <div style="flex:1"><input class="config-node-name-input" value="MQ 发送" maxlength="50"><div class="config-panel-code">mq_1</div></div>
+  </div>
+  <div class="config-section">
+    <div class="config-field"><div class="config-label">目标队列/Topic <span class="req">*</span></div><input class="config-input" value="order-events"></div>
+    <div class="config-field"><div class="config-label">消息内容 <span class="req">*</span></div><textarea class="config-input" rows="3" placeholder='{"orderId": "...", "status": "..."}'></textarea></div>
+  </div>
+  <div class="config-advanced-toggle" onclick="toggleAdvanced('mq')">
+    <span>▶ 高级配置（超时 / 异常策略 / 汇合策略）</span>
+    <span class="toggle-dot" id="dotMq"></span>
+  </div>
+  <div class="config-advanced-body" id="advBodyMq">
+    <div class="config-section">
+      <div class="config-field"><div class="config-label">超时时间（秒）</div><input class="config-input" type="number" value="30" style="width:100px"></div>
+      <div class="config-field"><div class="config-label">汇合策略</div><select class="config-input" style="font-size:12px"><option>等待全部完成</option><option>任一完成即继续</option></select></div>
+      <div class="config-field"><div class="config-label">异常策略</div><select class="config-input" style="font-size:12px"><option>终止流程（默认）</option><option>忽略错误继续</option><option>重试</option><option>走异常分支</option></select></div>
+    </div>
+  </div>
+</div>
+
+<!-- end config-panel for mq -->
+</div><!-- panel-mq end -->
+
+<!-- ===== 工作流节点 ===== -->
+<div class="node-panel" id="panel-workflow" style="display:none">
+<div class="config-panel">
+  <div class="config-panel-header">
+    <div class="config-panel-icon" style="background:var(--node-flow);color:var(--node-flow-fg)">🔗</div>
+    <div style="flex:1"><input class="config-node-name-input" value="工作流" maxlength="50"><div class="config-panel-code">workflow_1</div></div>
+    <button onclick="toggleNodeDesc2('wfDesc')" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:16px;padding:4px">?</button>
+  </div>
+  <div class="node-desc-box" id="wfDesc">工作流节点调用另一个已发布的工作流（子流程），支持同步等待执行结果。系统自动检测循环引用。</div>
+  <div class="config-section">
+    <div class="config-field"><div class="config-label">目标工作流 <span class="req">*</span></div>
+      <select class="config-input" style="font-size:12px"><option>发送通知流程 (已发布 v2)</option><option>数据清洗流程 (已发布 v1)</option></select>
+    </div>
+    <div class="config-field"><div class="config-label">版本策略</div>
+      <select class="config-input" style="font-size:12px"><option>使用最新发布版本</option><option>固定版本 v2</option></select>
+    </div>
+    <div class="config-section-title" style="margin-top:12px">输入参数映射</div>
+    <div class="param-card"><div class="param-card-top"><span class="param-name">orderId</span><span style="font-family:var(--font-mono);font-size:11px;color:var(--text)">${trigger_1.orderId}</span></div></div>
+    <div class="add-link">+ 添加输入参数</div>
+    <div class="config-section-title" style="margin-top:12px">输出变量映射</div>
+    <div class="config-help">声明子流程的输出变量供下游引用（设计时声明，运行时填充）</div>
+    <div class="output-var-card" style="margin-top:8px"><div><div class="output-var-name">notifyResult</div><div style="margin-top:2px"><span class="badge badge-primary">String</span></div></div><span style="font-size:18px;color:var(--text-muted);cursor:pointer">×</span></div>
+    <div class="add-link">+ 添加输出变量</div>
+  </div>
+  <div class="config-advanced-toggle" onclick="toggleAdvanced('wf')">
+    <span>▶ 高级配置（超时 / 异常策略 / 汇合策略）</span>
+    <span class="toggle-dot" id="dotWf"></span>
+  </div>
+  <div class="config-advanced-body" id="advBodyWf">
+    <div class="config-section">
+      <div class="config-field"><div class="config-label">子流程执行超时（秒）</div><input class="config-input" type="number" value="300" style="width:100px"></div>
+      <div class="config-field"><div class="config-label">汇合策略</div><select class="config-input" style="font-size:12px"><option>等待全部完成</option><option>任一完成即继续</option></select></div>
+      <div class="config-field"><div class="config-label">异常策略</div><select class="config-input" style="font-size:12px"><option>终止流程（默认）</option><option>忽略错误继续</option><option>重试</option><option>走异常分支</option></select></div>
+    </div>
+  </div>
+</div>
+
+<!-- end config-panel for workflow -->
+</div><!-- panel-workflow end -->
+
+  </div><!-- node-panel-area end -->
+</div><!-- node-config-layout end -->
+
+</div><!-- sec3 end -->
+
+<!-- ====== TAB 4: Spec Reference ====== -->
+<div class="page-section" id="sec4">
+<h2 class="section-title">设计规范速查</h2>
+<p class="section-desc">节点设计语言的核心规范。所有规范以 PRD 文档为权威来源，本页为速查索引。</p>
+
+<div class="category-label">节点色彩系统</div>
+<div class="color-grid">
+  <div class="color-chip-card" style="background:var(--node-trigger);color:var(--node-trigger-fg)">⚡ 开始/结束类</div>
+  <div class="color-chip-card" style="background:var(--node-end);color:var(--node-end-fg)">🏁 结束节点</div>
+  <div class="color-chip-card" style="background:var(--node-logic);color:var(--node-logic-fg)">🔀 逻辑控制</div>
+  <div class="color-chip-card" style="background:var(--node-data);color:var(--node-data-fg)">📝 数据执行</div>
+  <div class="color-chip-card" style="background:var(--node-integration);color:var(--node-integration-fg)">🌐 集成节点</div>
+  <div class="color-chip-card" style="background:var(--node-flow);color:var(--node-flow-fg)">🔗 工作流节点</div>
+  <div class="color-chip-card" style="background:var(--node-placeholder);color:var(--node-placeholder-fg)">⬜ 占位节点</div>
+</div>
+
+<div class="category-label">画布卡片尺寸规范</div>
+<table class="spec-table">
+<thead><tr><th>属性</th><th>值</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td>最小宽度</td><td>180px</td><td>确保内容不被截断</td></tr>
+<tr><td>卡片圆角</td><td>8px (radius-md)</td><td>与系统统一</td></tr>
+<tr><td>卡片边框</td><td>2px solid</td><td>默认 outline-variant 色</td></tr>
+<tr><td>图标尺寸</td><td>28 × 28px，圆角 6px</td><td>左上角彩色背景</td></tr>
+<tr><td>标题字号</td><td>13px / weight 600</td><td>默认纯文字，hover 变输入框</td></tr>
+<tr><td>编码字号</td><td>10px mono</td><td>灰色背景辅助标签</td></tr>
+<tr><td>摘要字号</td><td>11px</td><td>配置摘要文字，超长省略号截断</td></tr>
+<tr><td>端口尺寸</td><td>12 × 12px 圆形</td><td>hover 放大 1.4x；异常端口橙色</td></tr>
+<tr><td>错误徽标</td><td>18 × 18px 圆形</td><td>红色背景白色数字</td></tr>
+</tbody>
+</table>
+
+<div class="category-label">节点编码规范</div>
+<table class="spec-table">
+<thead><tr><th>规则项</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td>编码格式</td><td><code>类型标识_序号</code>，如 http_1、if_2、switch_3</td></tr>
+<tr><td>序号规则</td><td>按同类型节点的添加顺序递增，从 1 开始</td></tr>
+<tr><td>唯一性</td><td>同一工作流内节点编码唯一</td></tr>
+<tr><td>字符限制</td><td>英文、数字、下划线，1～50 字符</td></tr>
+<tr><td>修改时机</td><td>草稿状态可修改；调试进行中不可修改；已发布版本整体只读</td></tr>
+<tr><td>自动更新引用</td><td>修改后系统自动更新当前草稿内所有引用该编码的表达式</td></tr>
+</tbody>
+</table>
+
+<div class="category-label">变量类型规范（全局统一）</div>
+<table class="spec-table">
+<thead><tr><th>分类</th><th>类型名</th><th>标识</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td>原子类型</td><td>String</td><td><code>string</code></td><td>字符串</td></tr>
+<tr><td>原子类型</td><td>Integer</td><td><code>integer</code></td><td>整数</td></tr>
+<tr><td>原子类型</td><td>Double</td><td><code>double</code></td><td>浮点数</td></tr>
+<tr><td>原子类型</td><td>Boolean</td><td><code>boolean</code></td><td>布尔值</td></tr>
+<tr><td>原子类型</td><td>DateTime</td><td><code>datetime</code></td><td>日期时间</td></tr>
+<tr><td>原子类型</td><td>File</td><td><code>file</code></td><td>文件引用对象</td></tr>
+<tr><td>结构类型</td><td>Object</td><td><code>object</code></td><td>对象，可附加字段结构定义（Json Schema）</td></tr>
+<tr><td>结构类型</td><td>Array[Object]</td><td><code>array_object</code></td><td>对象数组，可附加元素结构定义</td></tr>
+<tr><td>数组类型</td><td>Array[String]</td><td><code>array_string</code></td><td>字符串数组</td></tr>
+<tr><td>数组类型</td><td>Array[Integer]</td><td><code>array_integer</code></td><td>整数数组</td></tr>
+</tbody>
+</table>
+
+<div class="category-label">IF 节点操作符——按变量类型适配</div>
+<table class="spec-table">
+<thead><tr><th>变量类型</th><th>可用操作符</th></tr></thead>
+<tbody>
+<tr><td><span class="badge badge-primary">String</span></td><td><code>==</code> <code>!=</code> <code>contains</code> 包含 <code>not_contains</code> 不包含 <code>starts_with</code> 开头为 <code>ends_with</code> 结尾为 <code>is_empty</code> 为空 <code>is_not_empty</code> 非空</td></tr>
+<tr><td><span class="badge badge-info">Integer</span></td><td><code>==</code> <code>!=</code> <code>&gt;</code> <code>&gt;=</code> <code>&lt;</code> <code>&lt;=</code> <code>is_empty</code> 为空 <code>is_not_empty</code> 非空</td></tr>
+<tr><td><span class="badge badge-info">Double</span></td><td><code>==</code> <code>!=</code> <code>&gt;</code> <code>&gt;=</code> <code>&lt;</code> <code>&lt;=</code> <code>is_empty</code> 为空 <code>is_not_empty</code> 非空</td></tr>
+<tr><td><span class="badge badge-warning">Boolean</span></td><td><code>==</code> <code>!=</code></td></tr>
+<tr><td><span class="badge badge-success">DateTime</span></td><td><code>==</code> <code>!=</code> <code>&gt;</code> 晚于 <code>&gt;=</code> 不早于 <code>&lt;</code> 早于 <code>&lt;=</code> 不晚于 <code>is_empty</code> <code>is_not_empty</code></td></tr>
+<tr><td><span class="badge badge-danger">File</span></td><td><code>is_empty</code> 为空 &nbsp;&nbsp;<code>is_not_empty</code> 非空</td></tr>
+<tr><td><span class="badge badge-danger">Object</span></td><td><code>is_empty</code> 为空 &nbsp;&nbsp;<code>is_not_empty</code> 非空</td></tr>
+<tr><td><span class="badge badge-muted">Array[Object]</span></td><td><code>contains</code> 包含元素 <code>not_contains</code> 不包含元素 <code>is_empty</code> 为空 <code>is_not_empty</code> 非空</td></tr>
+<tr><td><span class="badge badge-muted">Array[String]</span></td><td><code>contains</code> 包含元素 <code>not_contains</code> 不包含元素 <code>is_empty</code> 为空 <code>is_not_empty</code> 非空</td></tr>
+<tr><td><span class="badge badge-muted">Array[Integer]</span></td><td><code>contains</code> 包含元素 <code>not_contains</code> 不包含元素 <code>is_empty</code> 为空 <code>is_not_empty</code> 非空</td></tr>
+</tbody>
+</table>
+
+<div class="category-label">卡片摘要模板</div>
+<table class="spec-table">
+<thead><tr><th>节点</th><th>摘要模板</th><th>示例</th></tr></thead>
+<tbody>
+<tr><td>⚡ 开始节点</td><td>{触发方式}</td><td>手动触发 / 每天 10:00 自动触发</td></tr>
+<tr><td>🏁 结束节点</td><td>输出 {变量列表}</td><td>输出 orderResult, status</td></tr>
+<tr><td>🌐 HTTP</td><td>{method} {url}</td><td>GET /api/orders/{id}</td></tr>
+<tr><td>🔀 IF</td><td>判断 {primary 条件摘要}</td><td>判断 订单金额 > 1000</td></tr>
+<tr><td>🔃 Switch</td><td>{分支数} 个分支 · {匹配模式}</td><td>3 个分支 · 首次匹配</td></tr>
+<tr><td>🔄 循环</td><td>ForEach 遍历 {集合变量名} / While 持续当 {条件}</td><td>ForEach 遍历 订单列表</td></tr>
+<tr><td>⏱️ 延迟</td><td>等待 {时长}</td><td>等待 30 分钟</td></tr>
+<tr><td>💻 代码</td><td>{语言} · {描述}</td><td>JavaScript · 数据转换</td></tr>
+<tr><td>📝 赋值</td><td>{目标} = {来源摘要}</td><td>totalAmount = 金额 × 数量</td></tr>
+<tr><td>📤 输出</td><td>{级别} · {内容摘要}</td><td>INFO · 处理进度 50%</td></tr>
+<tr><td>📨 MQ</td><td>Topic: {topic名}</td><td>Topic: order-events</td></tr>
+<tr><td>🔗 工作流</td><td>调用 {流程名} ({版本})</td><td>调用 发送通知流程 (v2)</td></tr>
+<tr><td>⬜ 占位节点</td><td colspan="2" style="color:var(--warning)">⚠ 未完成配置</td></tr>
+</tbody>
+</table>
+
+</div><!-- sec4 end -->
+
+</div><!-- main end -->
+
+<script>
+// ===== Tab Switch =====
+function switchTab(idx) {
+  document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', i===idx));
+  document.querySelectorAll('.page-section').forEach((s,i) => s.classList.toggle('active', i===idx));
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ===== Node Panel Switch (Tab3) =====
+function switchNodePanel(nodeKey, navEl) {
+  // Hide all panels
+  document.querySelectorAll('#sec3 .node-panel').forEach(p => p.style.display = 'none');
+  // Show target
+  const target = document.getElementById('panel-' + nodeKey);
+  if (target) target.style.display = 'block';
+  // Update nav active state
+  document.querySelectorAll('#sec3 .node-nav-item').forEach(el => el.classList.remove('active'));
+  if (navEl) navEl.classList.add('active');
+}
+
+// ===== Canvas Node Title Hover Edit =====
+function startEditTitle(el) {
+  if (el.classList.contains('editing')) return;
+  const original = el.textContent;
+  el.contentEditable = 'true';
+  el.classList.add('editing');
+  el.focus();
+  // Select all
+  const range = document.createRange();
+  range.selectNodeContents(el);
+  window.getSelection().removeAllRanges();
+  window.getSelection().addRange(range);
+  el.onkeydown = function(e) {
+    if (e.key === 'Enter') { e.preventDefault(); el.blur(); }
+    if (e.key === 'Escape') { el.textContent = original; el.blur(); }
+    // 50 char limit
+    if (el.textContent.length >= 50 && !['Backspace','Delete','ArrowLeft','ArrowRight'].includes(e.key)) {
+      e.preventDefault();
+    }
+  };
+  el.onblur = function() {
+    el.contentEditable = 'false';
+    el.classList.remove('editing');
+    if (!el.textContent.trim()) el.textContent = original;
+    el.onkeydown = null; el.onblur = null;
+  };
+}
+
+// ===== Node Name input length check =====
+function checkNameLength(input) {
+  if (input.value.length > 50) {
+    input.classList.add('error');
+  } else {
+    input.classList.remove('error');
+  }
+}
+
+// ===== Node Desc Toggle =====
+function toggleNodeDesc() {
+  const box = document.getElementById('nodeDescBox');
+  box.classList.toggle('open');
+}
+function toggleNodeDesc2(id) {
+  const box = document.getElementById(id);
+  if (box) box.classList.toggle('open');
+}
+
+// ===== Advanced Config Toggle =====
+function toggleAdvanced(key) {
+  const body = document.getElementById('advBody' + key.charAt(0).toUpperCase() + key.slice(1));
+  const toggle = document.getElementById('advToggle' + key.charAt(0).toUpperCase() + key.slice(1)) ||
+    document.querySelector('[onclick="toggleAdvanced(\''+key+'\')"]');
+  if (!body) return;
+  const isOpen = body.classList.toggle('open');
+  if (toggle) {
+    const span = toggle.querySelector('span:first-child');
+    if (span) span.textContent = span.textContent.replace(/[▶▼]/, isOpen ? '▼' : '▶');
+  }
+}
+
+// ===== HTTP Method Select =====
+let currentMethod = '';
+function selectMethod(el, method) {
+  document.querySelectorAll('#methodChips .method-chip').forEach(c => {
+    c.className = 'method-chip';
+  });
+  el.classList.add(method === 'GET' ? 'active-get' : 'active-post');
+  currentMethod = method;
+  const bodyField = document.getElementById('bodyField');
+  if (bodyField) {
+    bodyField.style.display = ['POST','PUT','PATCH'].includes(method) ? 'block' : 'none';
+  }
+  updateSummary();
+}
+
+function updateSummary() {
+  // demo only
+}
+
+// ===== Generic chip toggle =====
+function toggleChip(el) {
+  const parent = el.closest('.method-chips');
+  if (!parent) return;
+  parent.querySelectorAll('.method-chip').forEach(c => c.classList.remove('active','active-get','active-post'));
+  el.classList.add('active');
+}
+
+// ===== AI Guide Bar =====
+function skipAiGuide() {
+  document.getElementById('aiGuideBar').classList.add('hidden');
+  document.getElementById('aiRecallBtn').style.display = '';
+}
+function showAiGuide() {
+  document.getElementById('aiGuideBar').classList.remove('hidden');
+  document.getElementById('aiConfiguredBar').classList.add('hidden');
+  document.getElementById('aiRecallBtn').style.display = 'none';
+}
+function simulateAiFill() {
+  const input = document.getElementById('aiInput').value.trim();
+  if (!input) { alert('请先输入描述'); return; }
+  document.getElementById('aiGuideBar').classList.add('hidden');
+  document.getElementById('aiFillingBar').classList.remove('hidden');
+  // simulate filling
+  setTimeout(() => {
+    const urlInput = document.getElementById('demoUrl');
+    if (urlInput) {
+      urlInput.value = 'https://api.example.com/orders';
+      urlInput.classList.add('filling');
+      setTimeout(() => urlInput.classList.remove('filling'), 600);
+    }
+    const chips = document.querySelectorAll('#methodChips .method-chip');
+    if (chips[0]) { chips.forEach(c=>c.className='method-chip'); chips[0].classList.add('active-get'); }
+  }, 800);
+  setTimeout(() => {
+    document.getElementById('aiFillingBar').classList.add('hidden');
+    document.getElementById('aiConfiguredBar').classList.remove('hidden');
+    document.getElementById('aiRecallBtn').style.display = 'none';
+  }, 2000);
+}
+function resetAiGuide() {
+  document.getElementById('aiConfiguredBar').classList.add('hidden');
+  document.getElementById('aiGuideBar').classList.remove('hidden');
+  document.getElementById('aiInput').value = '';
+}
+
+// ===== Error Strategy Select =====
+function toggleErrorBranch() {
+  const sel = document.getElementById('errorStrategy');
+  if (!sel) return;
+  const val = sel.value;
+  const retryOpts = document.getElementById('retryOptions');
+  const branchTip = document.getElementById('branchTip');
+  const helpEl = document.getElementById('errorStrategyHelp');
+  const helps = {
+    terminate: '节点异常时立即终止整个工作流实例',
+    ignore: '跳过异常，流程继续往下执行',
+    retry: '按配置的次数和间隔重试，重试耗尽后降级为终止流程',
+    branch: '节点有专属异常出口连线时，路由到异常分支处理'
+  };
+  if (helpEl) helpEl.textContent = helps[val] || '';
+  if (retryOpts) retryOpts.style.display = val === 'retry' ? 'block' : 'none';
+  if (branchTip) branchTip.style.display = val === 'branch' ? 'block' : 'none';
+  // show blue dot if non-default
+  const dot = document.getElementById('dotHttp');
+  if (dot) dot.classList.toggle('show', val !== 'terminate');
+}
+
+// ===== Merge Strategy Demo =====
+function updateMergeDesc() {
+  const sel = document.getElementById('mergeSelect');
+  const desc = document.getElementById('mergeDesc');
+  if (!sel || !desc) return;
+  const descs = {
+    all: '所有入线分支均到达后，该节点才开始执行。可引用所有分支的输出变量。',
+    any: '任一入线分支到达后，该节点即刻开始执行。只能引用已到达分支的输出，未到达分支的变量为空。'
+  };
+  desc.textContent = descs[sel.value] || '';
+}
+
+// ===== IF View Switch =====
+function switchIfView(mode, btn) {
+  document.querySelectorAll('.view-toggle-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('ifVisual').style.display = mode === 'visual' ? 'block' : 'none';
+  document.getElementById('ifExpr').style.display = mode === 'expr' ? 'block' : 'none';
+}
+
+// ===== IF Condition Row Add/Delete =====
+function addCondRow() {
+  const builder = document.getElementById('condBuilder');
+  if (!builder) return;
+  const row = document.createElement('div');
+  row.className = 'cond-row';
+  row.innerHTML = `<div class="cond-chip var-chip" contenteditable="true">${变量}</div>
+    <select style="padding:4px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px;background:rgba(245,158,11,0.06);color:var(--warning);font-weight:700">
+      <option>==</option><option>!=</option><option>&gt;</option><option>&gt;=</option><option>&lt;</option><option>&lt;=</option>
+      <option>contains</option><option>is_empty</option><option>is_not_empty</option>
+    </select>
+    <input class="cond-chip" placeholder="值" style="min-width:60px;border:1px solid var(--border)">
+    <div class="cond-del-btn" onclick="delCondRow(this)">×</div>`;
+  builder.insertBefore(row, builder.lastElementChild);
+}
+function delCondRow(btn) {
+  const builder = document.getElementById('condBuilder');
+  const rows = builder ? builder.querySelectorAll('.cond-row') : [];
+  if (rows.length <= 1) { alert('至少保留一条条件'); return; }
+  btn.closest('.cond-row').remove();
+}
+function addSubGroup() {
+  const builder = document.getElementById('condBuilder');
+  if (!builder) return;
+  const sg = document.createElement('div');
+  sg.className = 'cond-subgroup';
+  sg.innerHTML = `<div class="cond-subgroup-header">
+    <span class="cond-subgroup-label">子条件组</span>
+    <select class="config-input" style="width:auto;padding:3px 10px;font-size:11px;font-weight:600">
+      <option>满足任一 (OR)</option><option>满足全部 (AND)</option>
+    </select>
+    <span style="margin-left:auto;cursor:pointer;color:var(--text-muted);font-size:18px" onclick="if(confirm('删除后子组内的条件将被清除，确认删除？'))this.closest('.cond-subgroup').remove()">×</span>
+  </div>
+  <div class="cond-row">
+    <div class="cond-chip var-chip">${变量}</div>
+    <div class="cond-chip op-chip">==</div>
+    <div class="cond-chip">值</div>
+    <div class="cond-del-btn" onclick="delCondRow(this)">×</div>
+  </div>
+  <div class="add-link" onclick="addCondRowInSubgroup(this)">+ 添加条件</div>`;
+  builder.insertBefore(sg, builder.lastElementChild);
+}
+function addCondRowInSubgroup(link) {
+  const sg = link.closest('.cond-subgroup');
+  const row = document.createElement('div');
+  row.className = 'cond-row';
+  row.innerHTML = `<div class="cond-chip var-chip">${变量}</div><div class="cond-chip op-chip">==</div><input class="cond-chip" placeholder="值" style="min-width:60px;border:1px solid var(--border)"><div class="cond-del-btn" onclick="this.closest('.cond-row').remove()">×</div>`;
+  sg.insertBefore(row, link);
+}
+
+// ===== Switch Branch Add/Delete =====
+function addSwitchBranch() {
+  const container = document.getElementById('switchBranches');
+  if (!container) return;
+  const card = document.createElement('div');
+  card.className = 'switch-branch-card';
+  card.innerHTML = `<div>
+    <input class="switch-branch-name" placeholder="分支名称" style="border:none;background:transparent;font-size:13px;font-weight:600;color:var(--text);outline:none;width:100%" oninput="this.style.width=(this.value.length+2)*8+'px'">
+    <input class="switch-branch-cond" placeholder='== "值"' style="border:none;background:transparent;font-family:var(--font-mono);font-size:11px;color:var(--text-secondary);outline:none;display:block;margin-top:2px;width:100%">
+  </div>
+  <span style="cursor:pointer;color:var(--text-muted);font-size:18px" onclick="delBranch(this)">×</span>`;
+  container.appendChild(card);
+}
+function delBranch(btn) {
+  const container = document.getElementById('switchBranches');
+  if (!container) return;
+  const cards = container.querySelectorAll('.switch-branch-card');
+  if (cards.length <= 1) { alert('至少保留一个分支'); return; }
+  btn.closest('.switch-branch-card').remove();
+}
+
+// ===== Loop Mode Switch =====
+function switchLoopMode(mode, btn) {
+  document.querySelectorAll('#sec3 .method-chip').forEach(c => {
+    if (c.onclick && c.onclick.toString().includes('switchLoopMode')) c.classList.remove('active');
+  });
+  btn.classList.add('active');
+  const fe = document.getElementById('loopForeachFields');
+  const wh = document.getElementById('loopWhileFields');
+  if (fe) fe.style.display = mode === 'foreach' ? 'block' : 'none';
+  if (wh) wh.style.display = mode === 'while' ? 'block' : 'none';
+}
+
+// ===== Delay Mode Switch =====
+function switchDelayMode(mode, btn) {
+  btn.closest('.method-chips').querySelectorAll('.method-chip').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  const fx = document.getElementById('delayFixedFields');
+  const un = document.getElementById('delayUntilFields');
+  if (fx) fx.style.display = mode === 'fixed' ? 'block' : 'none';
+  if (un) un.style.display = mode === 'until' ? 'block' : 'none';
+}
+
+// ===== Assign Rule Add =====
+function addAssignRule() {
+  const container = document.getElementById('assignRules');
+  if (!container) return;
+  const row = document.createElement('div');
+  row.style.cssText = 'border:1px solid var(--border);border-radius:7px;padding:9px 13px;margin-bottom:7px;display:flex;align-items:center;gap:6px;flex-wrap:wrap';
+  row.innerHTML = `<input placeholder="变量名" style="font-family:var(--font-mono);font-size:12px;color:var(--primary);background:rgba(103,80,164,0.06);padding:3px 9px;border-radius:4px;font-weight:600;border:1px solid rgba(103,80,164,0.2);outline:none;width:100px">
+    <span class="assign-eq">=</span>
+    <input placeholder="表达式或变量引用" style="font-family:var(--font-mono);font-size:11px;color:var(--text);border:none;background:transparent;outline:none;flex:1;min-width:80px">
+    <span style="margin-left:auto;cursor:pointer;color:var(--text-muted);font-size:16px" onclick="this.closest('div[style]').remove()">×</span>`;
+  container.appendChild(row);
+}
+
+// ===== Param Add =====
+function addParam(containerId, nodeCode) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  const card = document.createElement('div');
+  card.className = 'param-card';
+  card.innerHTML = `<div class="param-card-top">
+    <input class="param-name" placeholder="参数名" style="border:none;background:transparent;font-family:var(--font-mono);font-size:13px;font-weight:600;color:var(--text);outline:none;width:120px">
+    <select style="padding:2px 6px;border:1px solid var(--border);border-radius:4px;font-size:11px">
+      <option>String</option><option>Integer</option><option>Double</option><option>Boolean</option>
+      <option>DateTime</option><option>Object</option><option>Array[Object]</option><option>Array[String]</option>
+    </select>
+    <span style="cursor:pointer;color:var(--text-muted);margin-left:6px" onclick="this.closest('.param-card').remove()">×</span>
+  </div>
+  <div class="param-ref">${nodeCode}.参数名</div>`;
+  container.appendChild(card);
+}
+</script>
+</body>
+</html>
+
