@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -589,6 +589,102 @@ body {
   .nodes-row { gap: 14px; }
   .page-header-inner { flex-direction: column; gap: 12px; align-items: flex-start; }
 }
+
+/* ========== Node Config Two-Column Layout ========== */
+.node-config-layout {
+  display: flex;
+  gap: 0;
+  min-height: 600px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.node-nav {
+  width: 196px;
+  flex-shrink: 0;
+  background: var(--surface-dim);
+  border-right: 1px solid var(--border);
+  padding: 12px 0;
+  overflow-y: auto;
+}
+
+.node-nav-group-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--text-muted);
+  padding: 10px 14px 5px;
+}
+
+.node-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  cursor: pointer;
+  border-left: 2px solid transparent;
+  transition: var(--transition);
+  border-radius: 0;
+}
+.node-nav-item:hover {
+  background: rgba(103,80,164,0.06);
+  border-left-color: rgba(103,80,164,0.25);
+}
+.node-nav-item.active {
+  background: rgba(103,80,164,0.08);
+  border-left-color: var(--primary);
+}
+.node-nav-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+.node-nav-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  flex: 1;
+  min-width: 0;
+}
+.node-nav-item.active .node-nav-name { font-weight: 600; color: var(--primary); }
+.node-nav-code {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  background: var(--border);
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+
+.node-panel-area {
+  flex: 1;
+  min-width: 0;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+.node-panel { animation: panelFadeIn 0.15s ease-out; }
+@keyframes panelFadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 700px) {
+  .node-config-layout { flex-direction: column; }
+  .node-nav { width: 100%; border-right: none; border-bottom: 1px solid var(--border); display: flex; flex-wrap: wrap; padding: 8px; gap: 4px; }
+  .node-nav-group-label { display: none; }
+  .node-nav-item { padding: 6px 10px; border-radius: 6px; border-left: none; border: 1.5px solid transparent; }
+  .node-nav-item.active { border-color: var(--primary); }
+  .node-nav-code { display: none; }
+}
 </style>
 </head>
 <body>
@@ -1009,7 +1105,7 @@ body {
 <tr><td>TRUE 分支</td><td><span class="line-demo" style="background:var(--success)"></span> 实线 绿色 + 标签</td><td>IF 条件成立时的分支路径</td></tr>
 <tr><td>FALSE 分支</td><td><span class="line-demo" style="background:var(--danger)"></span> 实线 红色 + 标签</td><td>IF 条件不成立时的分支路径</td></tr>
 <tr><td>Switch 分支</td><td><span class="line-demo" style="background:var(--primary)"></span> 实线 紫色 + 分支名标签</td><td>Switch 每个分支的路径</td></tr>
-<tr><td>异常连线</td><td><span class="line-demo-dashed" style="border-color:var(--warning)"></span> 虚线 橙色</td><td>节点异常时流向异常处理分支；由节点异常策略配置"走异常分支"后启用</td></tr>
+<tr><td>异常连线</td><td><span class="line-demo-dashed" style="border-color:var(--warning)"></span> 虚线 橙色</td><td>节点异常时流向异常处理分支；不需要异常策略配置，所有异常适用统一的错误处理节点</td></tr>
 <tr><td>循环体连线</td><td><span class="line-demo" style="background:var(--info)"></span> 实线 蓝色</td><td>循环节点底部端口到循环体节点的连线</td></tr>
 </tbody>
 </table>
@@ -1037,8 +1133,18 @@ body {
 </div>
 </div>
 
-<div class="category-label">异常分支连线示意</div>
-<p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px">在节点高级配置中将异常策略设为「走异常分支」后，节点右侧增加橙色虚线出口端口，可连接异常处理节点。</p>
+<div class="category-label">异常策略配置说明</div>
+<p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px">异常策略在节点高级配置区“错误处理”区块中配置。共有五种策略：</p>
+<table class="spec-table">
+<thead><tr><th>策略</th><th>关键字</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td>终止流程</td><td><code>stop</code></td><td>立即停止整条流程，记录错误（默认）</td></tr>
+<tr><td>忽略并继续</td><td><code>continue</code></td><td>跳过异常，流程继续往下执行</td></tr>
+<tr><td>自动重试</td><td><code>retry</code></td><td>按配置的次数（默认3）和间隔（默认5秒）重试；重试耗尽后降级为：终止流程 / 忽略并继续 / 转人工处理</td></tr>
+<tr><td>转人工处理</td><td><code>manual</code></td><td>流程挂起，通知人工介入处理；需配置挂起等待超时（默认24小时）</td></tr>
+<tr><td>挂起等待回调</td><td><code>callback</code></td><td>流程挂起，等待外部系统主动回调恢复；适合异步处理场景；需配置挂起等待超时（默认24小时）</td></tr>
+</tbody>
+</table>
 <div class="canvas-bg">
 <div class="flow-demo" style="flex-wrap:wrap;gap:8px">
   <!-- HTTP节点带异常出口 -->
@@ -1077,10 +1183,8 @@ body {
     </div>
   </div>
 </div>
-<div style="font-size:11px;color:var(--text-muted);margin-top:8px">⤳ 表示虚线橙色异常连线；异常策略在节点「高级配置」区的「异常策略」字段中设置为「走异常分支」后生效</div>
-</div>
+<div style="font-size:11px;color:var(--text-muted);margin-top:8px">异常策略在节点「高级配置」区的「错误处理」中配置</div>
 
-<div class="category-label">循环节点连线示意</div>
 <div class="canvas-bg">
 <div class="loop-demo">
   <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
@@ -1272,9 +1376,10 @@ body {
         <div class="config-label">发生异常时</div>
         <select class="config-input" id="errorStrategy" onchange="toggleErrorBranch()" style="font-size:12px">
           <option value="terminate">终止流程（默认）</option>
-          <option value="ignore">忽略错误继续</option>
-          <option value="retry">重试</option>
-          <option value="branch">走异常分支</option>
+          <option value="ignore">忽略并继续</option>
+          <option value="retry">自动重试</option>
+          <option value="manual">转人工处理</option>
+          <option value="callback">挂起等待回调</option>
         </select>
         <div class="config-help" id="errorStrategyHelp">节点异常时立即终止整个工作流实例</div>
       </div>
@@ -1286,6 +1391,19 @@ body {
         <div class="config-field">
           <div class="config-label">重试间隔（秒）</div>
           <input class="config-input" type="number" value="5" min="1" max="300" style="width:80px">
+        </div>
+        <div class="config-field">
+          <div class="config-label">重试用尽后降级</div>
+          <select class="config-input" style="font-size:12px">
+            <option>终止流程</option><option>忽略并继续</option><option>转人工处理</option>
+          </select>
+        </div>
+      </div>
+      <div id="suspendOptions" style="display:none">
+        <div class="config-field">
+          <div class="config-label">挂起等待超时（小时）</div>
+          <input class="config-input" type="number" value="24" min="1" max="720" style="width:80px">
+          <div class="config-help">等待外部回调或人工处理的最大时长，超时后触发异常策略（默认 24 小时）</div>
         </div>
       </div>
       <div id="branchTip" style="display:none;margin-top:8px;padding:9px 12px;background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.2);border-radius:6px;font-size:12px;color:var(--warning)">
@@ -1311,8 +1429,8 @@ body {
   <p style="margin-top:12px;margin-bottom:12px"><strong>条件展示规则（字段级联动）：</strong></p>
   <ul style="padding-left:20px;line-height:2">
     <li>HTTP 节点：选 POST/PUT/PATCH 后才显示 Body 字段</li>
-    <li>异常策略选「重试」后展示重试次数和间隔字段</li>
-    <li>异常策略选「走异常分支」后展示提示信息，节点增加异常出口端口</li>
+    <li>异常策略选「自动重试」后展示重试次数、间隔及降级策略字段</li>
+    <li>异常策略选「转人工处理」或「挂起等待回调」后展示挂起等待超时字段</li>
     <li>延迟节点：选「到指定时间」模式后，时长输入换为日期时间选择器</li>
     <li>循环节点：ForEach/While 切换时，集合变量与循环条件字段互相切换</li>
   </ul>
@@ -1344,30 +1462,103 @@ body {
 <!-- ====== TAB 3: Node Configs ====== -->
 <div class="page-section" id="sec3">
 <h2 class="section-title">各节点配置面板</h2>
-<p class="section-desc">点击各节点标题展开完整配置面板，均为真实可交互演示。高级配置默认折叠。</p>
+<p class="section-desc">从左侧节点列表选择节点，右侧显示对应配置面板。均为真实可交互演示，高级配置默认折叠。</p>
+
+<div class="node-config-layout">
+  <!-- 左侧节点导航 -->
+  <div class="node-nav">
+    <div class="node-nav-group-label">流程控制</div>
+    <div class="node-nav-item active" data-node="trigger" onclick="switchNodePanel('trigger',this)">
+      <span class="node-nav-icon" style="background:var(--node-trigger);color:var(--node-trigger-fg)">⚡</span>
+      <span class="node-nav-name">开始节点</span>
+      <span class="node-nav-code">trigger</span>
+    </div>
+    <div class="node-nav-item" data-node="end" onclick="switchNodePanel('end',this)">
+      <span class="node-nav-icon" style="background:var(--node-end);color:var(--node-end-fg)">🏁</span>
+      <span class="node-nav-name">结束节点</span>
+      <span class="node-nav-code">end</span>
+    </div>
+    <div class="node-nav-item" data-node="if" onclick="switchNodePanel('if',this)">
+      <span class="node-nav-icon" style="background:var(--node-logic);color:var(--node-logic-fg)">🔀</span>
+      <span class="node-nav-name">IF 条件</span>
+      <span class="node-nav-code">if</span>
+    </div>
+    <div class="node-nav-item" data-node="switch" onclick="switchNodePanel('switch',this)">
+      <span class="node-nav-icon" style="background:var(--node-logic);color:var(--node-logic-fg)">🔃</span>
+      <span class="node-nav-name">Switch</span>
+      <span class="node-nav-code">switch</span>
+    </div>
+    <div class="node-nav-item" data-node="loop" onclick="switchNodePanel('loop',this)">
+      <span class="node-nav-icon" style="background:var(--node-logic);color:var(--node-logic-fg)">🔄</span>
+      <span class="node-nav-name">循环</span>
+      <span class="node-nav-code">loop</span>
+    </div>
+    <div class="node-nav-item" data-node="delay" onclick="switchNodePanel('delay',this)">
+      <span class="node-nav-icon" style="background:var(--node-logic);color:var(--node-logic-fg)">⏱️</span>
+      <span class="node-nav-name">延迟</span>
+      <span class="node-nav-code">delay</span>
+    </div>
+    <div class="node-nav-group-label">数据执行</div>
+    <div class="node-nav-item" data-node="assign" onclick="switchNodePanel('assign',this)">
+      <span class="node-nav-icon" style="background:var(--node-data);color:var(--node-data-fg)">📝</span>
+      <span class="node-nav-name">赋值</span>
+      <span class="node-nav-code">assign</span>
+    </div>
+    <div class="node-nav-item" data-node="output" onclick="switchNodePanel('output',this)">
+      <span class="node-nav-icon" style="background:var(--node-data);color:var(--node-data-fg)">📤</span>
+      <span class="node-nav-name">输出</span>
+      <span class="node-nav-code">output</span>
+    </div>
+    <div class="node-nav-item" data-node="code" onclick="switchNodePanel('code',this)">
+      <span class="node-nav-icon" style="background:var(--node-data);color:var(--node-data-fg)">💻</span>
+      <span class="node-nav-name">代码</span>
+      <span class="node-nav-code">code</span>
+    </div>
+    <div class="node-nav-group-label">集成扩展</div>
+    <div class="node-nav-item" data-node="http" onclick="switchNodePanel('http',this)">
+      <span class="node-nav-icon" style="background:var(--node-integration);color:var(--node-integration-fg)">🌐</span>
+      <span class="node-nav-name">HTTP 请求</span>
+      <span class="node-nav-code">http</span>
+    </div>
+    <div class="node-nav-item" data-node="mq" onclick="switchNodePanel('mq',this)">
+      <span class="node-nav-icon" style="background:var(--node-integration);color:var(--node-integration-fg)">📨</span>
+      <span class="node-nav-name">MQ 发送</span>
+      <span class="node-nav-code">mq</span>
+    </div>
+    <div class="node-nav-item" data-node="workflow" onclick="switchNodePanel('workflow',this)">
+      <span class="node-nav-icon" style="background:var(--node-flow);color:var(--node-flow-fg)">🔗</span>
+      <span class="node-nav-name">工作流</span>
+      <span class="node-nav-code">workflow</span>
+    </div>
+  </div>
+
+  <!-- 右侧配置面板区 -->
+  <div class="node-panel-area">
 
 <!-- ===== 开始节点 ===== -->
-<div class="category-label">开始节点（trigger）</div>
+<div class="node-panel" id="panel-trigger">
 <div class="config-panel">
   <div class="config-panel-header">
     <div class="config-panel-icon" style="background:var(--node-trigger);color:var(--node-trigger-fg)">⚡</div>
     <div style="flex:1"><input class="config-node-name-input" value="开始节点" maxlength="50"><div class="config-panel-code">trigger_1</div></div>
     <button onclick="toggleNodeDesc2('triggerDesc')" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:16px;padding:4px" title="节点说明">?</button>
   </div>
-  <div class="node-desc-box" id="triggerDesc">开始节点是工作流的唯一入口，定义流程启动时传入的输入参数。下游节点通过 <code>${trigger_1.参数名}</code> 引用。对话流中额外注入 query、files、conversation_id、user_id 等内置变量。</div>
+  <div class="node-desc-box" id="triggerDesc">开始节点是工作流的唯一入口，定义流程启动时传入的输入参数。下游节点通过 <code>${trigger_1.参数名}</code> 引用。支持手动触发（默认）、定时触发（可选）、Webhook（可选）三种启动方式；对话流中额外注入 query、files、conversation_id、user_id 等内置变量。</div>
   <div class="config-section">
     <div class="config-section-title">📥 输入参数</div>
-    <div class="config-help" style="margin-bottom:10px">定义流程启动时传入的参数，下游通过 <code>${trigger_1.参数名}</code> 引用</div>
+    <div class="config-help" style="margin-bottom:10px">独立于触发方式，始终可配置。下游通过 <code>${trigger_1.参数名}</code> 引用</div>
     <div id="triggerParams">
       <div class="param-card">
-        <div class="param-card-top"><span class="param-name">orderId</span><span class="badge badge-primary">String</span></div>
-        <div class="param-ref">${trigger_1.orderId}</div>
+        <div class="param-card-top"><span class="param-name">orderId</span><span class="badge badge-primary">String</span><span style="font-size:11px;color:var(--text-muted);margin-left:4px">必填</span></div>
+        <div class="param-ref" style="margin-bottom:4px">${trigger_1.orderId}</div>
+        <div style="font-size:11px;color:var(--text-muted)">占位提示：请输入订单编号，如 ORD-2024001</div>
+        <div style="font-size:11px;color:var(--text-muted)">参数说明：用于标识本次处理的订单</div>
       </div>
     </div>
     <div class="add-link" onclick="addParam('triggerParams','trigger_1')">+ 添加输入参数</div>
   </div>
   <div class="config-advanced-toggle" onclick="toggleAdvanced('trigger')">
-    <span>▶ 定时触发配置（默认折叠）</span>
+    <span>▶ 高级配置（定时触发 / Webhook）</span>
     <span class="toggle-dot" id="dotTrigger"></span>
   </div>
   <div class="config-advanced-body" id="advBodyTrigger">
@@ -1380,18 +1571,36 @@ body {
         </select>
       </div>
     </div>
+    <div class="config-section">
+      <div class="config-section-title" style="font-size:11px;color:var(--text-muted)">🔗 Webhook（系统自动生成，只读）</div>
+      <div class="config-field">
+        <div class="config-label">回调 URL</div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <input class="config-input" value="https://beaver.example.com/webhook/abc123" readonly style="background:var(--surface);color:var(--text-secondary);font-family:var(--font-mono);font-size:11px;flex:1">
+          <button style="padding:5px 10px;font-size:11px;border:1px solid var(--border);border-radius:6px;background:var(--surface);cursor:pointer;color:var(--text-muted)">复制</button>
+        </div>
+        <div class="config-help">系统自动生成，供外部系统调用触发本流程</div>
+      </div>
+      <div class="config-field">
+        <div class="config-label">URL 别名 <span style="font-size:11px;color:var(--text-muted);font-weight:400">（可选）</span></div>
+        <input class="config-input" placeholder="/webhook/order-created" style="font-family:var(--font-mono);font-size:12px">
+        <div class="config-help">自定义别名路径，便于识别该 Webhook 的业务含义</div>
+      </div>
+    </div>
   </div>
   <div class="config-section" style="background:rgba(103,80,164,0.02)">
     <div class="config-section-title" style="font-size:11px;color:var(--text-muted)">💬 对话流内置变量（只读，系统自动注入）</div>
     <div class="param-card"><div class="param-card-top"><span class="param-name">query</span><span class="badge badge-primary">String</span></div><div class="param-ref">用户当前输入的消息内容</div></div>
-    <div class="param-card"><div class="param-card-top"><span class="param-name">files</span><span class="badge badge-info">Array[Object]</span></div><div class="param-ref">用户上传的文件列表</div></div>
+    <div class="param-card"><div class="param-card-top"><span class="param-name">files</span><span class="badge badge-info">Array[File]</span></div><div class="param-ref">用户上传的文件列表</div></div>
     <div class="param-card"><div class="param-card-top"><span class="param-name">conversation_id</span><span class="badge badge-primary">String</span></div><div class="param-ref">当前会话唯一标识</div></div>
     <div class="param-card"><div class="param-card-top"><span class="param-name">user_id</span><span class="badge badge-primary">String</span></div><div class="param-ref">当前对话用户唯一标识</div></div>
   </div>
 </div>
 
+</div><!-- panel-trigger end -->
+
 <!-- ===== 结束节点 ===== -->
-<div class="category-label">结束节点（end）</div>
+<div class="node-panel" id="panel-end" style="display:none">
 <div class="config-panel">
   <div class="config-panel-header">
     <div class="config-panel-icon" style="background:var(--node-end);color:var(--node-end-fg)">🏁</div>
@@ -1414,8 +1623,11 @@ body {
   </div>
 </div>
 
+<!-- end config-panel for end -->
+</div><!-- panel-end end -->
+
 <!-- ===== IF 条件节点 ===== -->
-<div class="category-label">IF 条件节点（if）</div>
+<div class="node-panel" id="panel-if" style="display:none">
 <div class="config-panel">
   <div class="config-panel-header">
     <div class="config-panel-icon" style="background:var(--node-logic);color:var(--node-logic-fg)">🔀</div>
@@ -1476,15 +1688,18 @@ body {
       <div class="config-field">
         <div class="config-label">异常策略</div>
         <select class="config-input" style="font-size:12px">
-          <option>终止流程（默认）</option><option>忽略错误继续</option><option>重试</option><option>走异常分支</option>
+          <option>终止流程（默认）</option><option>忽略并继续</option><option>自动重试</option><option>转人工处理</option><option>挂起等待回调</option>
         </select>
       </div>
     </div>
   </div>
 </div>
 
+<!-- end config-panel for if -->
+</div><!-- panel-if end -->
+
 <!-- ===== Switch 节点 ===== -->
-<div class="category-label">Switch 节点（switch）</div>
+<div class="node-panel" id="panel-switch" style="display:none">
 <div class="config-panel">
   <div class="config-panel-header">
     <div class="config-panel-icon" style="background:var(--node-logic);color:var(--node-logic-fg)">🔃</div>
@@ -1523,8 +1738,11 @@ body {
   </div>
 </div>
 
+<!-- end config-panel for switch -->
+</div><!-- panel-switch end -->
+
 <!-- ===== 循环节点 ===== -->
-<div class="category-label">循环节点（loop）</div>
+<div class="node-panel" id="panel-loop" style="display:none">
 <div class="config-panel">
   <div class="config-panel-header">
     <div class="config-panel-icon" style="background:var(--node-logic);color:var(--node-logic-fg)">🔄</div>
@@ -1579,19 +1797,24 @@ body {
     <div class="config-section">
       <div class="config-field">
         <div class="config-label">异常策略</div>
-        <select class="config-input" style="font-size:12px"><option>终止流程（默认）</option><option>忽略错误继续</option><option>重试</option><option>走异常分支</option></select>
+        <select class="config-input" style="font-size:12px"><option>终止流程（默认）</option><option>忽略并继续</option><option>自动重试</option><option>转人工处理</option><option>挂起等待回调</option></select>
       </div>
     </div>
   </div>
 </div>
 
+<!-- end config-panel for loop -->
+</div><!-- panel-loop end -->
+
 <!-- ===== 延迟节点 ===== -->
-<div class="category-label">延迟节点（delay）</div>
+<div class="node-panel" id="panel-delay" style="display:none">
 <div class="config-panel">
   <div class="config-panel-header">
     <div class="config-panel-icon" style="background:var(--node-logic);color:var(--node-logic-fg)">⏱️</div>
     <div style="flex:1"><input class="config-node-name-input" value="延迟" maxlength="50"><div class="config-panel-code">delay_1</div></div>
+    <button onclick="toggleNodeDesc2('delayDesc')" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:16px;padding:4px" title="节点说明">?</button>
   </div>
+  <div class="node-desc-box" id="delayDesc">延迟节点在等待指定时长或到达指定时间后，才继续执行后续节点。支持「固定时长」和「到指定时间」两种模式。适合需要等待外部条件成熟的场景，如定时提醒、分批处理。</div>
   <div class="config-section">
     <div class="config-field">
       <div class="config-label">延迟方式 <span class="req">*</span></div>
@@ -1616,8 +1839,11 @@ body {
   </div>
 </div>
 
+<!-- end config-panel for delay -->
+</div><!-- panel-delay end -->
+
 <!-- ===== 赋值节点 ===== -->
-<div class="category-label">赋值节点（assign）</div>
+<div class="node-panel" id="panel-assign" style="display:none">
 <div class="config-panel">
   <div class="config-panel-header">
     <div class="config-panel-icon" style="background:var(--node-data);color:var(--node-data-fg)">📝</div>
@@ -1639,8 +1865,11 @@ body {
   </div>
 </div>
 
+<!-- end config-panel for assign -->
+</div><!-- panel-assign end -->
+
 <!-- ===== 输出节点 ===== -->
-<div class="category-label">输出节点（output）</div>
+<div class="node-panel" id="panel-output" style="display:none">
 <div class="config-panel">
   <div class="config-panel-header">
     <div class="config-panel-icon" style="background:var(--node-data);color:var(--node-data-fg)">📤</div>
@@ -1665,8 +1894,11 @@ body {
   </div>
 </div>
 
+<!-- end config-panel for output -->
+</div><!-- panel-output end -->
+
 <!-- ===== 代码节点 ===== -->
-<div class="category-label">代码节点（code）</div>
+<div class="node-panel" id="panel-code" style="display:none">
 <div class="config-panel">
   <div class="config-panel-header">
     <div class="config-panel-icon" style="background:var(--node-data);color:var(--node-data-fg)">💻</div>
@@ -1709,21 +1941,48 @@ body {
     <div class="config-section">
       <div class="config-field"><div class="config-label">超时时间（秒）</div><input class="config-input" type="number" value="30" style="width:100px"></div>
       <div class="config-field"><div class="config-label">汇合策略</div><select class="config-input" style="font-size:12px"><option>等待全部完成</option><option>任一完成即继续</option></select></div>
-      <div class="config-field"><div class="config-label">异常策略</div><select class="config-input" style="font-size:12px"><option>终止流程（默认）</option><option>忽略错误继续</option><option>重试</option><option>走异常分支</option></select></div>
+      <div class="config-field"><div class="config-label">异常策略</div><select class="config-input" style="font-size:12px"><option>终止流程（默认）</option><option>忽略并继续</option><option>自动重试</option><option>转人工处理</option><option>挂起等待回调</option></select></div>
     </div>
   </div>
 </div>
 
+<!-- end config-panel for code -->
+</div><!-- panel-code end -->
+
 <!-- ===== HTTP 请求节点 ===== -->
-<div class="category-label">HTTP 请求节点（http）—— 已在「配置面板通用」Tab 中完整演示</div>
+<div class="node-panel" id="panel-http" style="display:none">
+
+<div style="padding:12px 0 4px;font-size:12px;color:var(--text-muted)">HTTP 请求节点完整交互演示已收录于「<strong>配置面板通用</strong>」Tab，以下为独立面板呈现：</div>
+<div class="config-panel">
+  <div class="config-panel-header">
+    <div class="config-panel-icon" style="background:var(--node-integration);color:var(--node-integration-fg)">🌐</div>
+    <div style="flex:1"><input class="config-node-name-input" value="HTTP 请求" maxlength="50"><div class="config-panel-code">http_1</div></div>
+  </div>
+  <div class="config-section">
+    <div class="config-field"><div class="config-label">请求 URL <span class="req">*</span></div><input class="config-input" placeholder="https://api.example.com/orders/{id}"><div class="config-help">支持变量引用，如 https://api.example.com/orders/${trigger_1.orderId}</div></div>
+    <div class="config-field"><div class="config-label">请求方法 <span class="req">*</span></div><div class="method-chips"><div class="method-chip" onclick="toggleChip(this)">GET</div><div class="method-chip" onclick="toggleChip(this)">POST</div><div class="method-chip" onclick="toggleChip(this)">PUT</div><div class="method-chip" onclick="toggleChip(this)">DELETE</div><div class="method-chip" onclick="toggleChip(this)">PATCH</div></div></div>
+    <div class="config-field"><div class="config-label">Headers</div><input class="config-input" placeholder="Content-Type: application/json"></div>
+  </div>
+  <div class="config-advanced-toggle" onclick="toggleAdvanced('http2')"><span>▶ 高级配置（超时 / 认证 / 异常策略 / 汇合策略）</span><span class="toggle-dot" id="dotHttp2"></span></div>
+  <div class="config-advanced-body" id="advBodyHttp2">
+    <div class="config-section">
+      <div class="config-field"><div class="config-label">超时时间（秒）</div><input class="config-input" type="number" value="30" style="width:100px"></div>
+      <div class="config-field"><div class="config-label">汇合策略</div><select class="config-input" style="font-size:12px"><option>等待全部完成 (Wait All)</option><option>任一完成即继续 (Any)</option></select></div>
+      <div class="config-field"><div class="config-label">异常策略</div><select class="config-input" style="font-size:12px"><option>终止流程（默认）</option><option>忽略并继续</option><option>自动重试</option><option>转人工处理</option><option>挂起等待回调</option></select></div>
+    </div>
+  </div>
+</div>
+</div><!-- panel-http end -->
 
 <!-- ===== MQ 节点 ===== -->
-<div class="category-label">MQ 发送节点（mq）</div>
+<div class="node-panel" id="panel-mq" style="display:none">
 <div class="config-panel">
   <div class="config-panel-header">
     <div class="config-panel-icon" style="background:var(--node-integration);color:var(--node-integration-fg)">📨</div>
     <div style="flex:1"><input class="config-node-name-input" value="MQ 发送" maxlength="50"><div class="config-panel-code">mq_1</div></div>
+    <button onclick="toggleNodeDesc2('mqDesc')" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:16px;padding:4px" title="节点说明">?</button>
   </div>
+  <div class="node-desc-box" id="mqDesc">MQ 发送节点向消息队列（Message Queue）投递消息，支持配置 Topic、消息内容、消息 Key 和属性。适用于异步解耦、事件通知等场景，如「发布订单创建事件」「推送数据变更通知」。</div>
   <div class="config-section">
     <div class="config-field"><div class="config-label">目标队列/Topic <span class="req">*</span></div><input class="config-input" value="order-events"></div>
     <div class="config-field"><div class="config-label">消息内容 <span class="req">*</span></div><textarea class="config-input" rows="3" placeholder='{"orderId": "...", "status": "..."}'></textarea></div>
@@ -1736,13 +1995,16 @@ body {
     <div class="config-section">
       <div class="config-field"><div class="config-label">超时时间（秒）</div><input class="config-input" type="number" value="30" style="width:100px"></div>
       <div class="config-field"><div class="config-label">汇合策略</div><select class="config-input" style="font-size:12px"><option>等待全部完成</option><option>任一完成即继续</option></select></div>
-      <div class="config-field"><div class="config-label">异常策略</div><select class="config-input" style="font-size:12px"><option>终止流程（默认）</option><option>忽略错误继续</option><option>重试</option><option>走异常分支</option></select></div>
+      <div class="config-field"><div class="config-label">异常策略</div><select class="config-input" style="font-size:12px"><option>终止流程（默认）</option><option>忽略并继续</option><option>自动重试</option><option>转人工处理</option><option>挂起等待回调</option></select></div>
     </div>
   </div>
 </div>
 
+<!-- end config-panel for mq -->
+</div><!-- panel-mq end -->
+
 <!-- ===== 工作流节点 ===== -->
-<div class="category-label">工作流节点（workflow）</div>
+<div class="node-panel" id="panel-workflow" style="display:none">
 <div class="config-panel">
   <div class="config-panel-header">
     <div class="config-panel-icon" style="background:var(--node-flow);color:var(--node-flow-fg)">🔗</div>
@@ -1773,10 +2035,16 @@ body {
     <div class="config-section">
       <div class="config-field"><div class="config-label">子流程执行超时（秒）</div><input class="config-input" type="number" value="300" style="width:100px"></div>
       <div class="config-field"><div class="config-label">汇合策略</div><select class="config-input" style="font-size:12px"><option>等待全部完成</option><option>任一完成即继续</option></select></div>
-      <div class="config-field"><div class="config-label">异常策略</div><select class="config-input" style="font-size:12px"><option>终止流程（默认）</option><option>忽略错误继续</option><option>重试</option><option>走异常分支</option></select></div>
+      <div class="config-field"><div class="config-label">异常策略</div><select class="config-input" style="font-size:12px"><option>终止流程（默认）</option><option>忽略并继续</option><option>自动重试</option><option>转人工处理</option><option>挂起等待回调</option></select></div>
     </div>
   </div>
 </div>
+
+<!-- end config-panel for workflow -->
+</div><!-- panel-workflow end -->
+
+  </div><!-- node-panel-area end -->
+</div><!-- node-config-layout end -->
 
 </div><!-- sec3 end -->
 
@@ -1787,7 +2055,7 @@ body {
 
 <div class="category-label">节点色彩系统</div>
 <div class="color-grid">
-  <div class="color-chip-card" style="background:var(--node-trigger);color:var(--node-trigger-fg)">⚡ 开始/结束类</div>
+  <div class="color-chip-card" style="background:var(--node-trigger);color:var(--node-trigger-fg)">⚡ 开始节点</div>
   <div class="color-chip-card" style="background:var(--node-end);color:var(--node-end-fg)">🏁 结束节点</div>
   <div class="color-chip-card" style="background:var(--node-logic);color:var(--node-logic-fg)">🔀 逻辑控制</div>
   <div class="color-chip-card" style="background:var(--node-data);color:var(--node-data-fg)">📝 数据执行</div>
@@ -1889,6 +2157,18 @@ function switchTab(idx) {
   document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', i===idx));
   document.querySelectorAll('.page-section').forEach((s,i) => s.classList.toggle('active', i===idx));
   window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ===== Node Panel Switch (Tab3) =====
+function switchNodePanel(nodeKey, navEl) {
+  // Hide all panels
+  document.querySelectorAll('#sec3 .node-panel').forEach(p => p.style.display = 'none');
+  // Show target
+  const target = document.getElementById('panel-' + nodeKey);
+  if (target) target.style.display = 'block';
+  // Update nav active state
+  document.querySelectorAll('#sec3 .node-nav-item').forEach(el => el.classList.remove('active'));
+  if (navEl) navEl.classList.add('active');
 }
 
 // ===== Canvas Node Title Hover Edit =====
@@ -2064,13 +2344,12 @@ function addCondRow() {
   if (!builder) return;
   const row = document.createElement('div');
   row.className = 'cond-row';
-  row.innerHTML = `<div class="cond-chip var-chip" contenteditable="true">${变量}</div>
-    <select style="padding:4px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px;background:rgba(245,158,11,0.06);color:var(--warning);font-weight:700">
-      <option>==</option><option>!=</option><option>&gt;</option><option>&gt;=</option><option>&lt;</option><option>&lt;=</option>
-      <option>contains</option><option>is_empty</option><option>is_not_empty</option>
-    </select>
-    <input class="cond-chip" placeholder="值" style="min-width:60px;border:1px solid var(--border)">
-    <div class="cond-del-btn" onclick="delCondRow(this)">×</div>`;
+  row.innerHTML = '<div class="cond-chip var-chip" contenteditable="true">${变量}</div>'
+    + '<select style="padding:4px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px;background:rgba(245,158,11,0.06);color:var(--warning);font-weight:700">'
+    + '<option>==</option><option>!=</option><option>&gt;</option><option>&gt;=</option><option>&lt;</option><option>&lt;=</option>'
+    + '<option>contains</option><option>is_empty</option><option>is_not_empty</option></select>'
+    + '<input class="cond-chip" placeholder="值" style="min-width:60px;border:1px solid var(--border)">'
+    + '<div class="cond-del-btn" onclick="delCondRow(this)">×</div>';
   builder.insertBefore(row, builder.lastElementChild);
 }
 function delCondRow(btn) {
@@ -2084,27 +2363,25 @@ function addSubGroup() {
   if (!builder) return;
   const sg = document.createElement('div');
   sg.className = 'cond-subgroup';
-  sg.innerHTML = `<div class="cond-subgroup-header">
-    <span class="cond-subgroup-label">子条件组</span>
-    <select class="config-input" style="width:auto;padding:3px 10px;font-size:11px;font-weight:600">
-      <option>满足任一 (OR)</option><option>满足全部 (AND)</option>
-    </select>
-    <span style="margin-left:auto;cursor:pointer;color:var(--text-muted);font-size:18px" onclick="if(confirm('删除后子组内的条件将被清除，确认删除？'))this.closest('.cond-subgroup').remove()">×</span>
-  </div>
-  <div class="cond-row">
-    <div class="cond-chip var-chip">${变量}</div>
-    <div class="cond-chip op-chip">==</div>
-    <div class="cond-chip">值</div>
-    <div class="cond-del-btn" onclick="delCondRow(this)">×</div>
-  </div>
-  <div class="add-link" onclick="addCondRowInSubgroup(this)">+ 添加条件</div>`;
+  sg.innerHTML = '<div class="cond-subgroup-header">'
+    + '<span class="cond-subgroup-label">子条件组</span>'
+    + '<select class="config-input" style="width:auto;padding:3px 10px;font-size:11px;font-weight:600"><option>满足任一 (OR)</option><option>满足全部 (AND)</option></select>'
+    + '<span style="margin-left:auto;cursor:pointer;color:var(--text-muted);font-size:18px" onclick="if(confirm(\'删除后子组内的条件将被清除，确认删除？\'))this.closest(\'.cond-subgroup\').remove()">×</span>'
+    + '</div>'
+    + '<div class="cond-row">'
+    + '<div class="cond-chip var-chip">${变量}</div>'
+    + '<div class="cond-chip op-chip">==</div>'
+    + '<div class="cond-chip">值</div>'
+    + '<div class="cond-del-btn" onclick="delCondRow(this)">×</div>'
+    + '</div>'
+    + '<div class="add-link" onclick="addCondRowInSubgroup(this)">+ 添加条件</div>';
   builder.insertBefore(sg, builder.lastElementChild);
 }
 function addCondRowInSubgroup(link) {
   const sg = link.closest('.cond-subgroup');
   const row = document.createElement('div');
   row.className = 'cond-row';
-  row.innerHTML = `<div class="cond-chip var-chip">${变量}</div><div class="cond-chip op-chip">==</div><input class="cond-chip" placeholder="值" style="min-width:60px;border:1px solid var(--border)"><div class="cond-del-btn" onclick="this.closest('.cond-row').remove()">×</div>`;
+  row.innerHTML = '<div class="cond-chip var-chip">${变量}</div><div class="cond-chip op-chip">==</div><input class="cond-chip" placeholder="值" style="min-width:60px;border:1px solid var(--border)"><div class="cond-del-btn" onclick="this.closest(\'.cond-row\').remove()">×</div>';
   sg.insertBefore(row, link);
 }
 

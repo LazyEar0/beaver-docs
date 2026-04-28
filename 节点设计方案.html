@@ -1543,20 +1543,22 @@ body {
     <div style="flex:1"><input class="config-node-name-input" value="开始节点" maxlength="50"><div class="config-panel-code">trigger_1</div></div>
     <button onclick="toggleNodeDesc2('triggerDesc')" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:16px;padding:4px" title="节点说明">?</button>
   </div>
-  <div class="node-desc-box" id="triggerDesc">开始节点是工作流的唯一入口，定义流程启动时传入的输入参数。下游节点通过 <code>${trigger_1.参数名}</code> 引用。对话流中额外注入 query、files、conversation_id、user_id 等内置变量。</div>
+  <div class="node-desc-box" id="triggerDesc">开始节点是工作流的唯一入口，定义流程启动时传入的输入参数。下游节点通过 <code>${trigger_1.参数名}</code> 引用。支持手动触发（默认）、定时触发（可选）、Webhook（可选）三种启动方式；对话流中额外注入 query、files、conversation_id、user_id 等内置变量。</div>
   <div class="config-section">
     <div class="config-section-title">📥 输入参数</div>
-    <div class="config-help" style="margin-bottom:10px">定义流程启动时传入的参数，下游通过 <code>${trigger_1.参数名}</code> 引用</div>
+    <div class="config-help" style="margin-bottom:10px">独立于触发方式，始终可配置。下游通过 <code>${trigger_1.参数名}</code> 引用</div>
     <div id="triggerParams">
       <div class="param-card">
-        <div class="param-card-top"><span class="param-name">orderId</span><span class="badge badge-primary">String</span></div>
-        <div class="param-ref">${trigger_1.orderId}</div>
+        <div class="param-card-top"><span class="param-name">orderId</span><span class="badge badge-primary">String</span><span style="font-size:11px;color:var(--text-muted);margin-left:4px">必填</span></div>
+        <div class="param-ref" style="margin-bottom:4px">${trigger_1.orderId}</div>
+        <div style="font-size:11px;color:var(--text-muted)">占位提示：请输入订单编号，如 ORD-2024001</div>
+        <div style="font-size:11px;color:var(--text-muted)">参数说明：用于标识本次处理的订单</div>
       </div>
     </div>
     <div class="add-link" onclick="addParam('triggerParams','trigger_1')">+ 添加输入参数</div>
   </div>
   <div class="config-advanced-toggle" onclick="toggleAdvanced('trigger')">
-    <span>▶ 定时触发配置（默认折叠）</span>
+    <span>▶ 高级配置（定时触发 / Webhook）</span>
     <span class="toggle-dot" id="dotTrigger"></span>
   </div>
   <div class="config-advanced-body" id="advBodyTrigger">
@@ -1567,6 +1569,22 @@ body {
           <option>不启用</option>
           <option>启用 Cron 定时</option>
         </select>
+      </div>
+    </div>
+    <div class="config-section">
+      <div class="config-section-title" style="font-size:11px;color:var(--text-muted)">🔗 Webhook（系统自动生成，只读）</div>
+      <div class="config-field">
+        <div class="config-label">回调 URL</div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <input class="config-input" value="https://beaver.example.com/webhook/abc123" readonly style="background:var(--surface);color:var(--text-secondary);font-family:var(--font-mono);font-size:11px;flex:1">
+          <button style="padding:5px 10px;font-size:11px;border:1px solid var(--border);border-radius:6px;background:var(--surface);cursor:pointer;color:var(--text-muted)">复制</button>
+        </div>
+        <div class="config-help">系统自动生成，供外部系统调用触发本流程</div>
+      </div>
+      <div class="config-field">
+        <div class="config-label">URL 别名 <span style="font-size:11px;color:var(--text-muted);font-weight:400">（可选）</span></div>
+        <input class="config-input" placeholder="/webhook/order-created" style="font-family:var(--font-mono);font-size:12px">
+        <div class="config-help">自定义别名路径，便于识别该 Webhook 的业务含义</div>
       </div>
     </div>
   </div>
