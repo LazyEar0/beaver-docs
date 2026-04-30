@@ -4741,14 +4741,44 @@ function cronBuilderFromExpr(expr) {
 
 // ─── Cron Popover JS ──────────────────────────────────────────────
 
-/** 获取指定字段当前选中值（chip.active 优先，否则读 custom input） */
+/** 获取指定字段当前选中值（Dow 多选特殊处理，其他字段 chip.active 优先） */
 function _cpGetVal(field) {
+  if (field === 'Dow') {
+    // Multi-select DOW: collect all active cp-dow-day chips
+    var anyChip = document.querySelector('.cp-dow-any.active');
+    if (anyChip) return '*';
+    var selected = [];
+    document.querySelectorAll('.cp-dow-day.active').forEach(function(c) {
+      selected.push(c.dataset.dow);
+    });
+    if (selected.length === 0) return '*';
+    // Sort numerically: 0(Sun),1..6
+    selected.sort(function(a,b){ return parseInt(a)-parseInt(b); });
+    return selected.join(',');
+  }
   const container = document.getElementById('cp' + field);
   if (!container) return '*';
   const activeChip = container.querySelector('.cron-chip.active');
   if (activeChip) return activeChip.dataset.val || '*';
   const customInput = document.getElementById('cp' + field + 'Custom');
   return (customInput && customInput.value.trim()) ? customInput.value.trim() : '*';
+}
+
+/** 周字段多选切换 */
+function cpDowToggle(dow, el) {
+  if (dow === 'any') {
+    // Click "不限" -> clear all day selections, activate only "not limited"
+    document.querySelectorAll('.cp-dow-day').forEach(function(c){ c.classList.remove('active'); });
+    el.classList.add('active');
+  } else {
+    // Click a specific day -> deactivate "any", toggle this day
+    document.querySelector('.cp-dow-any').classList.remove('active');
+    el.classList.toggle('active');
+    // If no day selected, fall back to "any"
+    var anySelected = document.querySelectorAll('.cp-dow-day.active').length > 0;
+    if (!anySelected) document.querySelector('.cp-dow-any').classList.add('active');
+  }
+  _cpUpdatePreview();
 }
 
 /** Update Popover preview text */
@@ -4786,7 +4816,7 @@ function _cpFillFromCron(expr) {
   if (parts.length === 6) vals = parts;
   else if (parts.length === 5) vals = ['0'].concat(parts);
   else return;
-  var fields = ['Sec', 'Min', 'Hour', 'Day', 'Month', 'Dow'];
+  var fields = ['Sec', 'Min', 'Hour', 'Day', 'Month'];
   fields.forEach(function(field, i) {
     var val = vals[i];
     var container = document.getElementById('cp' + field);
@@ -4804,6 +4834,26 @@ function _cpFillFromCron(expr) {
       customInput.value = '';
     }
   });
+  // Fill DOW field (multi-select)
+  var dowVal = vals[5];
+  document.querySelectorAll('.cp-dow-any,.cp-dow-day').forEach(function(c){ c.classList.remove('active'); });
+  if (dowVal === '*') {
+    var anyChip = document.querySelector('.cp-dow-any');
+    if (anyChip) anyChip.classList.add('active');
+  } else {
+    // Parse comma-separated day values
+    var dowNums = dowVal.split(',').map(function(v){ return v.trim(); });
+    dowNums.forEach(function(num) {
+      var chip = document.querySelector('.cp-dow-day[data-dow="' + num + '"]');
+      if (chip) chip.classList.add('active');
+    });
+    // If nothing matched, fallback to any
+    var anyActive = document.querySelectorAll('.cp-dow-day.active').length > 0;
+    if (!anyActive) {
+      var anyChip2 = document.querySelector('.cp-dow-any');
+      if (anyChip2) anyChip2.classList.add('active');
+    }
+  }
   _cpUpdatePreview();
 }
 
@@ -5093,61 +5143,71 @@ function refreshAllNextRuns(expr) {
       <span style="font-size:14px">🕐</span>
       <span id="cronPopoverPreviewText">每天 8 点 0 分 0 秒执行</span>
     </div>
+
+    <!-- 语法说明条 -->
+    <div style="font-size:11px;color:var(--text-muted);background:var(--surface-dim);border-radius:5px;padding:6px 8px;margin-bottom:10px;line-height:1.7">
+      <strong style="color:var(--text-secondary)">自定义语法：</strong>
+      单个值 <code style="background:#eee;border-radius:3px;padding:0 3px">5</code>
+      &nbsp;每隔N <code style="background:#eee;border-radius:3px;padding:0 3px">*/5</code>
+      &nbsp;范围 <code style="background:#eee;border-radius:3px;padding:0 3px">1-5</code>
+      &nbsp;范围+步长 <code style="background:#eee;border-radius:3px;padding:0 3px">1-5/2</code>
+      &nbsp;多选 <code style="background:#eee;border-radius:3px;padding:0 3px">1,3,5</code>
+      &nbsp;混合 <code style="background:#eee;border-radius:3px;padding:0 3px">1,3,10-15</code>
+    </div>
+
     <!-- 秒 -->
     <div class="cron-field-row">
-      <span class="cron-field-label">秒</span>
+      <span class="cron-field-label" title="秒字段（0-59）">秒</span>
       <div class="cron-chips" id="cpSec">
         <span class="cron-chip active" data-val="0" onclick="cpSelect('Sec',this)">整秒(0)</span>
-        <span class="cron-chip" data-val="*" onclick="cpSelect('Sec',this)">每秒(*)</span>
+        <span class="cron-chip" data-val="*" onclick="cpSelect('Sec',this)">每秒</span>
         <span class="cron-chip" data-val="*/5" onclick="cpSelect('Sec',this)">每5秒</span>
         <span class="cron-chip" data-val="*/10" onclick="cpSelect('Sec',this)">每10秒</span>
         <span class="cron-chip" data-val="*/15" onclick="cpSelect('Sec',this)">每15秒</span>
         <span class="cron-chip" data-val="*/30" onclick="cpSelect('Sec',this)">每30秒</span>
-        <span class="cron-chip" data-val="0-30" onclick="cpSelect('Sec',this)" title="周期：第0-30秒">周期 0-30</span>
-        <input class="cron-chip-custom" id="cpSecCustom" placeholder="自定义 如:0-30/5" title="支持：整数、*/n、a-b、a-b/n 等" oninput="cpCustomInput('Sec',this)" style="width:90px">
+        <input class="cron-chip-custom" id="cpSecCustom" placeholder="如 0,15,30 或 0-30/5" title="支持：单值5、每隔*/5、范围0-30、范围+步长0-30/5、多选0,15,30" oninput="cpCustomInput('Sec',this)" style="width:120px">
       </div>
     </div>
     <!-- 分 -->
     <div class="cron-field-row">
-      <span class="cron-field-label">分</span>
+      <span class="cron-field-label" title="分字段（0-59）">分</span>
       <div class="cron-chips" id="cpMin">
         <span class="cron-chip active" data-val="0" onclick="cpSelect('Min',this)">整分(0)</span>
-        <span class="cron-chip" data-val="*" onclick="cpSelect('Min',this)">每分(*)</span>
+        <span class="cron-chip" data-val="*" onclick="cpSelect('Min',this)">每分</span>
         <span class="cron-chip" data-val="*/5" onclick="cpSelect('Min',this)">每5分</span>
         <span class="cron-chip" data-val="*/15" onclick="cpSelect('Min',this)">每15分</span>
         <span class="cron-chip" data-val="*/30" onclick="cpSelect('Min',this)">每30分</span>
         <span class="cron-chip" data-val="30" onclick="cpSelect('Min',this)">30分</span>
-        <span class="cron-chip" data-val="0-30" onclick="cpSelect('Min',this)" title="周期：第0-30分">周期 0-30</span>
-        <input class="cron-chip-custom" id="cpMinCustom" placeholder="自定义 如:10-50/5" title="支持：整数、*/n、a-b、a-b/n 等" oninput="cpCustomInput('Min',this)" style="width:90px">
+        <input class="cron-chip-custom" id="cpMinCustom" placeholder="如 0,30 或 10-50/10" title="支持：单值30、每隔*/5、范围10-50、范围+步长10-50/10、多选0,15,30,45" oninput="cpCustomInput('Min',this)" style="width:120px">
       </div>
     </div>
     <!-- 时 -->
     <div class="cron-field-row">
-      <span class="cron-field-label">时</span>
+      <span class="cron-field-label" title="时字段（0-23）">时</span>
       <div class="cron-chips" id="cpHour">
-        <span class="cron-chip" data-val="*">每小时</span>
+        <span class="cron-chip" data-val="*" onclick="cpSelect('Hour',this)">每小时</span>
         <span class="cron-chip active" data-val="8" onclick="cpSelect('Hour',this)">8时</span>
         <span class="cron-chip" data-val="9" onclick="cpSelect('Hour',this)">9时</span>
         <span class="cron-chip" data-val="12" onclick="cpSelect('Hour',this)">12时</span>
         <span class="cron-chip" data-val="18" onclick="cpSelect('Hour',this)">18时</span>
         <span class="cron-chip" data-val="0" onclick="cpSelect('Hour',this)">凌晨(0)</span>
-        <input class="cron-chip-custom" id="cpHourCustom" type="number" min="0" max="23" placeholder="0-23" title="自定义时" oninput="cpCustomInput('Hour',this)">
+        <input class="cron-chip-custom" id="cpHourCustom" placeholder="如 8,12,18" title="支持：单值8、范围8-18、多选8,12,18" oninput="cpCustomInput('Hour',this)" style="width:90px">
       </div>
     </div>
     <!-- 日 -->
     <div class="cron-field-row">
-      <span class="cron-field-label">日</span>
+      <span class="cron-field-label" title="日字段（1-31，L=末日）">日</span>
       <div class="cron-chips" id="cpDay">
         <span class="cron-chip active" data-val="*" onclick="cpSelect('Day',this)">每天</span>
         <span class="cron-chip" data-val="1" onclick="cpSelect('Day',this)">1日</span>
         <span class="cron-chip" data-val="15" onclick="cpSelect('Day',this)">15日</span>
         <span class="cron-chip" data-val="L" onclick="cpSelect('Day',this)">末日</span>
-        <input class="cron-chip-custom" id="cpDayCustom" placeholder="1-31" title="自定义日" oninput="cpCustomInput('Day',this)" style="width:52px">
+        <input class="cron-chip-custom" id="cpDayCustom" placeholder="如 1,2,4,10-15" title="支持：单值1、多选1,2,4、范围10-15、混合1,2,4,10-15" oninput="cpCustomInput('Day',this)" style="width:120px">
       </div>
     </div>
     <!-- 月 -->
     <div class="cron-field-row">
-      <span class="cron-field-label">月</span>
+      <span class="cron-field-label" title="月字段（1-12）">月</span>
       <div class="cron-chips" id="cpMonth">
         <span class="cron-chip active" data-val="*" onclick="cpSelect('Month',this)">每月</span>
         <span class="cron-chip" data-val="1" onclick="cpSelect('Month',this)">1月</span>
@@ -5155,22 +5215,24 @@ function refreshAllNextRuns(expr) {
         <span class="cron-chip" data-val="6" onclick="cpSelect('Month',this)">6月</span>
         <span class="cron-chip" data-val="12" onclick="cpSelect('Month',this)">12月</span>
         <span class="cron-chip" data-val="1,4,7,10" onclick="cpSelect('Month',this)">每季度</span>
-        <input class="cron-chip-custom" id="cpMonthCustom" placeholder="1-12" title="自定义月" oninput="cpCustomInput('Month',this)" style="width:52px">
+        <input class="cron-chip-custom" id="cpMonthCustom" placeholder="如 1,3,6,9,12" title="支持：单值3、范围3-6、多选1,3,6,9,12" oninput="cpCustomInput('Month',this)" style="width:110px">
       </div>
     </div>
-    <!-- 周 -->
+    <!-- 周（多选） -->
     <div class="cron-field-row" style="margin-bottom:0">
-      <span class="cron-field-label">周</span>
-      <div class="cron-chips" id="cpDow">
-        <span class="cron-chip active" data-val="*" onclick="cpSelect('Dow',this)">不限</span>
-        <span class="cron-chip" data-val="1-5" onclick="cpSelect('Dow',this)">周一至五</span>
-        <span class="cron-chip" data-val="1" onclick="cpSelect('Dow',this)">周一</span>
-        <span class="cron-chip" data-val="2" onclick="cpSelect('Dow',this)">周二</span>
-        <span class="cron-chip" data-val="3" onclick="cpSelect('Dow',this)">周三</span>
-        <span class="cron-chip" data-val="4" onclick="cpSelect('Dow',this)">周四</span>
-        <span class="cron-chip" data-val="5" onclick="cpSelect('Dow',this)">周五</span>
-        <span class="cron-chip" data-val="6" onclick="cpSelect('Dow',this)">周六</span>
-        <span class="cron-chip" data-val="0" onclick="cpSelect('Dow',this)">周日</span>
+      <span class="cron-field-label" title="周字段（可多选，0/7=周日）">周</span>
+      <div>
+        <div style="font-size:10px;color:var(--text-muted);margin-bottom:5px">可多选，点选高亮即选中</div>
+        <div class="cron-chips" id="cpDow">
+          <span class="cron-chip cp-dow-any active" data-dow="any" onclick="cpDowToggle('any',this)">不限(*)</span>
+          <span class="cron-chip cp-dow-day" data-dow="1" onclick="cpDowToggle('1',this)">周一</span>
+          <span class="cron-chip cp-dow-day" data-dow="2" onclick="cpDowToggle('2',this)">周二</span>
+          <span class="cron-chip cp-dow-day" data-dow="3" onclick="cpDowToggle('3',this)">周三</span>
+          <span class="cron-chip cp-dow-day" data-dow="4" onclick="cpDowToggle('4',this)">周四</span>
+          <span class="cron-chip cp-dow-day" data-dow="5" onclick="cpDowToggle('5',this)">周五</span>
+          <span class="cron-chip cp-dow-day" data-dow="6" onclick="cpDowToggle('6',this)">周六</span>
+          <span class="cron-chip cp-dow-day" data-dow="0" onclick="cpDowToggle('0',this)">周日</span>
+        </div>
       </div>
     </div>
   </div>
