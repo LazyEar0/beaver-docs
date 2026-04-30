@@ -226,13 +226,46 @@ body {
 .config-node-name-input:hover { border-bottom-color: var(--border-strong); }
 .config-node-name-input:focus { border-bottom-color: var(--primary); }
 
-/* AI 引导按钮（右上角）*/
+/* 节点编码标签（配置面板内，可点击编辑）*/
+.config-panel-code {
+  font-size: 11px; color: var(--text-muted); font-family: var(--font-mono);
+  display: inline-flex; align-items: center; gap: 4px;
+  cursor: pointer; border-radius: 4px;
+  padding: 1px 4px; margin: 0 -4px;
+  border: 1px solid transparent;
+  transition: var(--transition);
+  user-select: none;
+}
+.config-panel-code:hover { background: var(--surface-dim); border-color: var(--border-strong); color: var(--text); }
+.config-panel-code.editing {
+  background: var(--surface);
+  border-color: var(--primary);
+  color: var(--text);
+  cursor: text;
+}
+.config-panel-code.code-readonly {
+  cursor: not-allowed; opacity: 0.45; pointer-events: none;
+}
+.config-panel-code-input {
+  font-family: var(--font-mono); font-size: 11px; color: var(--text);
+  background: transparent; border: none; outline: none;
+  min-width: 60px; max-width: 180px;
+  padding: 0;
+}
+.config-panel-code.code-error { border-color: var(--danger) !important; background: rgba(220,38,38,0.04); }
+.config-code-error-tip {
+  font-size: 10px; color: var(--danger);
+  margin-top: 2px; display: none;
+}
+.config-code-error-tip.show { display: block; }
+
+/* AI 引导按钮（头部右侧）*/
 .ai-guide-recall-btn {
-  position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
   padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600;
   background: var(--primary-light); color: var(--primary);
   border: 1px solid rgba(103,80,164,0.2);
   cursor: pointer; transition: var(--transition); white-space: nowrap;
+  flex-shrink: 0;
 }
 .ai-guide-recall-btn:hover { background: rgba(103,80,164,0.15); }
 
@@ -278,6 +311,46 @@ body {
 }
 .toggle-dot.show { display: inline-block; }
 
+/* ===== 定时触发配置器 ===== */
+.sched-mode-tabs { display: flex; gap: 6px; margin-bottom: 12px; }
+.sched-mode-btn {
+  padding: 4px 12px; border-radius: 20px; font-size: 11px; cursor: pointer;
+  border: 1px solid var(--border); background: none; color: var(--text-secondary);
+  transition: var(--transition); user-select: none;
+}
+.sched-mode-btn:hover { border-color: var(--primary); color: var(--primary); }
+.sched-mode-btn.active {
+  border-color: var(--primary); background: rgba(103,80,164,0.1); color: var(--primary); font-weight: 500;
+}
+.sched-week-chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+.sched-week-chip {
+  padding: 3px 8px; border-radius: 20px; font-size: 11px; cursor: pointer;
+  border: 1px solid var(--border); color: var(--text-secondary);
+  transition: var(--transition); user-select: none;
+}
+.sched-week-chip:hover { border-color: var(--primary); color: var(--primary); }
+.sched-week-chip.active {
+  border-color: var(--primary); background: rgba(103,80,164,0.1); color: var(--primary); font-weight: 500;
+}
+.cron-presets { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.cron-preset-chip {
+  padding: 3px 10px; border-radius: 20px; font-size: 11px; cursor: pointer;
+  border: 1px solid var(--border); background: none; color: var(--text-secondary);
+  transition: var(--transition); user-select: none;
+}
+.cron-preset-chip:hover { border-color: var(--primary); color: var(--primary); background: rgba(103,80,164,0.04); }
+.cron-preset-chip.active {
+  border-color: var(--primary); background: rgba(103,80,164,0.1); color: var(--primary);
+}
+.cron-description {
+  display: flex; align-items: center; gap: 6px;
+  margin-top: 8px; padding: 8px 10px;
+  background: rgba(103,80,164,0.04);
+  border: 1px solid var(--border); border-left: 3px solid var(--primary);
+  border-radius: 6px; font-size: 11px; color: var(--text-secondary); line-height: 1.4;
+}
+.cron-description-icon { font-style: normal; font-size: 13px; flex-shrink: 0; }
+
 /* Badges */
 .badge {
   display: inline-block; padding: 2px 8px;
@@ -300,12 +373,239 @@ body {
 .param-name { font-size: 13px; font-weight: 600; color: var(--text); font-family: var(--font-mono); }
 .param-ref  { font-size: 11px; color: var(--text-muted); font-family: var(--font-mono); }
 
+/* ===== trigger param card ===== */
+.tparam-card {
+  border: 1px solid var(--border); border-radius: 8px;
+  padding: 10px 13px; margin-bottom: 8px;
+  transition: var(--transition); background: var(--surface);
+}
+.tparam-card:hover { border-color: var(--primary); }
+.tparam-card-new { border-color: rgba(103,80,164,0.35); border-style: dashed; background: rgba(103,80,164,0.02); }
+@keyframes fadeSlideIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
+.tparam-card-header {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;
+}
+.tparam-index {
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--primary); color: #fff;
+  font-size: 10px; font-weight: 700;
+  display: inline-flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.tparam-label { font-size: 13px; font-weight: 600; color: var(--text); }
+.tparam-varname { font-size: 11px; font-weight: 400; color: var(--text-muted); font-family: var(--font-mono); margin-left: 2px; }
+.tparam-required-tag {
+  font-size: 10px; color: #e53935; border: 1px solid #e53935;
+  border-radius: 3px; padding: 0 4px; line-height: 16px;
+}
+.tparam-ref { font-size: 11px; color: var(--text-muted); font-family: var(--font-mono); padding-left: 24px; }
+.tparam-row {
+  display: flex; gap: 10px; margin-bottom: 8px;
+}
+.tparam-field {
+  flex: 1; display: flex; flex-direction: column; gap: 3px;
+}
+.tparam-label-text {
+  font-size: 11px; color: var(--text-secondary); font-weight: 500;
+}
+
 .add-link {
   font-size: 12px; color: var(--primary); font-weight: 600;
   cursor: pointer; padding: 5px 0;
   display: inline-flex; align-items: center; gap: 4px;
 }
 .add-link:hover { text-decoration: underline; }
+
+/* ===== 结构定义区域 ===== */
+.tparam-schema-row {
+  display: none;
+  margin-top: 2px; margin-bottom: 8px;
+  padding: 8px 10px;
+  background: rgba(103,80,164,0.03);
+  border: 1px dashed rgba(103,80,164,0.25);
+  border-radius: 6px;
+  flex-direction: column; gap: 6px;
+}
+.tparam-schema-row.visible { display: flex; }
+.tparam-schema-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+}
+.tparam-schema-label { font-size: 11px; color: var(--text-secondary); font-weight: 500; }
+.tparam-schema-summary-text {
+  font-size: 11px; color: var(--text-muted); font-family: var(--font-mono); flex: 1;
+}
+.tparam-schema-btn {
+  font-size: 11px; padding: 3px 10px;
+  border: 1px solid var(--primary); border-radius: 5px;
+  background: none; color: var(--primary); cursor: pointer; white-space: nowrap;
+  transition: var(--transition);
+}
+.tparam-schema-btn:hover { background: rgba(103,80,164,0.07); }
+/* 字段 tag 列表 */
+.tparam-schema-fields { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 2px; }
+.tparam-schema-field-tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 7px; border-radius: 4px;
+  background: rgba(103,80,164,0.07); border: 1px solid rgba(103,80,164,0.15);
+  font-size: 11px; font-family: var(--font-mono);
+  position: relative; cursor: default;
+  transition: background 0.15s, border-color 0.15s;
+}
+.tparam-schema-field-tag:hover {
+  background: rgba(103,80,164,0.13); border-color: rgba(103,80,164,0.35);
+}
+.tparam-schema-field-tag .tag-name { color: var(--text); font-weight: 600; }
+.tparam-schema-field-tag .tag-type {
+  color: var(--text-muted); font-weight: 400;
+  padding-left: 3px; border-left: 1px solid rgba(103,80,164,0.2);
+}
+.tparam-schema-field-tag .tag-del {
+  display: none; align-items: center; justify-content: center;
+  width: 13px; height: 13px; border-radius: 50%;
+  background: rgba(103,80,164,0.18); border: none; cursor: pointer;
+  font-size: 10px; line-height: 1; color: var(--text-muted);
+  padding: 0; margin-left: 1px;
+  transition: background 0.12s, color 0.12s;
+}
+.tparam-schema-field-tag:hover .tag-del { display: inline-flex; }
+.tparam-schema-field-tag .tag-del:hover { background: #e53935; color: #fff; }
+.tparam-schema-field-tag.tag-removing {
+  opacity: 0; transform: scale(0.85);
+  transition: opacity 0.18s, transform 0.18s;
+}
+.tparam-schema-field-tag.tag-child {
+  background: rgba(103,80,164,0.03); border-style: dashed;
+  margin-left: 8px;
+}
+.tparam-schema-field-tag.tag-child .tag-parent {
+  color: rgba(103,80,164,0.5); font-weight: 400;
+}
+.tparam-schema-more {
+  font-size: 11px; color: var(--text-muted); padding: 2px 4px;
+}
+
+/* ===== 结构定义弹窗 ===== */
+.schema-modal-overlay {
+  display: none; position: fixed; inset: 0; z-index: 9998;
+  background: rgba(0,0,0,0.28); align-items: center; justify-content: center;
+}
+.schema-modal-overlay.open { display: flex; }
+
+/* ===== Cron 可视化构建器 Popover ===== */
+.cron-popover-overlay {
+  display: none; position: fixed; inset: 0; z-index: 9997;
+}
+.cron-popover-overlay.open { display: block; }
+.cron-popover {
+  position: fixed; background: #fff; border-radius: 12px; width: 420px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18); border: 1px solid var(--border);
+  overflow: hidden; z-index: 9998;
+  display: flex; flex-direction: column; max-height: 90vh;
+}
+.cron-popover-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 16px 10px; border-bottom: 1px solid var(--border);
+  background: rgba(103,80,164,0.04); flex-shrink: 0;
+}
+.cron-popover-title { font-size: 13px; font-weight: 600; color: var(--text); }
+.cron-popover-body { padding: 14px 16px; overflow-y: auto; flex: 1; }
+.cron-field-row {
+  display: grid; grid-template-columns: 28px 1fr; gap: 6px 10px;
+  align-items: start; margin-bottom: 10px;
+}
+.cron-field-label {
+  font-size: 11px; font-weight: 600; color: var(--text-secondary);
+  padding-top: 4px; text-align: center;
+  background: rgba(103,80,164,0.08); border-radius: 4px; line-height: 22px;
+}
+.cron-chips {
+  display: flex; flex-wrap: wrap; gap: 5px;
+}
+.cron-chip {
+  font-size: 11px; padding: 2px 8px; border-radius: 12px;
+  border: 1px solid var(--border); background: var(--surface);
+  color: var(--text-secondary); cursor: pointer; line-height: 18px;
+  transition: all 0.15s;
+}
+.cron-chip:hover { border-color: var(--primary); color: var(--primary); background: rgba(103,80,164,0.05); }
+.cron-chip.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+.cron-chip-custom {
+  font-size: 11px; padding: 2px 6px; border-radius: 4px;
+  border: 1px solid var(--border); background: var(--surface); color: var(--text);
+  width: 60px; outline: none; font-family: var(--font-mono);
+}
+.cron-chip-custom:focus { border-color: var(--primary); }
+.cron-popover-preview {
+  margin: 0 0 12px;
+  background: rgba(103,80,164,0.05); border-radius: 6px;
+  padding: 7px 10px; font-size: 12px; color: var(--primary); font-weight: 500;
+  display: flex; align-items: center; gap: 6px; min-height: 32px;
+}
+.cron-popover-footer {
+  display: flex; justify-content: flex-end; gap: 8px;
+  padding: 10px 16px; border-top: 1px solid var(--border); flex-shrink: 0;
+}
+.schema-modal {
+  background: #fff; border-radius: 12px; width: 500px; max-height: 600px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18); overflow: hidden;
+  display: flex; flex-direction: column;
+}
+.schema-modal-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px 12px; border-bottom: 1px solid var(--border); flex-shrink: 0;
+}
+.schema-modal-title { font-size: 15px; font-weight: 700; color: var(--text); }
+.schema-modal-body { padding: 16px 20px; overflow-y: auto; flex: 1; }
+.schema-modal-footer {
+  display: flex; justify-content: flex-end; gap: 8px;
+  padding: 12px 20px; border-top: 1px solid var(--border); flex-shrink: 0;
+}
+.schema-field-row {
+  display: flex; align-items: flex-start; gap: 8px; margin-bottom: 6px;
+}
+.schema-field-row-inner {
+  display: flex; align-items: center; gap: 8px; flex: 1;
+}
+.schema-field-children {
+  display: none; margin-top: 4px; margin-bottom: 4px;
+  padding: 6px 8px;
+  background: rgba(103,80,164,0.03);
+  border-left: 2px solid rgba(103,80,164,0.25);
+  border-radius: 0 5px 5px 0;
+}
+.schema-field-children.open { display: block; }
+.schema-field-child-row {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 5px;
+}
+.schema-field-child-row:last-child { margin-bottom: 0; }
+.schema-expand-btn {
+  background: none; border: 1px solid rgba(103,80,164,0.35); border-radius: 4px;
+  width: 20px; height: 20px; cursor: pointer; color: var(--primary);
+  font-size: 13px; line-height: 1; padding: 0; flex-shrink: 0;
+  display: none; /* 默认隐藏，选 Object 后显示 */
+  align-items: center; justify-content: center;
+  transition: var(--transition);
+}
+.schema-expand-btn.show { display: inline-flex; }
+.schema-expand-btn.expanded { background: var(--primary); color: #fff; border-color: var(--primary); }
+.schema-nest-hint {
+  font-size: 10px; color: var(--text-muted); margin-left: 2px; white-space: nowrap;
+}
+.schema-field-name {
+  flex: 1; padding: 5px 8px; border: 1px solid var(--border); border-radius: 5px;
+  font-size: 12px; font-family: var(--font-mono); outline: none;
+}
+.schema-field-name:focus { border-color: var(--primary); }
+.schema-field-type {
+  padding: 5px 6px; border: 1px solid var(--border); border-radius: 5px;
+  font-size: 12px; outline: none; background: var(--surface);
+}
+.schema-field-type:focus { border-color: var(--primary); }
+.schema-field-del {
+  background: none; border: none; cursor: pointer;
+  color: var(--text-muted); font-size: 16px; line-height: 1; padding: 2px 4px;
+}
+.schema-field-del:hover { color: var(--danger); }
 
 /* ========== AI Guide Bar ========== */
 .ai-guide-bar {
@@ -735,7 +1035,148 @@ body {
     </div>
   </div>
 
-  <!-- End -->
+</div><!-- nodes-row end -->
+</div><!-- canvas-bg end -->
+
+<!-- 开始节点场景示例 -->
+<div class="category-label" style="margin-top:24px">开始节点 — 画布卡片摘要场景示例</div>
+<p class="section-desc" style="margin-top:-4px">根据配置状态，卡片摘要自动变化：优先展示定时触发信息，其次展示输入参数数量，二者均无时显示「手动触发」。</p>
+<div class="canvas-bg">
+<div class="nodes-row" style="flex-wrap:wrap;gap:16px 12px">
+
+  <!-- 场景 1：无任何配置 -->
+  <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+    <div class="node-wrap">
+      <div class="canvas-node">
+        <div class="canvas-node-header">
+          <div class="canvas-node-icon" style="background:var(--node-trigger);color:var(--node-trigger-fg)">⚡</div>
+          <div class="canvas-node-title">开始节点</div>
+        </div>
+        <div class="canvas-node-body">
+          <div class="node-code-tag">trigger_1</div>
+          <div class="node-summary-text">手动触发</div>
+        </div>
+        <div class="port port-out"></div>
+      </div>
+    </div>
+    <div style="font-size:11px;color:var(--text-muted);text-align:center">无配置<br>默认手动触发</div>
+  </div>
+
+  <!-- 场景 2：有输入参数 -->
+  <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+    <div class="node-wrap">
+      <div class="canvas-node">
+        <div class="canvas-node-header">
+          <div class="canvas-node-icon" style="background:var(--node-trigger);color:var(--node-trigger-fg)">⚡</div>
+          <div class="canvas-node-title">开始节点</div>
+        </div>
+        <div class="canvas-node-body">
+          <div class="node-code-tag">trigger_1</div>
+          <div class="node-summary-text">接收 3 个输入参数</div>
+        </div>
+        <div class="port port-out"></div>
+      </div>
+    </div>
+    <div style="font-size:11px;color:var(--text-muted);text-align:center">有输入参数<br>无定时</div>
+  </div>
+
+  <!-- 场景 3：只有定时触发 -->
+  <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+    <div class="node-wrap">
+      <div class="canvas-node">
+        <div class="canvas-node-header">
+          <div class="canvas-node-icon" style="background:var(--node-trigger);color:var(--node-trigger-fg)">⚡</div>
+          <div class="canvas-node-title">开始节点</div>
+        </div>
+        <div class="canvas-node-body">
+          <div class="node-code-tag">trigger_1</div>
+          <div class="node-summary-text">每天 08:30 自动触发</div>
+        </div>
+        <div class="port port-out"></div>
+      </div>
+    </div>
+    <div style="font-size:11px;color:var(--text-muted);text-align:center">定时触发<br>无输入参数</div>
+  </div>
+
+  <!-- 场景 4：定时 + 有输入参数 -->
+  <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+    <div class="node-wrap">
+      <div class="canvas-node">
+        <div class="canvas-node-header">
+          <div class="canvas-node-icon" style="background:var(--node-trigger);color:var(--node-trigger-fg)">⚡</div>
+          <div class="canvas-node-title">开始节点</div>
+        </div>
+        <div class="canvas-node-body">
+          <div class="node-code-tag">trigger_1</div>
+          <div class="node-summary-text">每周一 09:00 自动触发</div>
+        </div>
+        <div class="port port-out"></div>
+      </div>
+    </div>
+    <div style="font-size:11px;color:var(--text-muted);text-align:center">定时触发<br>有输入参数</div>
+  </div>
+
+  <!-- 场景 5：每月定时 -->
+  <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+    <div class="node-wrap">
+      <div class="canvas-node">
+        <div class="canvas-node-header">
+          <div class="canvas-node-icon" style="background:var(--node-trigger);color:var(--node-trigger-fg)">⚡</div>
+          <div class="canvas-node-title">开始节点</div>
+        </div>
+        <div class="canvas-node-body">
+          <div class="node-code-tag">trigger_1</div>
+          <div class="node-summary-text">每月 1 日 00:00 自动触发</div>
+        </div>
+        <div class="port port-out"></div>
+      </div>
+    </div>
+    <div style="font-size:11px;color:var(--text-muted);text-align:center">每月定时<br>无输入参数</div>
+  </div>
+
+  <!-- 场景 6：有输入参数（单个）-->
+  <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+    <div class="node-wrap">
+      <div class="canvas-node">
+        <div class="canvas-node-header">
+          <div class="canvas-node-icon" style="background:var(--node-trigger);color:var(--node-trigger-fg)">⚡</div>
+          <div class="canvas-node-title">开始节点</div>
+        </div>
+        <div class="canvas-node-body">
+          <div class="node-code-tag">trigger_1</div>
+          <div class="node-summary-text">接收 1 个输入参数</div>
+        </div>
+        <div class="port port-out"></div>
+      </div>
+    </div>
+    <div style="font-size:11px;color:var(--text-muted);text-align:center">有输入参数（单个）<br>手动触发</div>
+  </div>
+
+  <!-- 场景 7：有校验错误 -->
+  <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+    <div class="node-wrap">
+      <div class="canvas-node" style="position:relative">
+        <div style="position:absolute;top:-6px;right:-6px;background:#e53935;color:#fff;font-size:10px;font-weight:700;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:2">1</div>
+        <div class="canvas-node-header">
+          <div class="canvas-node-icon" style="background:var(--node-trigger);color:var(--node-trigger-fg)">⚡</div>
+          <div class="canvas-node-title">开始节点</div>
+        </div>
+        <div class="canvas-node-body">
+          <div class="node-code-tag">trigger_1</div>
+          <div class="node-summary-text" style="color:#e53935">接收 2 个输入参数</div>
+        </div>
+        <div class="port port-out"></div>
+      </div>
+    </div>
+    <div style="font-size:11px;color:var(--text-muted);text-align:center">有校验错误<br>（定时未配置完整）</div>
+  </div>
+
+</div><!-- nodes-row end -->
+</div><!-- canvas-bg end -->
+
+<div class="canvas-bg" style="margin-top:0">
+<div class="nodes-row">
+
   <div class="node-wrap">
     <div class="canvas-node">
       <div class="canvas-node-header">
@@ -1012,6 +1453,93 @@ body {
 @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
 </style>
 
+<div class="category-label">节点编码修改交互说明（配置面板头部内，点击编码即可内联编辑）</div>
+<p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px">节点编码显示在配置面板头部、节点名称正下方，仅在草稿状态下可修改；调试进行中或已发布版本为只读。</p>
+<div style="display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start;margin-bottom:24px">
+
+  <!-- 默认状态 -->
+  <div>
+    <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">默认状态</div>
+    <div class="config-panel" style="min-width:220px;max-width:260px;pointer-events:none">
+      <div class="config-panel-header" style="padding:10px 14px">
+        <div class="config-panel-icon" style="background:var(--node-integration);color:var(--node-integration-fg);width:28px;height:28px;font-size:14px">🌐</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:700;color:var(--text)">HTTP 请求</div>
+          <div class="config-panel-code" style="cursor:pointer">http_1 <span style="font-size:9px;opacity:0.5">✏️</span></div>
+        </div>
+      </div>
+    </div>
+    <div style="font-size:11px;color:var(--text-muted);margin-top:6px">编码为可点击的标签，看起来较暗</div>
+  </div>
+
+  <!-- Hover 状态 -->
+  <div>
+    <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">Hover 状态</div>
+    <div class="config-panel" style="min-width:220px;max-width:260px;pointer-events:none">
+      <div class="config-panel-header" style="padding:10px 14px">
+        <div class="config-panel-icon" style="background:var(--node-integration);color:var(--node-integration-fg);width:28px;height:28px;font-size:14px">🌐</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:700;color:var(--text)">HTTP 请求</div>
+          <div class="config-panel-code" style="background:var(--surface-dim);border-color:var(--border-strong);color:var(--text);cursor:pointer">http_1 <span style="font-size:9px;opacity:0.5">✏️</span></div>
+        </div>
+      </div>
+    </div>
+    <div style="font-size:11px;color:var(--text-muted);margin-top:6px">背景加深，边框出现，提示可点击</div>
+  </div>
+
+  <!-- 编辑中 -->
+  <div>
+    <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">编辑中</div>
+    <div class="config-panel" style="min-width:220px;max-width:260px;pointer-events:none">
+      <div class="config-panel-header" style="padding:10px 14px">
+        <div class="config-panel-icon" style="background:var(--node-integration);color:var(--node-integration-fg);width:28px;height:28px;font-size:14px">🌐</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:700;color:var(--text)">HTTP 请求</div>
+          <div class="config-panel-code editing" style="gap:0">
+            <span style="font-family:var(--font-mono);font-size:11px">order_query<span style="display:inline-block;width:1px;height:11px;background:var(--primary);margin-left:1px;animation:blink 1s step-end infinite;vertical-align:middle"></span></span>
+          </div>
+          <div style="font-size:10px;color:var(--text-muted);margin-top:2px">Enter 确认·Esc 取消</div>
+        </div>
+      </div>
+    </div>
+    <div style="font-size:11px;color:var(--text-muted);margin-top:6px">编码变为内联输入框，主色边框</div>
+  </div>
+
+  <!-- 校验错误状态 -->
+  <div>
+    <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">校验错误</div>
+    <div class="config-panel" style="min-width:220px;max-width:260px;pointer-events:none">
+      <div class="config-panel-header" style="padding:10px 14px">
+        <div class="config-panel-icon" style="background:var(--node-integration);color:var(--node-integration-fg);width:28px;height:28px;font-size:14px">🌐</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:700;color:var(--text)">HTTP 请求</div>
+          <div class="config-panel-code code-error editing" style="gap:0">
+            <span style="font-family:var(--font-mono);font-size:11px">http 1<span style="display:inline-block;width:1px;height:11px;background:var(--danger);margin-left:1px;animation:blink 1s step-end infinite;vertical-align:middle"></span></span>
+          </div>
+          <div style="font-size:10px;color:var(--danger);margin-top:2px">只允许英文、数字、下划线</div>
+        </div>
+      </div>
+    </div>
+    <div style="font-size:11px;color:var(--text-muted);margin-top:6px">含空格/特殊字符时边框变红+错误提示</div>
+  </div>
+
+  <!-- 只读状态 -->
+  <div>
+    <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">只读（已发布 / 调试中）</div>
+    <div class="config-panel" style="min-width:220px;max-width:260px;pointer-events:none">
+      <div class="config-panel-header" style="padding:10px 14px">
+        <div class="config-panel-icon" style="background:var(--node-integration);color:var(--node-integration-fg);width:28px;height:28px;font-size:14px">🌐</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:700;color:var(--text)">HTTP 请求</div>
+          <div class="config-panel-code code-readonly" style="pointer-events:none">http_1</div>
+        </div>
+      </div>
+    </div>
+    <div style="font-size:11px;color:var(--text-muted);margin-top:6px">编码置灰且不可点击，鼠标泡泡说明原因</div>
+  </div>
+
+</div>
+
 <div class="category-label">错误状态与选中态</div>
 <div class="canvas-bg">
 <div class="nodes-row">
@@ -1082,7 +1610,7 @@ body {
 <!-- ====== TAB 1: Connection System ====== -->
 <div class="page-section" id="sec1">
 <h2 class="section-title">连线与端口系统</h2>
-<p class="section-desc">节点通过端口和连线实现流程编排。不同节点类型有不同的端口布局和连线语义。<br>异常分支在节点高级配置中开启后，节点右侧增加橙色异常出口端口。</p>
+<p class="section-desc">节点通过端口和连线实现流程编排。不同节点类型有不同的端口布局和连线语义。</p>
 
 <div class="category-label">端口布局规则</div>
 <table class="spec-table">
@@ -1090,10 +1618,10 @@ body {
 <tbody>
 <tr><td>⚡ 开始节点</td><td>无</td><td>1 个</td><td>—</td></tr>
 <tr><td>🏁 结束节点</td><td>1 个</td><td>无</td><td>—</td></tr>
-<tr><td>🔀 IF 条件</td><td>1 个</td><td>2 个（TRUE绿/FALSE红）</td><td>开启异常分支后：+1 异常出口（橙色虚线）</td></tr>
-<tr><td>🔃 Switch</td><td>1 个</td><td>N 个（最多50，各带分支名）</td><td>开启异常分支后：+1 异常出口（橙色虚线）</td></tr>
-<tr><td>🔄 循环</td><td>1 个</td><td>完成 + 中断</td><td>底部：循环体端口（蓝色）；开启异常分支后：+1 异常出口（橙色虚线）</td></tr>
-<tr><td>其余节点</td><td>1 个</td><td>1 个</td><td>开启异常分支后：+1 异常出口（橙色虚线）</td></tr>
+<tr><td>🔀 IF 条件</td><td>1 个</td><td>2 个（TRUE绿/FALSE红）</td><td>—</td></tr>
+<tr><td>🔃 Switch</td><td>1 个</td><td>N 个（最多50，各带分支名）</td><td>—</td></tr>
+<tr><td>🔄 循环</td><td>1 个</td><td>完成 + 中断</td><td>底部：循环体端口（蓝色）</td></tr>
+<tr><td>延迟 / 赋值 / 输出 / 代码 / HTTP / MQ / 工作流 等</td><td>1 个</td><td>1 个</td><td>—</td></tr>
 </tbody>
 </table>
 
@@ -1105,7 +1633,6 @@ body {
 <tr><td>TRUE 分支</td><td><span class="line-demo" style="background:var(--success)"></span> 实线 绿色 + 标签</td><td>IF 条件成立时的分支路径</td></tr>
 <tr><td>FALSE 分支</td><td><span class="line-demo" style="background:var(--danger)"></span> 实线 红色 + 标签</td><td>IF 条件不成立时的分支路径</td></tr>
 <tr><td>Switch 分支</td><td><span class="line-demo" style="background:var(--primary)"></span> 实线 紫色 + 分支名标签</td><td>Switch 每个分支的路径</td></tr>
-<tr><td>异常连线</td><td><span class="line-demo-dashed" style="border-color:var(--warning)"></span> 虚线 橙色</td><td>节点异常时流向异常处理分支；不需要异常策略配置，所有异常适用统一的错误处理节点</td></tr>
 <tr><td>循环体连线</td><td><span class="line-demo" style="background:var(--info)"></span> 实线 蓝色</td><td>循环节点底部端口到循环体节点的连线</td></tr>
 </tbody>
 </table>
@@ -1133,58 +1660,7 @@ body {
 </div>
 </div>
 
-<div class="category-label">异常策略配置说明</div>
-<p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px">异常策略在节点高级配置区“错误处理”区块中配置。共有五种策略：</p>
-<table class="spec-table">
-<thead><tr><th>策略</th><th>关键字</th><th>说明</th></tr></thead>
-<tbody>
-<tr><td>终止流程</td><td><code>stop</code></td><td>立即停止整条流程，记录错误（默认）</td></tr>
-<tr><td>忽略并继续</td><td><code>continue</code></td><td>跳过异常，流程继续往下执行</td></tr>
-<tr><td>自动重试</td><td><code>retry</code></td><td>按配置的次数（默认3）和间隔（默认5秒）重试；重试耗尽后降级为：终止流程 / 忽略并继续 / 转人工处理</td></tr>
-<tr><td>转人工处理</td><td><code>manual</code></td><td>流程挂起，通知人工介入处理；需配置挂起等待超时（默认24小时）</td></tr>
-<tr><td>挂起等待回调</td><td><code>callback</code></td><td>流程挂起，等待外部系统主动回调恢复；适合异步处理场景；需配置挂起等待超时（默认24小时）</td></tr>
-</tbody>
-</table>
-<div class="canvas-bg">
-<div class="flow-demo" style="flex-wrap:wrap;gap:8px">
-  <!-- HTTP节点带异常出口 -->
-  <div class="node-wrap" style="position:relative">
-    <div class="canvas-node" style="min-width:150px">
-      <div class="canvas-node-header">
-        <div class="canvas-node-icon" style="background:var(--node-integration);color:var(--node-integration-fg)">🌐</div>
-        <div class="canvas-node-title" style="cursor:default">HTTP 请求</div>
-      </div>
-      <div class="canvas-node-body">
-        <div class="node-code-tag">http_1</div>
-        <div class="node-summary-text">GET /api/orders</div>
-      </div>
-      <div class="port port-in"></div>
-      <!-- 正常出口 -->
-      <div class="port" style="position:absolute;right:-7px;top:30%"></div>
-      <div class="port-label-r" style="top:26%;color:var(--text-muted)">成功</div>
-      <!-- 异常出口 -->
-      <div class="port port-error" style="position:absolute;right:-7px;top:65%"></div>
-      <div class="port-label-r" style="top:61%;color:var(--warning)">异常</div>
-    </div>
-  </div>
 
-  <div style="display:flex;flex-direction:column;gap:16px;margin-left:48px">
-    <div class="branch-row">
-      <div class="branch-tag normal-tag">成功</div>
-      <span style="font-size:16px;color:var(--text-muted)">→</span>
-      <div class="mini-node"><div class="mini-node-icon" style="background:var(--node-data);color:var(--node-data-fg)">📝</div>处理响应</div>
-      <div class="flow-arrow"></div>
-      <div class="mini-node"><div class="mini-node-icon" style="background:var(--node-end);color:var(--node-end-fg)">🏁</div>结束</div>
-    </div>
-    <div class="branch-row">
-      <div class="branch-tag error-tag">异常</div>
-      <span style="font-size:16px;color:var(--warning)">⤳</span>
-      <div class="mini-node error-handler"><div class="mini-node-icon" style="background:rgba(245,158,11,0.1);color:var(--warning)">⚠️</div>错误处理节点</div>
-    </div>
-  </div>
-</div>
-<div style="font-size:11px;color:var(--text-muted);margin-top:8px">异常策略在节点「高级配置」区的「错误处理」中配置</div>
-</div><!-- canvas-bg end -->
 
 <div class="canvas-bg">
 <div class="loop-demo">
@@ -1205,9 +1681,10 @@ body {
 </div>
 
 <div class="category-label">并行汇合连线示意</div>
-<p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px">多条连线汇合到同一节点时，在该节点的<strong>高级配置区</strong>设置汇合策略（仅当节点有 2 条及以上输入连线时该字段生效）。</p>
+<p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px">多条连线汇合到同一节点时，该节点左上角会自动出现<strong>汇合策略角标</strong>，点击角标可弹出策略选择弹窗（仅当节点有 2 条及以上输入连线时显示）。</p>
 <div class="merge-demo-box">
   <div class="merge-demo-canvas">
+    <!-- 画布示意：带角标的汇合节点 -->
     <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
       <div class="mini-node"><div class="mini-node-icon" style="background:var(--node-trigger);color:var(--node-trigger-fg)">⚡</div>开始</div>
       <div style="display:flex;flex-direction:column;gap:12px;margin:0 8px">
@@ -1224,32 +1701,107 @@ body {
         <span style="color:var(--text-muted);font-size:18px">⟶</span>
         <span style="color:var(--text-muted);font-size:18px">⟶</span>
       </div>
-      <div class="mini-node" style="border-color:var(--primary);background:rgba(103,80,164,0.04)">
-        <div class="mini-node-icon" style="background:var(--node-data);color:var(--node-data-fg)">📝</div>汇合节点
+      <!-- 汇合节点：带角标，点击弹出弹窗 -->
+      <div style="position:relative;display:inline-block" title="点击角标可更改汇合策略">
+        <div class="mini-node" style="border-color:var(--primary);background:rgba(103,80,164,0.04);cursor:default">
+          <div class="mini-node-icon" style="background:var(--node-data);color:var(--node-data-fg)">📝</div>汇合节点
+        </div>
+        <!-- 汇合策略角标 -->
+        <div id="mergeBadge" onclick="toggleMergeModal()" title="汇合策略：等待全部" style="position:absolute;top:-8px;left:-8px;background:var(--primary);color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:10px;cursor:pointer;user-select:none;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,0.18);transition:opacity 0.15s">全部</div>
       </div>
       <span style="color:var(--text-muted)">→</span>
       <div class="mini-node"><div class="mini-node-icon" style="background:var(--node-end);color:var(--node-end-fg)">🏁</div>结束</div>
     </div>
+    <p style="font-size:11px;color:var(--text-muted);margin-top:12px;margin-bottom:0">💡 点击节点左上角<strong>「全部」角标</strong>体验弹窗交互</p>
   </div>
-  <div class="merge-demo-config">
-    <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:10px">汇合节点 · 高级配置区（有多条入线时显示）</div>
-    <div class="config-field">
-      <div class="config-label">汇合策略</div>
-      <select class="config-input" style="font-size:12px" id="mergeSelect" onchange="updateMergeDesc()">
-        <option value="all">等待全部完成 (Wait All)</option>
-        <option value="any">任一完成即继续 (Any)</option>
-      </select>
-      <div class="config-help" id="mergeDesc">所有入线分支均到达后，该节点才开始执行。可引用所有分支的输出变量。</div>
+
+  <!-- 汇合策略弹窗（内联演示） -->
+  <div id="mergeModalOverlay" onclick="closeMergeModal(event)" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.28);align-items:center;justify-content:center">
+    <div style="background:#fff;border-radius:12px;width:340px;box-shadow:0 8px 32px rgba(0,0,0,0.18);overflow:hidden" onclick="event.stopPropagation()">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px 12px;border-bottom:1px solid var(--border)">
+        <span style="font-size:15px;font-weight:700;color:var(--text)">🔀 汇合策略</span>
+        <button onclick="closeMergeModal()" style="background:none;border:none;cursor:pointer;font-size:18px;color:var(--text-muted);line-height:1">×</button>
+      </div>
+      <div style="padding:16px 20px">
+        <p style="font-size:13px;color:var(--text-secondary);line-height:1.6;margin-bottom:14px">节点「汇合节点」有多条输入连线，请选择汇合策略：</p>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <label id="mergeOptAll" onclick="selectMergeOpt('all')" style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border:1.5px solid var(--primary);border-radius:8px;cursor:pointer;background:rgba(103,80,164,0.04);transition:border-color 0.15s">
+            <input type="radio" name="mergeStrategyDemo" value="all" checked style="margin-top:2px;accent-color:var(--primary)" />
+            <div>
+              <div style="font-size:13px;font-weight:600;color:var(--text)">等待全部 (Wait All)</div>
+              <div style="font-size:12px;color:var(--text-secondary);margin-top:2px">所有上游节点完成后再执行</div>
+            </div>
+          </label>
+          <label id="mergeOptAny" onclick="selectMergeOpt('any')" style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;transition:border-color 0.15s">
+            <input type="radio" name="mergeStrategyDemo" value="any" style="margin-top:2px;accent-color:var(--primary)" />
+            <div>
+              <div style="font-size:13px;font-weight:600;color:var(--text)">任一完成 (Any)</div>
+              <div style="font-size:12px;color:var(--text-secondary);margin-top:2px">任一上游节点完成后立即执行</div>
+            </div>
+          </label>
+        </div>
+      </div>
+      <div style="padding:12px 20px 16px;display:flex;justify-content:flex-end;border-top:1px solid var(--border)">
+        <button onclick="confirmMergeStrategy()" style="background:var(--primary);color:#fff;border:none;border-radius:8px;padding:8px 24px;font-size:13px;font-weight:600;cursor:pointer">确定</button>
+      </div>
     </div>
   </div>
 </div>
+
+<script>
+(function(){
+  var currentMerge = 'all';
+  var pending = 'all';
+  window.toggleMergeModal = function(){
+    var overlay = document.getElementById('mergeModalOverlay');
+    if(!overlay) return;
+    pending = currentMerge;
+    selectMergeOpt(currentMerge, true);
+    overlay.style.display = 'flex';
+  };
+  window.closeMergeModal = function(e){
+    var overlay = document.getElementById('mergeModalOverlay');
+    if(overlay) overlay.style.display = 'none';
+  };
+  window.selectMergeOpt = function(val, silent){
+    pending = val;
+    var allEl = document.getElementById('mergeOptAll');
+    var anyEl = document.getElementById('mergeOptAny');
+    if(!allEl || !anyEl) return;
+    if(val === 'all'){
+      allEl.style.borderColor = 'var(--primary)';
+      allEl.style.background = 'rgba(103,80,164,0.04)';
+      allEl.querySelector('input').checked = true;
+      anyEl.style.borderColor = 'var(--border)';
+      anyEl.style.background = '';
+      anyEl.querySelector('input').checked = false;
+    } else {
+      anyEl.style.borderColor = 'var(--primary)';
+      anyEl.style.background = 'rgba(103,80,164,0.04)';
+      anyEl.querySelector('input').checked = true;
+      allEl.style.borderColor = 'var(--border)';
+      allEl.style.background = '';
+      allEl.querySelector('input').checked = false;
+    }
+  };
+  window.confirmMergeStrategy = function(){
+    currentMerge = pending;
+    var badge = document.getElementById('mergeBadge');
+    if(badge) badge.textContent = currentMerge === 'all' ? '全部' : '任一';
+    closeMergeModal();
+  };
+  // position overlay relative to demo box
+  var box = document.querySelector('.merge-demo-box');
+  if(box) box.style.position = 'relative';
+})();
+</script>
 
 <div class="category-label">通用连线规则</div>
 <table class="spec-table">
 <thead><tr><th>规则</th><th>说明</th></tr></thead>
 <tbody>
 <tr><td>输入要求</td><td>除开始节点外，所有节点必须有至少一条输入连线</td></tr>
-<tr><td>输出要求</td><td>除结束节点外，所有节点必须有至少一条输出连线（异常出口不计入）</td></tr>
+<tr><td>输出要求</td><td>除结束节点外，所有节点必须有至少一条输出连线</td></tr>
 <tr><td>环路检测</td><td>连线不能形成环路；循环节点内部体为合法环路</td></tr>
 <tr><td>同源端口限制</td><td>同一源端口到同一目标端口只能有一条连线</td></tr>
 <tr><td>自连限制</td><td>节点不能连接到自身</td></tr>
@@ -1265,14 +1817,14 @@ body {
 
 <div class="category-label">面板布局框架</div>
 <p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px">所有节点配置面板的结构层次固定如下（渐进式披露原则）：</p>
-<table class="spec-table" style="max-width:560px">
-<thead><tr><th>区域</th><th>默认状态</th><th>内容</th></tr></thead>
+<table class="spec-table" style="max-width:620px">
+<thead><tr><th style="white-space:nowrap">区域</th><th style="white-space:nowrap">默认状态</th><th>内容</th></tr></thead>
 <tbody>
-<tr><td>面板头部</td><td>始终显示</td><td>节点图标 + 节点名称（可编辑）+ 节点编码 + AI引导按钮（可选）</td></tr>
-<tr><td>节点说明</td><td>折叠</td><td>点击 ? 图标展开，说明节点用途和使用场景</td></tr>
-<tr><td>AI 引导条</td><td>展开（未配置时）</td><td>引导用户用自然语言描述需求，AI 自动填充表单</td></tr>
-<tr><td>基础配置区</td><td>展开</td><td>必填项 + 80% 场景都会用到的配置</td></tr>
-<tr><td>高级配置区</td><td>折叠</td><td>超时、认证、异常策略、汇合策略等技术性配置；有非默认值时标题旁显示蓝色圆点</td></tr>
+<tr><td style="white-space:nowrap">面板头部</td><td style="white-space:nowrap">始终显示</td><td>节点图标 + 节点名称（可编辑）+ 节点编码 + 节点类型转换按钮（非开始/结束节点）+ AI引导按钮（可选）+ 节点说明按钮（?）</td></tr>
+<tr><td style="white-space:nowrap">节点说明</td><td style="white-space:nowrap">默认折叠</td><td>点击头部「?」图标展开/折叠，包含定义 / 适用场景 / 使用规则三段内容</td></tr>
+<tr><td style="white-space:nowrap">AI 引导条</td><td style="white-space:nowrap">展开（未配置时）</td><td>引导用户用自然语言描述需求，AI 自动填充表单</td></tr>
+<tr><td style="white-space:nowrap">基础配置 Tab</td><td style="white-space:nowrap">默认选中</td><td>必填项 + 80% 场景都会用到的配置</td></tr>
+<tr><td style="white-space:nowrap">高级配置 Tab</td><td style="white-space:nowrap">默认未选中</td><td>超时、认证、异常策略、汇合策略等技术性配置；有非默认值时 Tab 标签右上角显示蓝色圆点</td></tr>
 </tbody>
 </table>
 
@@ -1286,16 +1838,17 @@ body {
     <div class="config-panel-icon" style="background:var(--node-integration);color:var(--node-integration-fg)">🌐</div>
     <div style="flex:1;min-width:0">
       <input class="config-node-name-input" id="nodeNameInput" value="HTTP 请求" maxlength="50" oninput="checkNameLength(this)">
-      <div class="config-panel-code">http_1</div>
+      <div class="config-panel-code" onclick="startEditCode(this)" title="点击修改节点编码">http_1 <span style="font-size:9px;opacity:0.5">✏️</span></div>
     </div>
+    <button style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:11px;padding:4px;margin-left:2px" onclick="showNodeConvertModal('http','HTTP 请求')" title="切换节点类型">🔄</button>
     <button class="ai-guide-recall-btn" id="aiRecallBtn" style="display:none" onclick="showAiGuide()" title="重新展开 AI 引导">✦ AI 引导</button>
-    <button onclick="toggleNodeDesc()" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:16px;padding:4px;margin-left:4px" title="节点说明">?</button>
+    <button onclick="toggleNodeDesc()" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:16px;padding:4px;margin-left:2px" title="节点说明">?</button>
   </div>
-  <!-- 节点说明 -->
+  <!-- 节点说明（默认折叠，点击 ? 展开） -->
   <div class="node-desc-box" id="nodeDescBox">
-    <strong>HTTP 请求节点</strong>：向外部或内部系统发送 HTTP 请求，支持 GET/POST/PUT/DELETE/PATCH 方法。<br>
-    <strong>适用场景：</strong>调用第三方 API、查询内部服务、触发 WebHook 等。<br>
-    <strong>注意：</strong>挂起等待回调模式下，节点发出请求后会挂起等待外部系统回调，适合异步处理场景。
+    <div style="margin-bottom:6px"><strong>定义：</strong>HTTP 请求节点向外部或内部系统发送 HTTP 请求，支持 GET/POST/PUT/DELETE/PATCH 方法。</div>
+    <div style="margin-bottom:6px"><strong>适用场景：</strong>调用第三方 API、查询内部服务、触发 WebHook 等。</div>
+    <div><strong>使用规则：</strong>请求 URL 为必填项；建议配置超时和重试策略；挂起等待回调模式适合异步处理场景。</div>
   </div>
   <!-- AI 引导条：未配置状态 -->
   <div class="ai-guide-bar" id="aiGuideBar" style="margin-top:14px;margin-bottom:4px">
@@ -1319,9 +1872,15 @@ body {
     <strong>✦ AI 已完成配置</strong> — 点击此处重新引导
   </div>
 
-  <!-- 基础配置 -->
+  <!-- 基础/高级配置 Tab -->
+  <div style="display:flex;border-bottom:1px solid var(--border);margin-top:12px">
+    <div id="demoTabBasic" onclick="demoPanelTab('basic')" style="padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;border-bottom:2px solid var(--primary);color:var(--primary);margin-bottom:-1px">基础配置</div>
+    <div id="demoTabAdv" onclick="demoPanelTab('adv')" style="padding:6px 14px;font-size:12px;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;position:relative">高级配置<span id="demoAdvDot" style="display:none;position:absolute;top:6px;right:6px;width:6px;height:6px;border-radius:50%;background:var(--primary)"></span></div>
+  </div>
+
+  <!-- 基础配置内容 -->
+  <div id="demoBasicBody">
   <div class="config-section" id="basicSection">
-    <div class="config-section-title">基础配置</div>
     <div class="config-field">
       <div class="config-label">请求 URL <span class="req">*</span></div>
       <input class="config-input" id="demoUrl" placeholder="https://api.example.com/orders/{id}" oninput="updateSummary()">
@@ -1348,69 +1907,44 @@ body {
       <div class="config-help">支持 JSON / 表单 / 原始文本；仅 POST / PUT / PATCH 请求可用</div>
     </div>
   </div>
-
-  <!-- 高级配置（折叠） -->
-  <div class="config-advanced-toggle" onclick="toggleAdvanced('http')" id="advToggleHttp">
-    <span>▶ 高级配置（超时 / 认证 / 异常策略 / 汇合策略）</span>
-    <span class="toggle-dot" id="dotHttp"></span>
   </div>
-  <div class="config-advanced-body" id="advBodyHttp">
-    <div class="config-section">
-      <div class="config-section-title">执行策略</div>
-      <div class="config-field">
-        <div class="config-label">超时时间（秒）</div>
-        <input class="config-input" type="number" value="30" min="1" max="3600" style="width:100px">
-        <div class="config-help">HTTP 请求的最大等待时间（默认 30 秒）</div>
-      </div>
-      <div class="config-field">
-        <div class="config-label">汇合策略</div>
-        <select class="config-input" style="font-size:12px">
-          <option>等待全部完成 (Wait All)</option>
-          <option>任一完成即继续 (Any)</option>
-        </select>
-        <div class="config-help">有多条输入连线时生效，决定何时执行此节点</div>
-      </div>
+
+  <!-- 高级配置内容 -->
+  <div id="demoAdvBody" style="display:none">
+  <div class="config-section">
+    <div class="config-section-title">执行策略</div>
+    <div class="config-field">
+      <div class="config-label">超时时间（秒）</div>
+      <input class="config-input" type="number" value="30" min="1" max="3600" style="width:100px">
+      <div class="config-help">HTTP 请求的最大等待时间（默认 30 秒）</div>
     </div>
-    <div class="config-section">
-      <div class="config-section-title">异常策略</div>
-      <div class="config-field">
-        <div class="config-label">发生异常时</div>
-        <select class="config-input" id="errorStrategy" onchange="toggleErrorBranch()" style="font-size:12px">
-          <option value="terminate">终止流程（默认）</option>
-          <option value="ignore">忽略并继续</option>
-          <option value="retry">自动重试</option>
-          <option value="manual">转人工处理</option>
-          <option value="callback">挂起等待回调</option>
-        </select>
-        <div class="config-help" id="errorStrategyHelp">节点异常时立即终止整个工作流实例</div>
-      </div>
-      <div id="retryOptions" style="display:none">
-        <div class="config-field">
-          <div class="config-label">重试次数</div>
-          <input class="config-input" type="number" value="3" min="1" max="10" style="width:80px">
-        </div>
-        <div class="config-field">
-          <div class="config-label">重试间隔（秒）</div>
-          <input class="config-input" type="number" value="5" min="1" max="300" style="width:80px">
-        </div>
-        <div class="config-field">
-          <div class="config-label">重试用尽后降级</div>
-          <select class="config-input" style="font-size:12px">
-            <option>终止流程</option><option>忽略并继续</option><option>转人工处理</option>
-          </select>
-        </div>
-      </div>
-      <div id="suspendOptions" style="display:none">
-        <div class="config-field">
-          <div class="config-label">挂起等待超时（小时）</div>
-          <input class="config-input" type="number" value="24" min="1" max="720" style="width:80px">
-          <div class="config-help">等待外部回调或人工处理的最大时长，超时后触发异常策略（默认 24 小时）</div>
-        </div>
-      </div>
-      <div id="branchTip" style="display:none;margin-top:8px;padding:9px 12px;background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.2);border-radius:6px;font-size:12px;color:var(--warning)">
-        ⚠ 已在节点右侧增加橙色异常出口端口，请在画布上连接异常处理节点。
-      </div>
+    <div class="config-field">
+      <div class="config-label">异常策略</div>
+      <select class="config-input" style="font-size:12px" onchange="toggleErrorStrategy('http',this.value)">
+        <option value="stop">终止流程（默认）</option>
+        <option value="continue">忽略并继续</option>
+        <option value="retry">自动重试</option>
+        <option value="manual">转人工处理</option>
+        <option value="callback">挂起等待回调</option>
+      </select>
     </div>
+    <div id="retryFieldsHttp" style="display:none">
+      <div class="config-field"><div class="config-label">重试次数</div><input class="config-input" type="number" value="3" min="1" max="10" style="width:100px"></div>
+      <div class="config-field"><div class="config-label">重试间隔（秒）</div><input class="config-input" type="number" value="5" min="1" max="300" style="width:100px"></div>
+      <div class="config-field"><div class="config-label">重试耗尽后降级</div><select class="config-input" style="font-size:12px"><option>终止流程</option><option>忽略并继续</option><option>转人工处理</option></select></div>
+    </div>
+    <div id="suspendFieldsHttp" style="display:none">
+      <div class="config-field"><div class="config-label">挂起等待超时（小时）</div><input class="config-input" type="number" value="24" min="1" max="720" style="width:100px"></div>
+    </div>
+    <div class="config-field">
+      <div class="config-label">汇合策略</div>
+      <select class="config-input" style="font-size:12px">
+        <option>等待全部完成 (Wait All)</option>
+        <option>任一完成即继续 (Any)</option>
+      </select>
+      <div class="config-help">有多条输入连线时生效，决定何时执行此节点</div>
+    </div>
+  </div>
   </div>
 </div>
 </div>
@@ -1423,19 +1957,17 @@ body {
   <table class="spec-table">
   <thead><tr><th>层次</th><th>展开状态</th><th>放什么字段</th></tr></thead>
   <tbody>
-  <tr><td>基础配置区</td><td>默认展开</td><td>必填项、80% 场景都会用到的配置</td></tr>
-  <tr><td>高级配置区</td><td>默认折叠</td><td>超时、认证、异常策略、汇合策略等低频技术性配置</td></tr>
+  <tr><td>基础配置 Tab</td><td>默认选中</td><td>必填项、80% 场景都会用到的配置</td></tr>
+  <tr><td>高级配置 Tab</td><td>默认未选中</td><td>超时、认证、异常策略、汇合策略等低频技术性配置</td></tr>
   </tbody>
   </table>
   <p style="margin-top:12px;margin-bottom:12px"><strong>条件展示规则（字段级联动）：</strong></p>
   <ul style="padding-left:20px;line-height:2">
     <li>HTTP 节点：选 POST/PUT/PATCH 后才显示 Body 字段</li>
-    <li>异常策略选「自动重试」后展示重试次数、间隔及降级策略字段</li>
-    <li>异常策略选「转人工处理」或「挂起等待回调」后展示挂起等待超时字段</li>
     <li>延迟节点：选「到指定时间」模式后，时长输入换为日期时间选择器</li>
     <li>循环节点：ForEach/While 切换时，集合变量与循环条件字段互相切换</li>
   </ul>
-  <p style="margin-top:12px"><strong>高级配置有非默认值时：</strong>折叠状态下标题旁显示蓝色圆点标记，提示用户此处有自定义配置。</p>
+  <p style="margin-top:12px"><strong>高级配置有非默认值时：</strong>高级配置 Tab 标签右上角显示蓝色圆点标记，提示用户此处有自定义配置。</p>
 </div>
 
 <div class="category-label" style="margin-top:24px">AI 引导条三种状态</div>
@@ -1445,15 +1977,22 @@ body {
 <tr><td><span class="badge badge-muted">未配置</span></td><td>节点首次打开配置面板</td><td>展示 AI 引导输入框和引导问题；基于节点 primary 字段自动生成</td></tr>
 <tr><td><span class="badge badge-info">AI 填充中</span></td><td>用户点击「生成配置」</td><td>字段逐项出现填充动画，模拟 AI 填写表单</td></tr>
 <tr><td><span class="badge badge-success">已配置</span></td><td>AI 填充完成</td><td>收起为一行绿色摘要，可点击重新引导</td></tr>
-<tr><td><span class="badge badge-muted">已跳过</span></td><td>用户点击「跳过」</td><td>引导条隐藏；面板右上角保留「✦ AI 引导」小图标可唤回</td></tr>
+<tr><td><span class="badge badge-muted">已跳过</span></td><td>用户点击「跳过」</td><td>引导条隐藏；面板头部右上角保留「✦ AI 引导」小图标可唤回</td></tr>
 </tbody>
 </table>
 <div style="font-size:12px;color:var(--text-secondary);margin-top:8px">哪些节点有 AI 引导条：有 <code>summary_weight = primary</code> 字段的节点均显示；开始节点、结束节点等纯逻辑节点无 primary 字段，不显示引导条。</div>
 
-<div class="category-label" style="margin-top:24px">节点说明入口</div>
+<div class="category-label" style="margin-top:24px">节点说明内容结构</div>
 <div style="font-size:13px;color:var(--text-secondary);line-height:1.8">
-  面板头部右侧的 <strong>「?」</strong> 图标，点击展开/折叠节点说明文字。<br>
-  节点说明面向所有用户，说明该节点是什么、适用场景和注意事项。
+  面板头部右上角的 <strong>「?」</strong> 图标，点击展开/折叠节点说明。节点说明面向所有用户，内容固定三段结构：
+  <table class="spec-table" style="margin-top:8px">
+  <thead><tr><th>段落</th><th>内容</th></tr></thead>
+  <tbody>
+  <tr><td>定义</td><td>该节点是什么，技术简述</td></tr>
+  <tr><td>适用场景</td><td>业务使用场景举例</td></tr>
+  <tr><td>使用规则</td><td>连线规则、注意事项、使用限制</td></tr>
+  </tbody>
+  </table>
 </div>
 </div>
 </div><!-- panel-grid end -->
@@ -1463,7 +2002,7 @@ body {
 <!-- ====== TAB 3: Node Configs ====== -->
 <div class="page-section" id="sec3">
 <h2 class="section-title">各节点配置面板</h2>
-<p class="section-desc">从左侧节点列表选择节点，右侧显示对应配置面板。均为真实可交互演示，高级配置默认折叠。</p>
+<p class="section-desc">从左侧节点列表选择节点，右侧显示对应配置面板。均为真实可交互演示，遵循配置面板通用规范：AI 引导条 + 基础配置Tab（默认选中）+ 高级配置Tab（默认未选中）。</p>
 
 <div class="node-config-layout">
   <!-- 左侧节点导航 -->
@@ -1541,39 +2080,357 @@ body {
 <div class="config-panel">
   <div class="config-panel-header">
     <div class="config-panel-icon" style="background:var(--node-trigger);color:var(--node-trigger-fg)">⚡</div>
-    <div style="flex:1"><input class="config-node-name-input" value="开始节点" maxlength="50"><div class="config-panel-code">trigger_1</div></div>
+    <div style="flex:1"><input class="config-node-name-input" value="开始节点" maxlength="50"><div class="config-panel-code" onclick="startEditCode(this)" title="点击修改节点编码">trigger_1 <span style="font-size:9px;opacity:0.5">✏️</span></div></div>
+    <button class="ai-guide-recall-btn" id="triggerAiBtn" style="display:inline-flex" onclick="showTriggerAiGuide()" title="AI 引导：描述你需要哪些输入参数，AI 帮你生成">✦ AI 引导</button>
     <button onclick="toggleNodeDesc2('triggerDesc')" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:16px;padding:4px" title="节点说明">?</button>
   </div>
-  <div class="node-desc-box" id="triggerDesc">开始节点是工作流的唯一入口，定义流程启动时传入的输入参数。下游节点通过 <code>${trigger_1.参数名}</code> 引用。支持手动触发（默认）、定时触发（可选）、Webhook（可选）三种启动方式；对话流中额外注入 query、files、conversation_id、user_id 等内置变量。</div>
+  <div class="node-desc-box" id="triggerDesc">
+    <div style="margin-bottom:6px"><strong>定义：</strong>工作流的唯一入口节点，负责定义流程的启动方式和接收外部传入的输入参数，触发后续节点开始执行。</div>
+    <div style="margin-bottom:4px"><strong>适用场景：</strong></div>
+    <ul style="margin:0 0 6px 16px;padding:0;list-style:disc">
+      <li>手动点击「运行」启动流程，如发起数据导出、触发审批</li>
+      <li>设置定时任务，让流程在指定时间自动运行，如每天 8:00 发送日报</li>
+      <li>通过 Webhook 接收外部系统通知后自动触发，如收到支付成功回调</li>
+      <li>对话流中，用户发送消息后触发本轮对话流程</li>
+    </ul>
+    <div style="margin-bottom:4px"><strong>使用规则：</strong></div>
+    <ul style="margin:0 0 2px 16px;padding:0;list-style:disc">
+      <li>每条流程有且只有一个开始节点，不能删除</li>
+      <li>开始节点必须连接到下一个步骤，否则流程无法运行</li>
+      <li>如需外部传入数据（如订单号、用户 ID），在「输入参数」里添加</li>
+      <li>定时触发为可选功能，不需要时无需配置</li>
+    </ul>
+  </div>
+
+  <!-- AI 引导条 -->
+  <div class="ai-guide-bar hidden" id="triggerAiGuideBar" style="margin-top:14px;margin-bottom:4px">
+    <strong>🤖 AI 引导</strong> — 描述你的流程需要接收哪些数据，AI 帮你生成输入参数列表<br>
+    <span style="opacity:.65;font-size:11px">例如：「订单号（必填）、收件人姓名、手机号、金额」&nbsp;或&nbsp;「用户ID（必填）、是否加急、创建时间」；加「（必填）」表示必填参数</span>
+    <div style="margin-top:8px;display:flex;gap:8px">
+      <input class="config-input" id="triggerAiInput" placeholder="描述你需要的参数..." style="flex:1;font-size:12px">
+    </div>
+    <div class="ai-btn-row">
+      <button class="ai-btn ai-btn-primary" onclick="triggerAiFill()">生成参数</button>
+      <button class="ai-btn ai-btn-ghost" onclick="skipTriggerAiGuide()">跳过</button>
+    </div>
+  </div>
+  <div class="ai-guide-bar hidden" id="triggerAiFillingBar" style="margin-top:14px;margin-bottom:4px">
+    <strong>🤖 AI 正在生成参数...</strong><br>
+    <span style="opacity:.65;font-size:11px">解析你的描述，自动推断参数名、类型和说明</span>
+  </div>
+  <div class="ai-guide-bar configured hidden" id="triggerAiConfiguredBar" style="margin-top:14px;margin-bottom:4px;cursor:pointer" onclick="showTriggerAiGuide()">
+    <strong>✦ AI 已完成配置</strong> — 点击重新引导
+  </div>
+
+  <!-- 📥 输入参数 -->
   <div class="config-section">
-    <div class="config-section-title">📥 输入参数</div>
+    <div class="config-section-title" style="display:flex;align-items:center;justify-content:space-between">
+      <span>📥 输入参数</span>
+      <button onclick="addTriggerParamCard()" style="font-size:11px;padding:2px 10px;border:1px solid var(--primary);border-radius:5px;background:none;color:var(--primary);cursor:pointer">+ 添加</button>
+    </div>
     <div class="config-help" style="margin-bottom:10px">独立于触发方式，始终可配置。下游通过 <code>${trigger_1.参数名}</code> 引用</div>
-    <div id="triggerParams">
-      <div class="param-card">
-        <div class="param-card-top"><span class="param-name">orderId</span><span class="badge badge-primary">String</span><span style="font-size:11px;color:var(--text-muted);margin-left:4px">必填</span></div>
-        <div class="param-ref" style="margin-bottom:4px">${trigger_1.orderId}</div>
-        <div style="font-size:11px;color:var(--text-muted)">占位提示：请输入订单编号，如 ORD-2024001</div>
-        <div style="font-size:11px;color:var(--text-muted)">参数说明：用于标识本次处理的订单</div>
+    <div id="triggerParamList">
+      <!-- 参数卡片 1：默认折叠，点击 header 展开编辑 -->
+      <div class="tparam-card">
+        <div class="tparam-card-header" onclick="toggleTparam(this)" style="cursor:pointer;user-select:none">
+          <div style="display:flex;align-items:center;gap:6px">
+            <span class="tparam-index">1</span>
+            <span class="tparam-label">订单编号</span>
+            <span class="tparam-varname">orderId</span>
+            <span class="badge badge-primary" style="font-size:10px">String</span>
+            <span class="tparam-required-tag">必填</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:4px">
+            <span class="tparam-chevron" style="font-size:10px;color:var(--text-muted);transition:transform 0.2s;display:inline-block">▶</span>
+            <button onclick="event.stopPropagation();removeTriggerParam(this)" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:14px;line-height:1;padding:2px 4px">×</button>
+          </div>
+        </div>
+        <div class="tparam-body" style="display:none;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
+          <div class="tparam-row">
+            <div class="tparam-field">
+              <label class="tparam-label-text">显示名称</label>
+              <input class="config-input" value="订单编号" placeholder="如：订单编号" style="font-size:11px" oninput="_syncTparamHeaderLabel(this)">
+            </div>
+            <div class="tparam-field">
+              <label class="tparam-label-text">字段类型</label>
+              <select class="config-input" style="font-size:11px" onchange="onTparamTypeChange(this)">
+                <option selected>短文本 → String</option><option>长文本 → String</option>
+                <option>数字 → Integer</option><option>开关 → Boolean</option>
+                <option>日期时间 → DateTime</option><option>文件 → File</option>
+                <option>JSON 对象 → Object</option><option>数组（字符串）→ Array[String]</option><option>数组（对象）→ Array[Object]</option>
+              </select>
+            </div>
+          </div>
+          <!-- 结构定义行：仅 Object / Array[Object] 时显示 -->
+          <div class="tparam-schema-row">
+            <div class="tparam-schema-head">
+              <span class="tparam-schema-label">对象结构</span>
+              <button class="tparam-schema-btn" onclick="openSchemaModal(this)">定义结构</button>
+            </div>
+            <div class="tparam-schema-fields">
+              <span class="tparam-schema-summary-text">未定义，下游可通过 .字段名 自由引用</span>
+            </div>
+          </div>
+          <div class="tparam-row">
+            <div class="tparam-field">
+              <label class="tparam-label-text">变量名 <span style="color:#e53935">*</span></label>
+              <input class="config-input" value="orderId" style="font-size:11px;font-family:var(--font-mono)">
+            </div>
+            <div class="tparam-field">
+              <label class="tparam-label-text">占位提示</label>
+              <input class="config-input" value="请输入订单编号，如 ORD-2024001" style="font-size:11px">
+            </div>
+          </div>
+          <div class="tparam-row">
+            <div class="tparam-field" style="flex:1">
+              <label class="tparam-label-text">参数说明</label>
+              <input class="config-input" value="用于标识本次处理的订单" style="font-size:11px">
+            </div>
+          </div>
+          <div class="tparam-row tparam-default-row">
+            <div class="tparam-field" style="flex:1">
+              <label class="tparam-label-text">默认值 <span style="font-size:10px;color:var(--text-muted);font-weight:400">（可选）</span></label>
+              <input class="config-input tparam-default-input" placeholder="无默认值" style="font-size:11px">
+              <label class="tparam-default-toggle" style="display:none;align-items:center;gap:6px;font-size:11px;cursor:pointer">
+                <input type="checkbox" class="tparam-default-bool" style="accent-color:var(--primary);width:13px;height:13px">
+                <span>默认开启</span>
+              </label>
+            </div>
+          </div>
+          <div style="margin-top:6px">
+            <label style="display:inline-flex;align-items:center;gap:4px;font-size:11px;cursor:pointer">
+              <input type="checkbox" checked style="accent-color:var(--primary);width:12px;height:12px"> 必填
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- 参数卡片 2：默认展开（新增态），同样可点 header 折叠 -->
+      <div class="tparam-card tparam-card-new">
+        <div class="tparam-card-header" onclick="toggleTparam(this)" style="cursor:pointer;user-select:none">
+          <div style="display:flex;align-items:center;gap:6px">
+            <span class="tparam-index">2</span>
+            <span class="tparam-label" style="color:var(--text-muted)">新参数</span>
+            <span class="tparam-varname"></span>
+            <span class="badge badge-primary" style="font-size:10px">String</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:4px">
+            <span class="tparam-chevron" style="font-size:10px;color:var(--text-muted);transition:transform 0.2s;display:inline-block;transform:rotate(90deg)">▶</span>
+            <button onclick="event.stopPropagation();removeTriggerParam(this)" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:14px;line-height:1;padding:2px 4px">×</button>
+          </div>
+        </div>
+        <div class="tparam-body" style="display:block;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
+          <div class="tparam-row">
+            <div class="tparam-field">
+              <label class="tparam-label-text">显示名称</label>
+              <input class="config-input" placeholder="如：客户姓名" style="font-size:11px" oninput="_syncTparamHeaderLabel(this)">
+            </div>
+            <div class="tparam-field">
+              <label class="tparam-label-text">字段类型</label>
+              <select class="config-input" style="font-size:11px" onchange="onTparamTypeChange(this)">
+                <option selected>短文本 → String</option><option>长文本 → String</option>
+                <option>数字 → Integer</option><option>开关 → Boolean</option>
+                <option>日期时间 → DateTime</option><option>文件 → File</option>
+                <option>JSON 对象 → Object</option><option>数组（字符串）→ Array[String]</option><option>数组（对象）→ Array[Object]</option>
+              </select>
+            </div>
+          </div>
+          <!-- 结构定义行：仅 Object / Array[Object] 时显示 -->
+          <div class="tparam-schema-row">
+            <div class="tparam-schema-head">
+              <span class="tparam-schema-label">对象结构</span>
+              <button class="tparam-schema-btn" onclick="openSchemaModal(this)">定义结构</button>
+            </div>
+            <div class="tparam-schema-fields">
+              <span class="tparam-schema-summary-text">未定义，下游可通过 .字段名 自由引用</span>
+            </div>
+          </div>
+          <div class="tparam-row">
+            <div class="tparam-field">
+              <label class="tparam-label-text">变量名 <span style="color:#e53935">*</span></label>
+              <input class="config-input" placeholder="如：customer_name" style="font-size:11px;font-family:var(--font-mono)">
+            </div>
+            <div class="tparam-field">
+              <label class="tparam-label-text">占位提示</label>
+              <input class="config-input" placeholder="输入框的提示文字" style="font-size:11px">
+            </div>
+          </div>
+          <div class="tparam-row">
+            <div class="tparam-field" style="flex:1">
+              <label class="tparam-label-text">参数说明</label>
+              <input class="config-input" placeholder="对这个参数的用途做简要说明" style="font-size:11px">
+            </div>
+          </div>
+          <div class="tparam-row tparam-default-row">
+            <div class="tparam-field" style="flex:1">
+              <label class="tparam-label-text">默认值 <span style="font-size:10px;color:var(--text-muted);font-weight:400">（可选）</span></label>
+              <input class="config-input tparam-default-input" placeholder="无默认值" style="font-size:11px">
+              <label class="tparam-default-toggle" style="display:none;align-items:center;gap:6px;font-size:11px;cursor:pointer">
+                <input type="checkbox" class="tparam-default-bool" style="accent-color:var(--primary);width:13px;height:13px">
+                <span>默认开启</span>
+              </label>
+            </div>
+          </div>
+          <div style="margin-top:6px">
+            <label style="display:inline-flex;align-items:center;gap:4px;font-size:11px;cursor:pointer">
+              <input type="checkbox" style="accent-color:var(--primary);width:12px;height:12px"> 必填
+            </label>
+          </div>
+        </div>
       </div>
     </div>
-    <div class="add-link" onclick="addParam('triggerParams','trigger_1')">+ 添加输入参数</div>
   </div>
+
+  <!-- ⚙️ 定时触发（主动配置区，可选）-->
   <div class="config-advanced-toggle" onclick="toggleAdvanced('trigger')">
-    <span>▶ 高级配置（定时触发 / Webhook）</span>
+    <span>▶ 定时触发</span>
     <span class="toggle-dot" id="dotTrigger"></span>
   </div>
   <div class="config-advanced-body" id="advBodyTrigger">
-    <div class="config-section">
-      <div class="config-field">
-        <div class="config-label">定时触发</div>
-        <select class="config-input" style="font-size:12px">
-          <option>不启用</option>
-          <option>启用 Cron 定时</option>
-        </select>
+    <div class="config-section" id="schedConfigBody">
+      <!-- 启用开关行 -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border)">
+        <div>
+          <div style="font-size:13px;font-weight:600;color:var(--text)">启用定时触发</div>
+          <div style="font-size:12px;color:var(--text-muted);margin-top:2px">开启后按配置的规则自动触发流程</div>
+        </div>
+        <label style="display:flex;align-items:center;gap:7px;cursor:pointer" onclick="toggleScheduleEnabled(event)">
+          <span style="font-size:11px;color:var(--text-muted)" id="schedEnabledLabel">未启用</span>
+          <span id="schedToggleSwitch" title="启用/关闭定时触发"
+            style="display:inline-flex;align-items:center;width:36px;height:20px;border-radius:10px;background:#D0D5E8;cursor:pointer;transition:background 0.2s;position:relative;flex-shrink:0">
+            <span id="schedToggleKnob" style="position:absolute;left:2px;top:2px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.2);transition:left 0.2s"></span>
+          </span>
+        </label>
+      </div>
+
+      <!-- 配置内容（启用后激活） -->
+      <div id="schedInnerConfig" style="opacity:0.35;pointer-events:none;transition:opacity 0.2s">
+        <div class="config-help" style="margin-bottom:10px">适用于定期执行的任务，如每日凌晨同步数据、每周一发送周报、每月末执行对账</div>
+
+      <!-- 模式切换 Tab -->
+      <div class="sched-mode-tabs">
+        <button class="sched-mode-btn active" id="schedModeSimple" onclick="switchSchedMode('simple')">简单模式</button>
+        <button class="sched-mode-btn" id="schedModeAdvanced" onclick="switchSchedMode('advanced')">高级模式</button>
+      </div>
+
+      <!-- 简单模式 -->
+      <div id="schedSimplePanel">
+        <div class="config-field">
+          <div class="config-label">频率类型</div>
+          <select class="config-input" style="font-size:12px" id="schedFreqSelect" onchange="onSchedFreqChange(this.value)">
+            <option value="hourly">每小时</option>
+            <option value="daily" selected>每天</option>
+            <option value="weekly">每周</option>
+            <option value="monthly">每月</option>
+          </select>
+        </div>
+
+        <!-- 每小时：指定分钟 + 秒 -->
+        <div id="schedHourlyPanel" style="display:none">
+          <div class="config-field">
+            <div class="config-label">指定分钟与秒</div>
+            <div style="display:flex;align-items:center;gap:6px">
+              <input class="config-input" type="number" min="0" max="59" value="0" id="schedMinuteOnly" style="width:72px;font-size:12px" oninput="syncSchedCron()" placeholder="0-59">
+              <span style="font-size:12px;color:var(--text-secondary)">分</span>
+              <input class="config-input" type="number" min="0" max="59" value="0" id="schedSecondHourly" style="width:72px;font-size:12px" oninput="syncSchedCron()" placeholder="0-59">
+              <span style="font-size:12px;color:var(--text-secondary)">秒</span>
+            </div>
+            <div class="config-help">每小时第 N 分 N 秒执行</div>
+          </div>
+        </div>
+
+        <!-- 每天/每周/每月：指定时间（含秒） -->
+        <div id="schedTimePanel">
+          <div class="config-field">
+            <div class="config-label">指定时间</div>
+            <div style="display:flex;align-items:center;gap:6px">
+              <input class="config-input" type="number" min="0" max="23" value="8" id="schedHour" style="width:62px;font-size:12px" oninput="syncSchedCron()" placeholder="时">
+              <span style="color:var(--text-secondary)">:</span>
+              <input class="config-input" type="number" min="0" max="59" value="0" id="schedMinute" style="width:62px;font-size:12px" oninput="syncSchedCron()" placeholder="分">
+              <span style="color:var(--text-secondary)">:</span>
+              <input class="config-input" type="number" min="0" max="59" value="0" id="schedSecond" style="width:62px;font-size:12px" oninput="syncSchedCron()" placeholder="秒">
+            </div>
+          </div>
+        </div>
+
+        <!-- 每周：星期选择 -->
+        <div id="schedWeekPanel" style="display:none">
+          <div class="config-field">
+            <div class="config-label">选择星期</div>
+            <div class="sched-week-chips">
+              <span class="sched-week-chip active" data-day="1" onclick="toggleSchedDay(this)">周一</span>
+              <span class="sched-week-chip" data-day="2" onclick="toggleSchedDay(this)">周二</span>
+              <span class="sched-week-chip" data-day="3" onclick="toggleSchedDay(this)">周三</span>
+              <span class="sched-week-chip" data-day="4" onclick="toggleSchedDay(this)">周四</span>
+              <span class="sched-week-chip" data-day="5" onclick="toggleSchedDay(this)">周五</span>
+              <span class="sched-week-chip" data-day="6" onclick="toggleSchedDay(this)">周六</span>
+              <span class="sched-week-chip" data-day="7" onclick="toggleSchedDay(this)">周日</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 每月：日期选择 -->
+        <div id="schedMonthPanel" style="display:none">
+          <div class="config-field">
+            <div class="config-label">选择日期</div>
+            <div style="display:flex;align-items:center;gap:6px">
+              <input class="config-input" type="number" min="1" max="31" value="1" id="schedMonthDay" style="width:80px;font-size:12px" oninput="syncSchedCron()" placeholder="1-31">
+              <span style="font-size:12px;color:var(--text-secondary)">日</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 执行预览 -->
+        <div class="cron-description" id="schedSimpleDesc">
+          <span class="cron-description-icon">🕐</span>
+          <span id="schedSimpleDescText">每天 8 点 0 分执行</span>
+        </div>
+      </div>
+
+      <!-- 高级模式 -->
+      <div id="schedAdvancedPanel" style="display:none">
+        <div class="config-field">
+          <div class="config-label">Cron 表达式
+            <span style="font-size:10px;color:var(--text-muted);font-weight:400;margin-left:4px">（6 字段：秒 分 时 日 月 周）</span>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center">
+            <input class="config-input" id="cronExprInput" value="0 0 8 * * *" style="font-family:var(--font-mono);font-size:12px;flex:1" placeholder="秒 分 时 日 月 周（示例：0 30 8 * * 1-5）" oninput="onCronInput(this.value)">
+            <button onclick="openCronPopover()" style="flex-shrink:0;padding:5px 10px;font-size:11px;font-weight:500;border:1px solid var(--primary);border-radius:6px;background:rgba(103,80,164,0.06);color:var(--primary);cursor:pointer;white-space:nowrap">📅 可视化</button>
+          </div>
+          <div class="cron-presets">
+            <span class="cron-preset-chip" onclick="setCronPreset('0 * * * * *')">每分钟</span>
+            <span class="cron-preset-chip" onclick="setCronPreset('0 0 * * * *')">每小时</span>
+            <span class="cron-preset-chip active" onclick="setCronPreset('0 0 8 * * *')">每天</span>
+            <span class="cron-preset-chip" onclick="setCronPreset('0 0 9 * * 1')">每周一</span>
+            <span class="cron-preset-chip" onclick="setCronPreset('0 0 0 1 * *')">每月 1 号</span>
+          </div>
+          <div class="cron-description" id="schedAdvancedDesc">
+            <span class="cron-description-icon">🕐</span>
+            <span id="schedAdvancedDescText">每天 8 点 0 分 0 秒执行</span>
+          </div>
+        </div>
+      </div>
+      </div><!-- schedInnerConfig end -->
+    </div>
+    <!-- next 5 runs panel (shared by simple & advanced mode) -->
+    <div id="schedNextRunsPanel" style="margin:0 0 2px;padding:10px 12px;background:rgba(103,80,164,0.04);border-radius:8px;border:1px solid rgba(103,80,164,0.12);display:none">
+      <div style="font-size:11px;font-weight:600;color:var(--primary);margin-bottom:6px;display:flex;align-items:center;gap:5px">
+        <span>📋</span><span>近 5 次执行时间预览</span>
+      </div>
+      <div id="schedNextRunsList" style="font-size:11px;font-family:var(--font-mono);color:var(--text-secondary);line-height:1.8">
+        <!-- JS 动态填充 -->
       </div>
     </div>
+  </div>
+
+  <!-- 🔗 Webhook（只读信息区）-->
+  <div class="config-advanced-toggle" onclick="toggleAdvanced('triggerWebhook')">
+    <span>▶ Webhook</span>
+    <span style="font-size:10px;color:var(--text-muted);font-weight:400;margin-left:4px">（系统自动生成，只读）</span>
+    <span class="toggle-dot" id="dotTriggerWebhook"></span>
+  </div>
+  <div class="config-advanced-body" id="advBodyTriggerWebhook">
     <div class="config-section">
-      <div class="config-section-title" style="font-size:11px;color:var(--text-muted)">🔗 Webhook（系统自动生成，只读）</div>
       <div class="config-field">
         <div class="config-label">回调 URL</div>
         <div style="display:flex;align-items:center;gap:6px">
@@ -1589,8 +2446,11 @@ body {
       </div>
     </div>
   </div>
+
+  <!-- 💬 对话流内置变量（只读信息区，放最后）-->
   <div class="config-section" style="background:rgba(103,80,164,0.02)">
     <div class="config-section-title" style="font-size:11px;color:var(--text-muted)">💬 对话流内置变量（只读，系统自动注入）</div>
+    <div class="config-help" style="margin-bottom:8px">仅对话流可见，无需配置，可直接在下游节点引用</div>
     <div class="param-card"><div class="param-card-top"><span class="param-name">query</span><span class="badge badge-primary">String</span></div><div class="param-ref">用户当前输入的消息内容</div></div>
     <div class="param-card"><div class="param-card-top"><span class="param-name">files</span><span class="badge badge-info">Array[File]</span></div><div class="param-ref">用户上传的文件列表</div></div>
     <div class="param-card"><div class="param-card-top"><span class="param-name">conversation_id</span><span class="badge badge-primary">String</span></div><div class="param-ref">当前会话唯一标识</div></div>
@@ -1605,7 +2465,7 @@ body {
 <div class="config-panel">
   <div class="config-panel-header">
     <div class="config-panel-icon" style="background:var(--node-end);color:var(--node-end-fg)">🏁</div>
-    <div style="flex:1"><input class="config-node-name-input" value="结束节点" maxlength="50"><div class="config-panel-code">end_1</div></div>
+    <div style="flex:1"><input class="config-node-name-input" value="结束节点" maxlength="50"><div class="config-panel-code" onclick="startEditCode(this)" title="点击修改节点编码">end_1 <span style="font-size:9px;opacity:0.5">✏️</span></div></div>
     <button onclick="toggleNodeDesc2('endDesc')" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:16px;padding:4px">?</button>
   </div>
   <div class="node-desc-box" id="endDesc">结束节点是工作流的唯一终点，配置工作流的输出变量。应用流中一次性返回最终结果；对话流中仅结束当前轮次，会话保持等待用户下一条消息。</div>
@@ -1632,11 +2492,29 @@ body {
 <div class="config-panel">
   <div class="config-panel-header">
     <div class="config-panel-icon" style="background:var(--node-logic);color:var(--node-logic-fg)">🔀</div>
-    <div style="flex:1"><input class="config-node-name-input" value="IF 条件" maxlength="50"><div class="config-panel-code">if_1</div></div>
+    <div style="flex:1;min-width:0"><input class="config-node-name-input" value="IF 条件" maxlength="50"><div class="config-panel-code" onclick="startEditCode(this)" title="点击修改节点编码">if_1 <span style="font-size:9px;opacity:0.5">✏️</span></div></div>
+    <button style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:11px;padding:4px" onclick="showNodeConvertModal('if','IF 条件')" title="切换节点类型">🔄</button>
+    <button class="ai-guide-recall-btn" style="display:none" onclick="nodeAiRecall('if')" title="重新展开 AI 引导">✦ AI 引导</button>
     <button onclick="toggleNodeDesc2('ifDesc')" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:16px;padding:4px">?</button>
   </div>
   <div class="node-desc-box" id="ifDesc">IF 节点根据条件表达式走 TRUE 或 FALSE 分支，是互斥选择。支持可视化构建器和表达式编辑器双模式切换，两者双向同步。</div>
-  <div class="config-section">
+  <div class="ai-guide-bar" id="aiGuideBar-if" style="margin:10px 0 0">
+    <strong>🤖 AI 引导</strong> — 描述这个条件判断的业务含义，AI 帮你自动填写条件表达式<br>
+    <span style="opacity:.65;font-size:11px">例如：「订单金额大于 1000 元且状态为待支付」</span>
+    <div style="margin-top:8px;display:flex;gap:8px">
+      <input class="config-input" placeholder="描述你的判断条件..." style="flex:1;font-size:12px">
+    </div>
+    <div class="ai-btn-row">
+      <button class="ai-btn ai-btn-primary">生成条件</button>
+      <button class="ai-btn ai-btn-ghost" onclick="nodeSkipAi('if')">跳过</button>
+    </div>
+  </div>
+  <!-- 基础/高级配置 Tab -->
+  <div style="display:flex;border-bottom:1px solid var(--border);margin-top:12px">
+    <div id="tabBasic-if" onclick="nodeTab('if','basic')" style="padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;border-bottom:2px solid var(--primary);color:var(--primary);margin-bottom:-1px">基础配置</div>
+    <div id="tabAdv-if" onclick="nodeTab('if','adv')" style="padding:6px 14px;font-size:12px;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px">高级配置</div>
+  </div>
+  <div id="tabBasicBody-if">
     <div class="view-toggle">
       <div class="view-toggle-btn active" onclick="switchIfView('visual',this)">可视化构建器</div>
       <div class="view-toggle-btn" onclick="switchIfView('expr',this)">表达式编辑器</div>
@@ -1675,25 +2553,23 @@ body {
         <div class="config-help">布尔表达式，结果为 true 走 TRUE 分支，否则走 FALSE 分支</div>
       </div>
     </div>
-  </div>
-  <div class="config-advanced-toggle" onclick="toggleAdvanced('if')">
-    <span>▶ 高级配置（分支标签 / 异常策略）</span>
-    <span class="toggle-dot" id="dotIf"></span>
-  </div>
-  <div class="config-advanced-body" id="advBodyIf">
+  </div><!-- tabBasicBody-if end -->
+  <div id="tabAdvBody-if" style="display:none">
     <div class="config-section">
       <div class="config-field"><div class="config-label">TRUE 分支标签</div><input class="config-input" value="TRUE"></div>
       <div class="config-field"><div class="config-label">FALSE 分支标签</div><input class="config-input" value="FALSE"></div>
-    </div>
-    <div class="config-section">
       <div class="config-field">
         <div class="config-label">异常策略</div>
         <select class="config-input" style="font-size:12px">
-          <option>终止流程（默认）</option><option>忽略并继续</option><option>自动重试</option><option>转人工处理</option><option>挂起等待回调</option>
+          <option value="stop">终止流程（默认）</option>
+          <option value="continue">忽略并继续</option>
+          <option value="retry">自动重试</option>
+          <option value="manual">转人工处理</option>
+          <option value="callback">挂起等待回调</option>
         </select>
       </div>
     </div>
-  </div>
+  </div><!-- tabAdvBody-if end -->
 </div>
 
 <!-- end config-panel for if -->
@@ -1704,11 +2580,28 @@ body {
 <div class="config-panel">
   <div class="config-panel-header">
     <div class="config-panel-icon" style="background:var(--node-logic);color:var(--node-logic-fg)">🔃</div>
-    <div style="flex:1"><input class="config-node-name-input" value="Switch" maxlength="50"><div class="config-panel-code">switch_1</div></div>
+    <div style="flex:1;min-width:0"><input class="config-node-name-input" value="Switch" maxlength="50"><div class="config-panel-code" onclick="startEditCode(this)" title="点击修改节点编码">switch_1 <span style="font-size:9px;opacity:0.5">✏️</span></div></div>
+    <button style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:11px;padding:4px" onclick="showNodeConvertModal('switch','Switch')" title="切换节点类型">🔄</button>
+    <button class="ai-guide-recall-btn" style="display:none" onclick="nodeAiRecall('switch')" title="重新展开 AI 引导">✦ AI 引导</button>
     <button onclick="toggleNodeDesc2('switchDesc')" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:16px;padding:4px">?</button>
   </div>
   <div class="node-desc-box" id="switchDesc">Switch 节点根据匹配变量或表达式的值，选择对应分支执行。支持「首次匹配」（互斥）和「所有匹配」（并行）两种模式。</div>
-  <div class="config-section">
+  <div class="ai-guide-bar" id="aiGuideBar-switch" style="margin:10px 0 0">
+    <strong>🤖 AI 引导</strong> — 描述这个分支判断的业务含义，AI 帮你自动生成分支条件<br>
+    <span style="opacity:.65;font-size:11px">例如：「根据订单状态分别走待支付、已支付、已取消分支」</span>
+    <div style="margin-top:8px;display:flex;gap:8px">
+      <input class="config-input" placeholder="描述你的分支逻辑..." style="flex:1;font-size:12px">
+    </div>
+    <div class="ai-btn-row">
+      <button class="ai-btn ai-btn-primary">生成分支</button>
+      <button class="ai-btn ai-btn-ghost" onclick="nodeSkipAi('switch')">跳过</button>
+    </div>
+  </div>
+  <!-- 基础配置（带Tab包装以保持结构一致）-->
+  <div style="display:flex;border-bottom:1px solid var(--border);margin-top:12px">
+    <div style="padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;border-bottom:2px solid var(--primary);color:var(--primary);margin-bottom:-1px">基础配置</div>
+  </div>
+  <div>
     <div class="config-field">
       <div class="config-label">匹配变量/表达式 <span class="req">*</span></div>
       <input class="config-input" value="${order.status}" style="font-family:var(--font-mono);font-size:12px">
@@ -1747,20 +2640,37 @@ body {
 <div class="config-panel">
   <div class="config-panel-header">
     <div class="config-panel-icon" style="background:var(--node-logic);color:var(--node-logic-fg)">🔄</div>
-    <div style="flex:1"><input class="config-node-name-input" value="循环" maxlength="50"><div class="config-panel-code">loop_1</div></div>
+    <div style="flex:1;min-width:0"><input class="config-node-name-input" value="循环" maxlength="50"><div class="config-panel-code" onclick="startEditCode(this)" title="点击修改节点编码">loop_1 <span style="font-size:9px;opacity:0.5">✏️</span></div></div>
+    <button style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:11px;padding:4px" onclick="showNodeConvertModal('loop','循环')" title="切换节点类型">🔄</button>
+    <button class="ai-guide-recall-btn" style="display:none" onclick="nodeAiRecall('loop')" title="重新展开 AI 引导">✦ AI 引导</button>
     <button onclick="toggleNodeDesc2('loopDesc')" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:16px;padding:4px">?</button>
   </div>
   <div class="node-desc-box" id="loopDesc">循环节点支持 ForEach（遍历数组）和 While（条件循环）两种模式。循环体通过底部蓝色端口连接；循环正常结束走「完成」出口；条件满足时走「中断」出口跳出循环。</div>
-  <div class="config-section">
-    <div class="config-field">
-      <div class="config-label">循环模式 <span class="req">*</span></div>
+  <div class="ai-guide-bar" id="aiGuideBar-loop" style="margin:10px 0 0">
+    <strong>🤖 AI 引导</strong> — 描述这个循环的业务含义，AI 帮你自动配置循环参数<br>
+    <span style="opacity:.65;font-size:11px">例如：「遍历订单列表，逐个发送通知」</span>
+    <div style="margin-top:8px;display:flex;gap:8px">
+      <input class="config-input" placeholder="描述你的循环逻辑..." style="flex:1;font-size:12px">
+    </div>
+    <div class="ai-btn-row">
+      <button class="ai-btn ai-btn-primary">生成配置</button>
+      <button class="ai-btn ai-btn-ghost" onclick="nodeSkipAi('loop')">跳过</button>
+    </div>
+  </div>
+  <!-- 基础/高级配置 Tab -->
+  <div style="display:flex;border-bottom:1px solid var(--border);margin-top:12px">
+    <div id="tabBasic-loop" onclick="nodeTab('loop','basic')" style="padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;border-bottom:2px solid var(--primary);color:var(--primary);margin-bottom:-1px">基础配置</div>
+    <div id="tabAdv-loop" onclick="nodeTab('loop','adv')" style="padding:6px 14px;font-size:12px;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px">高级配置</div>
+  </div>
+  <div id="tabBasicBody-loop">
+    <div class="config-section">
       <div class="method-chips">
         <div class="method-chip active" onclick="switchLoopMode('foreach',this)">ForEach</div>
         <div class="method-chip" onclick="switchLoopMode('while',this)">While</div>
       </div>
     </div>
     <!-- ForEach 模式 -->
-    <div id="loopForeachFields">
+    <div id="loopForeachFields" class="config-section">
       <div class="config-field">
         <div class="config-label">集合变量 <span class="req">*</span></div>
         <input class="config-input" value="${http_1.response.orders}" style="font-family:var(--font-mono);font-size:12px">
@@ -1773,35 +2683,35 @@ body {
       </div>
     </div>
     <!-- While 模式 -->
-    <div id="loopWhileFields" style="display:none">
+    <div id="loopWhileFields" class="config-section" style="display:none">
       <div class="config-field">
         <div class="config-label">循环条件 <span class="req">*</span></div>
         <input class="config-input" placeholder="${assign_1.count} < 10" style="font-family:var(--font-mono);font-size:12px">
         <div class="config-help">布尔表达式，为真时继续循环</div>
       </div>
     </div>
-  </div>
-  <div class="config-advanced-toggle" onclick="toggleAdvanced('loop')">
-    <span>▶ 高级配置（超时 / 异常策略 / 汇合策略）</span>
-    <span class="toggle-dot" id="dotLoop"></span>
-  </div>
-  <div class="config-advanced-body" id="advBodyLoop">
+  </div><!-- tabBasicBody-loop end -->
+  <div id="tabAdvBody-loop" style="display:none">
     <div class="config-section">
       <div class="config-field"><div class="config-label">节点超时（秒）</div><input class="config-input" type="number" value="300" style="width:100px"></div>
       <div class="config-field"><div class="config-label">单次迭代超时（秒）</div><input class="config-input" type="number" value="30" style="width:100px"></div>
+      <div class="config-field">
+        <div class="config-label">异常策略</div>
+        <select class="config-input" style="font-size:12px">
+          <option value="stop">终止流程（默认）</option>
+          <option value="continue">忽略并继续</option>
+          <option value="retry">自动重试</option>
+          <option value="manual">转人工处理</option>
+          <option value="callback">挂起等待回调</option>
+        </select>
+      </div>
       <div class="config-field">
         <div class="config-label">汇合策略</div>
         <select class="config-input" style="font-size:12px"><option>等待全部完成 (Wait All)</option><option>任一完成即继续 (Any)</option></select>
         <div class="config-help">有多条输入连线时生效</div>
       </div>
     </div>
-    <div class="config-section">
-      <div class="config-field">
-        <div class="config-label">异常策略</div>
-        <select class="config-input" style="font-size:12px"><option>终止流程（默认）</option><option>忽略并继续</option><option>自动重试</option><option>转人工处理</option><option>挂起等待回调</option></select>
-      </div>
-    </div>
-  </div>
+  </div><!-- tabAdvBody-loop end -->
 </div>
 
 <!-- end config-panel for loop -->
@@ -1812,11 +2722,27 @@ body {
 <div class="config-panel">
   <div class="config-panel-header">
     <div class="config-panel-icon" style="background:var(--node-logic);color:var(--node-logic-fg)">⏱️</div>
-    <div style="flex:1"><input class="config-node-name-input" value="延迟" maxlength="50"><div class="config-panel-code">delay_1</div></div>
+    <div style="flex:1;min-width:0"><input class="config-node-name-input" value="延迟" maxlength="50"><div class="config-panel-code" onclick="startEditCode(this)" title="点击修改节点编码">delay_1 <span style="font-size:9px;opacity:0.5">✏️</span></div></div>
+    <button style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:11px;padding:4px" onclick="showNodeConvertModal('delay','延迟')" title="切换节点类型">🔄</button>
+    <button class="ai-guide-recall-btn" style="display:none" onclick="nodeAiRecall('delay')" title="重新展开 AI 引导">✦ AI 引导</button>
     <button onclick="toggleNodeDesc2('delayDesc')" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:16px;padding:4px" title="节点说明">?</button>
   </div>
   <div class="node-desc-box" id="delayDesc">延迟节点在等待指定时长或到达指定时间后，才继续执行后续节点。支持「固定时长」和「到指定时间」两种模式。适合需要等待外部条件成熟的场景，如定时提醒、分批处理。</div>
-  <div class="config-section">
+  <div class="ai-guide-bar" id="aiGuideBar-delay" style="margin:10px 0 0">
+    <strong>🤖 AI 引导</strong> — 描述这个延迟的业务含义，AI 帮你自动配置延迟时长<br>
+    <span style="opacity:.65;font-size:11px">例如：「御单提交后等待30分钒发送确认短信」</span>
+    <div style="margin-top:8px;display:flex;gap:8px">
+      <input class="config-input" placeholder="描述你的延迟场景..." style="flex:1;font-size:12px">
+    </div>
+    <div class="ai-btn-row">
+      <button class="ai-btn ai-btn-primary">生成配置</button>
+      <button class="ai-btn ai-btn-ghost" onclick="nodeSkipAi('delay')">跳过</button>
+    </div>
+  </div>
+  <div style="display:flex;border-bottom:1px solid var(--border);margin-top:12px">
+    <div style="padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;border-bottom:2px solid var(--primary);color:var(--primary);margin-bottom:-1px">基础配置</div>
+  </div>
+  <div>
     <div class="config-field">
       <div class="config-label">延迟方式 <span class="req">*</span></div>
       <div class="method-chips">
@@ -1848,11 +2774,27 @@ body {
 <div class="config-panel">
   <div class="config-panel-header">
     <div class="config-panel-icon" style="background:var(--node-data);color:var(--node-data-fg)">📝</div>
-    <div style="flex:1"><input class="config-node-name-input" value="赋值" maxlength="50"><div class="config-panel-code">assign_1</div></div>
+    <div style="flex:1;min-width:0"><input class="config-node-name-input" value="赋值" maxlength="50"><div class="config-panel-code" onclick="startEditCode(this)" title="点击修改节点编码">assign_1 <span style="font-size:9px;opacity:0.5">✏️</span></div></div>
+    <button style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:11px;padding:4px" onclick="showNodeConvertModal('assign','赋值')" title="切换节点类型">🔄</button>
+    <button class="ai-guide-recall-btn" style="display:none" onclick="nodeAiRecall('assign')" title="重新展开 AI 引导">✦ AI 引导</button>
     <button onclick="toggleNodeDesc2('assignDesc')" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:16px;padding:4px">?</button>
   </div>
   <div class="node-desc-box" id="assignDesc">赋值节点按规则顺序执行，将表达式结果写入指定变量。支持引用上游节点输出变量进行计算。</div>
-  <div class="config-section">
+  <div class="ai-guide-bar" id="aiGuideBar-assign" style="margin:10px 0 0">
+    <strong>🤖 AI 引导</strong> — 描述需要计算的业务逻辑，AI 帮你自动生成赋值规则<br>
+    <span style="opacity:.65;font-size:11px">例如：「计算订单总金额 = 单价 × 数量 × 1.13」</span>
+    <div style="margin-top:8px;display:flex;gap:8px">
+      <input class="config-input" placeholder="描述你的计算逻辑..." style="flex:1;font-size:12px">
+    </div>
+    <div class="ai-btn-row">
+      <button class="ai-btn ai-btn-primary">生成规则</button>
+      <button class="ai-btn ai-btn-ghost" onclick="nodeSkipAi('assign')">跳过</button>
+    </div>
+  </div>
+  <div style="display:flex;border-bottom:1px solid var(--border);margin-top:12px">
+    <div style="padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;border-bottom:2px solid var(--primary);color:var(--primary);margin-bottom:-1px">基础配置</div>
+  </div>
+  <div>
     <div class="config-section-title">赋值规则（按序执行）</div>
     <div id="assignRules">
       <div style="border:1px solid var(--border);border-radius:7px;padding:9px 13px;margin-bottom:7px;display:flex;align-items:center;gap:6px;flex-wrap:wrap">
@@ -1874,11 +2816,27 @@ body {
 <div class="config-panel">
   <div class="config-panel-header">
     <div class="config-panel-icon" style="background:var(--node-data);color:var(--node-data-fg)">📤</div>
-    <div style="flex:1"><input class="config-node-name-input" value="输出" maxlength="50"><div class="config-panel-code">output_1</div></div>
+    <div style="flex:1;min-width:0"><input class="config-node-name-input" value="输出" maxlength="50"><div class="config-panel-code" onclick="startEditCode(this)" title="点击修改节点编码">output_1 <span style="font-size:9px;opacity:0.5">✏️</span></div></div>
+    <button style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:11px;padding:4px" onclick="showNodeConvertModal('output','输出')" title="切换节点类型">🔄</button>
+    <button class="ai-guide-recall-btn" style="display:none" onclick="nodeAiRecall('output')" title="重新展开 AI 引导">✦ AI 引导</button>
     <button onclick="toggleNodeDesc2('outputDesc')" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:16px;padding:4px">?</button>
   </div>
   <div class="node-desc-box" id="outputDesc">应用流中记录日志；对话流中向用户发送回复内容（非终止性，流程继续执行）。支持流式回复模式。</div>
-  <div class="config-section">
+  <div class="ai-guide-bar" id="aiGuideBar-output" style="margin:10px 0 0">
+    <strong>🤖 AI 引导</strong> — 描述需要输出的内容，AI 帮你自动生成输出模板<br>
+    <span style="opacity:.65;font-size:11px">例如：「告知用户订单 {orderId} 已处理完成，总金额 {total}」</span>
+    <div style="margin-top:8px;display:flex;gap:8px">
+      <input class="config-input" placeholder="描述输出内容..." style="flex:1;font-size:12px">
+    </div>
+    <div class="ai-btn-row">
+      <button class="ai-btn ai-btn-primary">生成模板</button>
+      <button class="ai-btn ai-btn-ghost" onclick="nodeSkipAi('output')">跳过</button>
+    </div>
+  </div>
+  <div style="display:flex;border-bottom:1px solid var(--border);margin-top:12px">
+    <div style="padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;border-bottom:2px solid var(--primary);color:var(--primary);margin-bottom:-1px">基础配置</div>
+  </div>
+  <div>
     <div class="config-field">
       <div class="config-label">输出内容 <span class="req">*</span></div>
       <textarea class="config-input" rows="2" placeholder="支持变量引用，如 处理完成：${assign_1.totalAmount}"></textarea>
@@ -1903,11 +2861,29 @@ body {
 <div class="config-panel">
   <div class="config-panel-header">
     <div class="config-panel-icon" style="background:var(--node-data);color:var(--node-data-fg)">💻</div>
-    <div style="flex:1"><input class="config-node-name-input" value="代码" maxlength="50"><div class="config-panel-code">code_1</div></div>
+    <div style="flex:1;min-width:0"><input class="config-node-name-input" value="代码" maxlength="50"><div class="config-panel-code" onclick="startEditCode(this)" title="点击修改节点编码">code_1 <span style="font-size:9px;opacity:0.5">✏️</span></div></div>
+    <button style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:11px;padding:4px" onclick="showNodeConvertModal('code','代码')" title="切换节点类型">🔄</button>
+    <button class="ai-guide-recall-btn" style="display:none" onclick="nodeAiRecall('code')" title="重新展开 AI 引导">✦ AI 引导</button>
     <button onclick="toggleNodeDesc2('codeDesc')" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:16px;padding:4px">?</button>
   </div>
   <div class="node-desc-box" id="codeDesc">执行自定义脚本，支持 JavaScript 和 Python。通过 inputs 对象访问上游变量，return 返回输出变量。</div>
-  <div class="config-section">
+  <div class="ai-guide-bar" id="aiGuideBar-code" style="margin:10px 0 0">
+    <strong>🤖 AI 引导</strong> — 描述需要实现的计算逻辑，AI 帮你自动生成脚本<br>
+    <span style="opacity:.65;font-size:11px">例如：「计算订单金额加 13% 税后的总价，返回 total 字段」</span>
+    <div style="margin-top:8px;display:flex;gap:8px">
+      <input class="config-input" placeholder="描述你的计算逻辑..." style="flex:1;font-size:12px">
+    </div>
+    <div class="ai-btn-row">
+      <button class="ai-btn ai-btn-primary">生成脚本</button>
+      <button class="ai-btn ai-btn-ghost" onclick="nodeSkipAi('code')">跳过</button>
+    </div>
+  </div>
+  <!-- 基础/高级配置 Tab -->
+  <div style="display:flex;border-bottom:1px solid var(--border);margin-top:12px">
+    <div id="tabBasic-code" onclick="nodeTab('code','basic')" style="padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;border-bottom:2px solid var(--primary);color:var(--primary);margin-bottom:-1px">基础配置</div>
+    <div id="tabAdv-code" onclick="nodeTab('code','adv')" style="padding:6px 14px;font-size:12px;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px">高级配置</div>
+  </div>
+  <div id="tabBasicBody-code">
     <div class="config-field">
       <div class="config-label">脚本语言 <span class="req">*</span></div>
       <div class="method-chips">
@@ -1924,7 +2900,7 @@ body {
       </div>
       <div class="code-expand">↗ 展开全屏编辑器</div>
     </div>
-  </div>
+  </div><!-- tabBasicBody-code end -->
   <div class="config-section">
     <div class="config-section-title">输出变量声明</div>
     <div class="config-help" style="margin-bottom:8px">声明 return 中的变量，供下游节点引用。设计时声明类型，运行时填充实际值。</div>
@@ -1933,18 +2909,23 @@ body {
       <span style="font-size:18px;color:var(--text-muted);cursor:pointer">×</span>
     </div>
     <div class="add-link">+ 添加输出变量</div>
-  </div>
-  <div class="config-advanced-toggle" onclick="toggleAdvanced('code')">
-    <span>▶ 高级配置（超时 / 异常策略 / 汇合策略）</span>
-    <span class="toggle-dot" id="dotCode"></span>
-  </div>
-  <div class="config-advanced-body" id="advBodyCode">
+  </div><!-- config-section 输出变量声明 end -->
+  <div id="tabAdvBody-code" style="display:none">
     <div class="config-section">
       <div class="config-field"><div class="config-label">超时时间（秒）</div><input class="config-input" type="number" value="30" style="width:100px"></div>
+      <div class="config-field">
+        <div class="config-label">异常策略</div>
+        <select class="config-input" style="font-size:12px">
+          <option value="stop">终止流程（默认）</option>
+          <option value="continue">忽略并继续</option>
+          <option value="retry">自动重试</option>
+          <option value="manual">转人工处理</option>
+          <option value="callback">挂起等待回调</option>
+        </select>
+      </div>
       <div class="config-field"><div class="config-label">汇合策略</div><select class="config-input" style="font-size:12px"><option>等待全部完成</option><option>任一完成即继续</option></select></div>
-      <div class="config-field"><div class="config-label">异常策略</div><select class="config-input" style="font-size:12px"><option>终止流程（默认）</option><option>忽略并继续</option><option>自动重试</option><option>转人工处理</option><option>挂起等待回调</option></select></div>
     </div>
-  </div>
+  </div><!-- tabAdvBody-code end -->
 </div>
 
 <!-- end config-panel for code -->
@@ -1957,21 +2938,49 @@ body {
 <div class="config-panel">
   <div class="config-panel-header">
     <div class="config-panel-icon" style="background:var(--node-integration);color:var(--node-integration-fg)">🌐</div>
-    <div style="flex:1"><input class="config-node-name-input" value="HTTP 请求" maxlength="50"><div class="config-panel-code">http_1</div></div>
+    <div style="flex:1;min-width:0"><input class="config-node-name-input" value="HTTP 请求" maxlength="50"><div class="config-panel-code" onclick="startEditCode(this)" title="点击修改节点编码">http_1 <span style="font-size:9px;opacity:0.5">✏️</span></div></div>
+    <button style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:11px;padding:4px" onclick="showNodeConvertModal('http','HTTP 请求')" title="切换节点类型">🔄</button>
+    <button class="ai-guide-recall-btn" style="display:none" onclick="nodeAiRecall('http2')" title="重新展开 AI 引导">✦ AI 引导</button>
+    <button onclick="toggleNodeDesc2('httpDesc')" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:16px;padding:4px">?</button>
   </div>
-  <div class="config-section">
+  <div class="node-desc-box" id="httpDesc">HTTP 请求节点向外部或内部系统发送 HTTP 请求，支持 GET/POST/PUT/DELETE/PATCH 方法。适用于调用第三方 API、查询内部服务、触发 WebHook 等场景。请求 URL 为必填项；建议配置超时和重试策略；挂起等待回调模式适合异步处理场景。</div>
+  <div class="ai-guide-bar" id="aiGuideBar-http2" style="margin:10px 0 0">
+    <strong>🤖 AI 引导</strong> — 描述你想调用的接口，AI 帮你自动填写配置<br>
+    <span style="opacity:.65;font-size:11px">例如：「调用订单服务的查询接口，传入 orderId，GET 请求」</span>
+    <div style="margin-top:8px;display:flex;gap:8px">
+      <input class="config-input" placeholder="描述你的需求..." style="flex:1;font-size:12px">
+    </div>
+    <div class="ai-btn-row">
+      <button class="ai-btn ai-btn-primary">生成配置</button>
+      <button class="ai-btn ai-btn-ghost" onclick="nodeSkipAi('http2')">跳过</button>
+    </div>
+  </div>
+  <!-- 基础/高级配置 Tab -->
+  <div style="display:flex;border-bottom:1px solid var(--border);margin-top:12px">
+    <div id="tabBasic-http2" onclick="nodeTab('http2','basic')" style="padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;border-bottom:2px solid var(--primary);color:var(--primary);margin-bottom:-1px">基础配置</div>
+    <div id="tabAdv-http2" onclick="nodeTab('http2','adv')" style="padding:6px 14px;font-size:12px;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px">高级配置</div>
+  </div>
+  <div id="tabBasicBody-http2">
     <div class="config-field"><div class="config-label">请求 URL <span class="req">*</span></div><input class="config-input" placeholder="https://api.example.com/orders/{id}"><div class="config-help">支持变量引用，如 https://api.example.com/orders/${trigger_1.orderId}</div></div>
     <div class="config-field"><div class="config-label">请求方法 <span class="req">*</span></div><div class="method-chips"><div class="method-chip" onclick="toggleChip(this)">GET</div><div class="method-chip" onclick="toggleChip(this)">POST</div><div class="method-chip" onclick="toggleChip(this)">PUT</div><div class="method-chip" onclick="toggleChip(this)">DELETE</div><div class="method-chip" onclick="toggleChip(this)">PATCH</div></div></div>
     <div class="config-field"><div class="config-label">Headers</div><input class="config-input" placeholder="Content-Type: application/json"></div>
-  </div>
-  <div class="config-advanced-toggle" onclick="toggleAdvanced('http2')"><span>▶ 高级配置（超时 / 认证 / 异常策略 / 汇合策略）</span><span class="toggle-dot" id="dotHttp2"></span></div>
-  <div class="config-advanced-body" id="advBodyHttp2">
+  </div><!-- tabBasicBody-http2 end -->
+  <div id="tabAdvBody-http2" style="display:none">
     <div class="config-section">
       <div class="config-field"><div class="config-label">超时时间（秒）</div><input class="config-input" type="number" value="30" style="width:100px"></div>
+      <div class="config-field">
+        <div class="config-label">异常策略</div>
+        <select class="config-input" style="font-size:12px">
+          <option value="stop">终止流程（默认）</option>
+          <option value="continue">忽略并继续</option>
+          <option value="retry">自动重试</option>
+          <option value="manual">转人工处理</option>
+          <option value="callback">挂起等待回调</option>
+        </select>
+      </div>
       <div class="config-field"><div class="config-label">汇合策略</div><select class="config-input" style="font-size:12px"><option>等待全部完成 (Wait All)</option><option>任一完成即继续 (Any)</option></select></div>
-      <div class="config-field"><div class="config-label">异常策略</div><select class="config-input" style="font-size:12px"><option>终止流程（默认）</option><option>忽略并继续</option><option>自动重试</option><option>转人工处理</option><option>挂起等待回调</option></select></div>
     </div>
-  </div>
+  </div><!-- tabAdvBody-http2 end -->
 </div>
 </div><!-- panel-http end -->
 
@@ -1980,25 +2989,48 @@ body {
 <div class="config-panel">
   <div class="config-panel-header">
     <div class="config-panel-icon" style="background:var(--node-integration);color:var(--node-integration-fg)">📨</div>
-    <div style="flex:1"><input class="config-node-name-input" value="MQ 发送" maxlength="50"><div class="config-panel-code">mq_1</div></div>
+    <div style="flex:1;min-width:0"><input class="config-node-name-input" value="MQ 发送" maxlength="50"><div class="config-panel-code" onclick="startEditCode(this)" title="点击修改节点编码">mq_1 <span style="font-size:9px;opacity:0.5">✏️</span></div></div>
+    <button style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:11px;padding:4px" onclick="showNodeConvertModal('mq','MQ 发送')" title="切换节点类型">🔄</button>
+    <button class="ai-guide-recall-btn" style="display:none" onclick="nodeAiRecall('mq')" title="重新展开 AI 引导">✦ AI 引导</button>
     <button onclick="toggleNodeDesc2('mqDesc')" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:16px;padding:4px" title="节点说明">?</button>
   </div>
   <div class="node-desc-box" id="mqDesc">MQ 发送节点向消息队列（Message Queue）投递消息，支持配置 Topic、消息内容、消息 Key 和属性。适用于异步解耦、事件通知等场景，如「发布订单创建事件」「推送数据变更通知」。</div>
-  <div class="config-section">
-    <div class="config-field"><div class="config-label">目标队列/Topic <span class="req">*</span></div><input class="config-input" value="order-events"></div>
-    <div class="config-field"><div class="config-label">消息内容 <span class="req">*</span></div><textarea class="config-input" rows="3" placeholder='{"orderId": "...", "status": "..."}'></textarea></div>
-  </div>
-  <div class="config-advanced-toggle" onclick="toggleAdvanced('mq')">
-    <span>▶ 高级配置（超时 / 异常策略 / 汇合策略）</span>
-    <span class="toggle-dot" id="dotMq"></span>
-  </div>
-  <div class="config-advanced-body" id="advBodyMq">
-    <div class="config-section">
-      <div class="config-field"><div class="config-label">超时时间（秒）</div><input class="config-input" type="number" value="30" style="width:100px"></div>
-      <div class="config-field"><div class="config-label">汇合策略</div><select class="config-input" style="font-size:12px"><option>等待全部完成</option><option>任一完成即继续</option></select></div>
-      <div class="config-field"><div class="config-label">异常策略</div><select class="config-input" style="font-size:12px"><option>终止流程（默认）</option><option>忽略并继续</option><option>自动重试</option><option>转人工处理</option><option>挂起等待回调</option></select></div>
+  <div class="ai-guide-bar" id="aiGuideBar-mq" style="margin:10px 0 0">
+    <strong>🤖 AI 引导</strong> — 描述需要发送的消息内容，AI 帮你自动生成消息模板<br>
+    <span style="opacity:.65;font-size:11px">例如：「向 order-events 发布订单已创建事件，包含 orderId 和 status」</span>
+    <div style="margin-top:8px;display:flex;gap:8px">
+      <input class="config-input" placeholder="描述你的消息内容..." style="flex:1;font-size:12px">
+    </div>
+    <div class="ai-btn-row">
+      <button class="ai-btn ai-btn-primary">生成配置</button>
+      <button class="ai-btn ai-btn-ghost" onclick="nodeSkipAi('mq')">跳过</button>
     </div>
   </div>
+  <!-- 基础/高级配置 Tab -->
+  <div style="display:flex;border-bottom:1px solid var(--border);margin-top:12px">
+    <div id="tabBasic-mq" onclick="nodeTab('mq','basic')" style="padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;border-bottom:2px solid var(--primary);color:var(--primary);margin-bottom:-1px">基础配置</div>
+    <div id="tabAdv-mq" onclick="nodeTab('mq','adv')" style="padding:6px 14px;font-size:12px;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px">高级配置</div>
+  </div>
+  <div id="tabBasicBody-mq">
+    <div class="config-field"><div class="config-label">目标队列/Topic <span class="req">*</span></div><input class="config-input" value="order-events"></div>
+    <div class="config-field"><div class="config-label">消息内容 <span class="req">*</span></div><textarea class="config-input" rows="3" placeholder='{"orderId": "...", "status": "..."}'></textarea></div>
+  </div><!-- tabBasicBody-mq end -->
+  <div id="tabAdvBody-mq" style="display:none">
+    <div class="config-section">
+      <div class="config-field"><div class="config-label">超时时间（秒）</div><input class="config-input" type="number" value="30" style="width:100px"></div>
+      <div class="config-field">
+        <div class="config-label">异常策略</div>
+        <select class="config-input" style="font-size:12px">
+          <option value="stop">终止流程（默认）</option>
+          <option value="continue">忽略并继续</option>
+          <option value="retry">自动重试</option>
+          <option value="manual">转人工处理</option>
+          <option value="callback">挂起等待回调</option>
+        </select>
+      </div>
+      <div class="config-field"><div class="config-label">汇合策略</div><select class="config-input" style="font-size:12px"><option>等待全部完成</option><option>任一完成即继续</option></select></div>
+    </div>
+  </div><!-- tabAdvBody-mq end -->
 </div>
 
 <!-- end config-panel for mq -->
@@ -2009,11 +3041,29 @@ body {
 <div class="config-panel">
   <div class="config-panel-header">
     <div class="config-panel-icon" style="background:var(--node-flow);color:var(--node-flow-fg)">🔗</div>
-    <div style="flex:1"><input class="config-node-name-input" value="工作流" maxlength="50"><div class="config-panel-code">workflow_1</div></div>
+    <div style="flex:1;min-width:0"><input class="config-node-name-input" value="工作流" maxlength="50"><div class="config-panel-code" onclick="startEditCode(this)" title="点击修改节点编码">workflow_1 <span style="font-size:9px;opacity:0.5">✏️</span></div></div>
+    <button style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:11px;padding:4px" onclick="showNodeConvertModal('workflow','工作流')" title="切换节点类型">🔄</button>
+    <button class="ai-guide-recall-btn" style="display:none" onclick="nodeAiRecall('wf')" title="重新展开 AI 引导">✦ AI 引导</button>
     <button onclick="toggleNodeDesc2('wfDesc')" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:16px;padding:4px">?</button>
   </div>
   <div class="node-desc-box" id="wfDesc">工作流节点调用另一个已发布的工作流（子流程），支持同步等待执行结果。系统自动检测循环引用。</div>
-  <div class="config-section">
+  <div class="ai-guide-bar" id="aiGuideBar-wf" style="margin:10px 0 0">
+    <strong>🤖 AI 引导</strong> — 描述需要调用的子流程功能，AI 帮你自动配置参数映射<br>
+    <span style="opacity:.65;font-size:11px">例如：「调用发送通知流程，传入订单号和客户邮笱」</span>
+    <div style="margin-top:8px;display:flex;gap:8px">
+      <input class="config-input" placeholder="描述子流程用途..." style="flex:1;font-size:12px">
+    </div>
+    <div class="ai-btn-row">
+      <button class="ai-btn ai-btn-primary">生成配置</button>
+      <button class="ai-btn ai-btn-ghost" onclick="nodeSkipAi('wf')">跳过</button>
+    </div>
+  </div>
+  <!-- 基础/高级配置 Tab -->
+  <div style="display:flex;border-bottom:1px solid var(--border);margin-top:12px">
+    <div id="tabBasic-wf" onclick="nodeTab('wf','basic')" style="padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;border-bottom:2px solid var(--primary);color:var(--primary);margin-bottom:-1px">基础配置</div>
+    <div id="tabAdv-wf" onclick="nodeTab('wf','adv')" style="padding:6px 14px;font-size:12px;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px">高级配置</div>
+  </div>
+  <div id="tabBasicBody-wf">
     <div class="config-field"><div class="config-label">目标工作流 <span class="req">*</span></div>
       <select class="config-input" style="font-size:12px"><option>发送通知流程 (已发布 v2)</option><option>数据清洗流程 (已发布 v1)</option></select>
     </div>
@@ -2027,18 +3077,23 @@ body {
     <div class="config-help">声明子流程的输出变量供下游引用（设计时声明，运行时填充）</div>
     <div class="output-var-card" style="margin-top:8px"><div><div class="output-var-name">notifyResult</div><div style="margin-top:2px"><span class="badge badge-primary">String</span></div></div><span style="font-size:18px;color:var(--text-muted);cursor:pointer">×</span></div>
     <div class="add-link">+ 添加输出变量</div>
-  </div>
-  <div class="config-advanced-toggle" onclick="toggleAdvanced('wf')">
-    <span>▶ 高级配置（超时 / 异常策略 / 汇合策略）</span>
-    <span class="toggle-dot" id="dotWf"></span>
-  </div>
-  <div class="config-advanced-body" id="advBodyWf">
+  </div><!-- tabBasicBody-wf end -->
+  <div id="tabAdvBody-wf" style="display:none">
     <div class="config-section">
       <div class="config-field"><div class="config-label">子流程执行超时（秒）</div><input class="config-input" type="number" value="300" style="width:100px"></div>
+      <div class="config-field">
+        <div class="config-label">异常策略</div>
+        <select class="config-input" style="font-size:12px">
+          <option value="stop">终止流程（默认）</option>
+          <option value="continue">忽略并继续</option>
+          <option value="retry">自动重试</option>
+          <option value="manual">转人工处理</option>
+          <option value="callback">挂起等待回调</option>
+        </select>
+      </div>
       <div class="config-field"><div class="config-label">汇合策略</div><select class="config-input" style="font-size:12px"><option>等待全部完成</option><option>任一完成即继续</option></select></div>
-      <div class="config-field"><div class="config-label">异常策略</div><select class="config-input" style="font-size:12px"><option>终止流程（默认）</option><option>忽略并继续</option><option>自动重试</option><option>转人工处理</option><option>挂起等待回调</option></select></div>
     </div>
-  </div>
+  </div><!-- tabAdvBody-wf end -->
 </div>
 
 <!-- end config-panel for workflow -->
@@ -2076,7 +3131,7 @@ body {
 <tr><td>标题字号</td><td>13px / weight 600</td><td>默认纯文字，hover 变输入框</td></tr>
 <tr><td>编码字号</td><td>10px mono</td><td>灰色背景辅助标签</td></tr>
 <tr><td>摘要字号</td><td>11px</td><td>配置摘要文字，超长省略号截断</td></tr>
-<tr><td>端口尺寸</td><td>12 × 12px 圆形</td><td>hover 放大 1.4x；异常端口橙色</td></tr>
+<tr><td>端口尺寸</td><td>12 × 12px 圆形</td><td>hover 放大 1.4x</td></tr>
 <tr><td>错误徽标</td><td>18 × 18px 圆形</td><td>红色背景白色数字</td></tr>
 </tbody>
 </table>
@@ -2211,7 +3266,252 @@ function checkNameLength(input) {
   }
 }
 
+// ===== 节点编码内联编辑 =====
+function startEditCode(el) {
+  if (el.classList.contains('editing') || el.classList.contains('code-readonly')) return;
+
+  const pencilSpan = el.querySelector('span');
+  const originalCode = el.textContent.trim().replace(/\s*[\u270f\ufe0f\u270f]+\s*$/,'').trim();
+
+  // 清空内容，换成 input
+  el.innerHTML = '';
+  el.classList.add('editing');
+
+  const input = document.createElement('input');
+  input.className = 'config-panel-code-input';
+  input.value = originalCode;
+  input.maxLength = 50;
+  el.appendChild(input);
+  input.focus();
+  input.select();
+
+  // 消息层（Enter/Esc 提示）
+  let tipEl = el.nextElementSibling;
+  if (!tipEl || !tipEl.classList.contains('config-code-edit-tip')) {
+    tipEl = document.createElement('div');
+    tipEl.className = 'config-code-edit-tip';
+    tipEl.style.cssText = 'font-size:10px;color:var(--text-muted);margin-top:2px';
+    tipEl.textContent = 'Enter 确认 · Esc 取消';
+    el.parentNode.insertBefore(tipEl, el.nextSibling);
+  } else {
+    tipEl.style.display = '';
+  }
+
+  // 错误提示
+  let errEl = tipEl.nextElementSibling;
+  if (!errEl || !errEl.classList.contains('config-code-err-msg')) {
+    errEl = document.createElement('div');
+    errEl.className = 'config-code-err-msg';
+    errEl.style.cssText = 'font-size:10px;color:var(--danger);display:none;margin-top:1px';
+    tipEl.parentNode.insertBefore(errEl, tipEl.nextSibling);
+  }
+
+  const codeReg = /^[a-zA-Z0-9_]{1,50}$/;
+
+  function validate(val) {
+    if (!val) return '编码不能为空';
+    if (!codeReg.test(val)) return '只允许英文、数字、下划线（1–50字符）';
+    return '';
+  }
+
+  input.oninput = function() {
+    const err = validate(input.value);
+    if (err) {
+      el.classList.add('code-error');
+      errEl.textContent = err;
+      errEl.style.display = '';
+    } else {
+      el.classList.remove('code-error');
+      errEl.style.display = 'none';
+    }
+  };
+
+  function commit() {
+    const newVal = input.value.trim();
+    const err = validate(newVal);
+    if (err) {
+      el.classList.add('code-error');
+      errEl.textContent = err;
+      errEl.style.display = '';
+      input.focus();
+      return;
+    }
+    el.classList.remove('editing', 'code-error');
+    el.innerHTML = newVal + ' <span style="font-size:9px;opacity:0.5">✏️</span>';
+    if (tipEl) tipEl.style.display = 'none';
+    if (errEl) errEl.style.display = 'none';
+
+    // 模拟确认反馈：编码标签短暂闪烁
+    el.style.background = 'rgba(22,163,74,0.08)';
+    el.style.borderColor = 'var(--success)';
+    setTimeout(function() { el.style.background = ''; el.style.borderColor = ''; }, 800);
+  }
+
+  function cancel() {
+    el.classList.remove('editing', 'code-error');
+    el.innerHTML = originalCode + ' <span style="font-size:9px;opacity:0.5">✏️</span>';
+    if (tipEl) tipEl.style.display = 'none';
+    if (errEl) errEl.style.display = 'none';
+  }
+
+  input.onkeydown = function(e) {
+    if (e.key === 'Enter') { e.preventDefault(); commit(); }
+    if (e.key === 'Escape') { cancel(); }
+  };
+
+  input.onblur = function() {
+    // 延迟处理，避免点击 Esc 时覆盖
+    setTimeout(function() {
+      if (el.classList.contains('editing')) { commit(); }
+    }, 150);
+  };
+}
+
 // ===== Node Desc Toggle =====
+// ===== Demo Panel Tab Switch =====
+function demoPanelTab(tab) {
+  const basicBody = document.getElementById('demoBasicBody');
+  const advBody = document.getElementById('demoAdvBody');
+  const tabBasic = document.getElementById('demoTabBasic');
+  const tabAdv = document.getElementById('demoTabAdv');
+  if (!basicBody || !advBody) return;
+  if (tab === 'basic') {
+    basicBody.style.display = '';
+    advBody.style.display = 'none';
+    tabBasic.style.borderBottomColor = 'var(--primary)';
+    tabBasic.style.color = 'var(--primary)';
+    tabBasic.style.fontWeight = '600';
+    tabAdv.style.borderBottomColor = 'transparent';
+    tabAdv.style.color = 'var(--text-muted)';
+    tabAdv.style.fontWeight = 'normal';
+  } else {
+    basicBody.style.display = 'none';
+    advBody.style.display = '';
+    tabAdv.style.borderBottomColor = 'var(--primary)';
+    tabAdv.style.color = 'var(--primary)';
+    tabAdv.style.fontWeight = '600';
+    tabBasic.style.borderBottomColor = 'transparent';
+    tabBasic.style.color = 'var(--text-muted)';
+    tabBasic.style.fontWeight = 'normal';
+  }
+}
+
+// ===== 各节点配置面板 Tab 切换 =====
+function nodeTab(nodeId, tab) {
+  const basicBody = document.getElementById('tabBasicBody-' + nodeId);
+  const advBody = document.getElementById('tabAdvBody-' + nodeId);
+  const tabBasic = document.getElementById('tabBasic-' + nodeId);
+  const tabAdv = document.getElementById('tabAdv-' + nodeId);
+  if (!basicBody) return;
+  if (tab === 'basic') {
+    basicBody.style.display = '';
+    if (advBody) advBody.style.display = 'none';
+    tabBasic.style.borderBottomColor = 'var(--primary)';
+    tabBasic.style.color = 'var(--primary)';
+    tabBasic.style.fontWeight = '600';
+    if (tabAdv) { tabAdv.style.borderBottomColor = 'transparent'; tabAdv.style.color = 'var(--text-muted)'; tabAdv.style.fontWeight = 'normal'; }
+  } else {
+    basicBody.style.display = 'none';
+    if (advBody) advBody.style.display = '';
+    if (tabAdv) { tabAdv.style.borderBottomColor = 'var(--primary)'; tabAdv.style.color = 'var(--primary)'; tabAdv.style.fontWeight = '600'; }
+    tabBasic.style.borderBottomColor = 'transparent';
+    tabBasic.style.color = 'var(--text-muted)';
+    tabBasic.style.fontWeight = 'normal';
+  }
+}
+
+// ===== 各节点 AI 引导跳过 =====
+function nodeSkipAi(nodeId) {
+  const bar = document.getElementById('aiGuideBar-' + nodeId);
+  if (bar) bar.style.display = 'none';
+  const btn = document.querySelector('[onclick="nodeAiRecall(\'' + nodeId + '\')"]');
+  if (btn) btn.style.display = '';
+}
+function nodeAiRecall(nodeId) {
+  const bar = document.getElementById('aiGuideBar-' + nodeId);
+  if (bar) bar.style.display = '';
+  const btn = document.querySelector('[onclick="nodeAiRecall(\'' + nodeId + '\')"' + ']');
+  if (btn) btn.style.display = 'none';
+}
+
+// ===== 节点类型转换 Modal =====
+const _nodeConvertTypes = [
+  { type: 'if',       name: 'IF 条件',  icon: '🔀', cat: '流程控制' },
+  { type: 'switch',   name: 'Switch',    icon: '🔃', cat: '流程控制' },
+  { type: 'loop',     name: '循环',     icon: '🔄', cat: '流程控制' },
+  { type: 'delay',    name: '延迟',     icon: '⏱️', cat: '流程控制' },
+  { type: 'assign',   name: '赋值',     icon: '📝', cat: '数据执行' },
+  { type: 'output',   name: '输出',     icon: '📤', cat: '数据执行' },
+  { type: 'code',     name: '代码',     icon: '💻', cat: '数据执行' },
+  { type: 'http',     name: 'HTTP 请求', icon: '🌐', cat: '集成扩展' },
+  { type: 'mq',       name: 'MQ 发送',  icon: '📨', cat: '集成扩展' },
+  { type: 'workflow', name: '工作流',   icon: '🔗', cat: '集成扩展' },
+];
+
+const _convertHint = {
+  '流程控制-流程控制': '⚠️ 部分配置可保留',
+  'if-switch': '✅ 可保留条件配置',
+  'switch-if': '✅ 可保留条件配置',
+  '数据执行-数据执行': '⚠️ 部分配置可保留',
+  'default': '❌ 配置将重置'
+};
+
+function _getHint(fromType, fromCat, toType, toCat) {
+  const key = fromType + '-' + toType;
+  if (_convertHint[key]) return _convertHint[key];
+  if (fromCat === toCat) return _convertHint[fromCat + '-' + toCat] || '⚠️ 部分配置可保留';
+  return _convertHint['default'];
+}
+
+function showNodeConvertModal(currentType, currentName) {
+  const others = _nodeConvertTypes.filter(t => t.type !== currentType);
+  const currentCat = (_nodeConvertTypes.find(t => t.type === currentType) || {}).cat || '';
+  const same = others.filter(t => t.cat === currentCat);
+  const diff = others.filter(t => t.cat !== currentCat);
+
+  function makeItems(list) {
+    return list.map(t => {
+      const hint = _getHint(currentType, currentCat, t.type, t.cat);
+      const hintColor = hint.startsWith('✅') ? '#16a34a' : hint.startsWith('⚠') ? '#d97706' : '#dc2626';
+      return `<div onclick="confirmNodeConvert('${t.name}')" style="display:flex;align-items:center;gap:10px;padding:9px 16px;cursor:pointer;border-radius:6px;transition:background 0.12s" onmouseover="this.style.background='rgba(103,80,164,0.06)'" onmouseout="this.style.background=''">
+        <span style="font-size:16px;width:22px;text-align:center">${t.icon}</span>
+        <span style="flex:1;font-size:13px;font-weight:500;color:var(--text)">${t.name}</span>
+        <span style="font-size:11px;color:${hintColor};white-space:nowrap">${hint}</span>
+      </div>`;
+    }).join('');
+  }
+
+  let body = '';
+  if (same.length) {
+    body += `<div style="font-size:11px;font-weight:700;color:var(--text-muted);padding:8px 16px 4px;letter-spacing:.05em">同类节点</div>${makeItems(same)}`;
+  }
+  if (diff.length) {
+    body += `<div style="font-size:11px;font-weight:700;color:var(--text-muted);padding:8px 16px 4px;letter-spacing:.05em;${same.length ? 'border-top:1px solid var(--border);margin-top:4px' : ''}">\u5176他类型</div>${makeItems(diff)}`;
+  }
+
+  const overlay = document.getElementById('nodeConvertOverlay');
+  document.getElementById('nodeConvertCurrentName').textContent = currentName || '当前节点';
+  document.getElementById('nodeConvertList').innerHTML = body;
+  overlay.style.display = 'flex';
+}
+
+function closeNodeConvertModal() {
+  document.getElementById('nodeConvertOverlay').style.display = 'none';
+}
+
+function confirmNodeConvert(targetName) {
+  closeNodeConvertModal();
+  // 显示 Toast 提示
+  const toast = document.getElementById('nodeConvertToast');
+  toast.textContent = '已切换为「' + targetName + '」（演示模式，不真实切换）';
+  toast.style.opacity = '1';
+  toast.style.transform = 'translateY(0)';
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateY(8px)';
+  }, 2200);
+}
+
 function toggleNodeDesc() {
   const box = document.getElementById('nodeDescBox');
   box.classList.toggle('open');
@@ -2297,40 +3597,6 @@ function resetAiGuide() {
   document.getElementById('aiConfiguredBar').classList.add('hidden');
   document.getElementById('aiGuideBar').classList.remove('hidden');
   document.getElementById('aiInput').value = '';
-}
-
-// ===== Error Strategy Select =====
-function toggleErrorBranch() {
-  const sel = document.getElementById('errorStrategy');
-  if (!sel) return;
-  const val = sel.value;
-  const retryOpts = document.getElementById('retryOptions');
-  const branchTip = document.getElementById('branchTip');
-  const helpEl = document.getElementById('errorStrategyHelp');
-  const helps = {
-    terminate: '节点异常时立即终止整个工作流实例',
-    ignore: '跳过异常，流程继续往下执行',
-    retry: '按配置的次数和间隔重试，重试耗尽后降级为终止流程',
-    branch: '节点有专属异常出口连线时，路由到异常分支处理'
-  };
-  if (helpEl) helpEl.textContent = helps[val] || '';
-  if (retryOpts) retryOpts.style.display = val === 'retry' ? 'block' : 'none';
-  if (branchTip) branchTip.style.display = val === 'branch' ? 'block' : 'none';
-  // show blue dot if non-default
-  const dot = document.getElementById('dotHttp');
-  if (dot) dot.classList.toggle('show', val !== 'terminate');
-}
-
-// ===== Merge Strategy Demo =====
-function updateMergeDesc() {
-  const sel = document.getElementById('mergeSelect');
-  const desc = document.getElementById('mergeDesc');
-  if (!sel || !desc) return;
-  const descs = {
-    all: '所有入线分支均到达后，该节点才开始执行。可引用所有分支的输出变量。',
-    any: '任一入线分支到达后，该节点即刻开始执行。只能引用已到达分支的输出，未到达分支的变量为空。'
-  };
-  desc.textContent = descs[sel.value] || '';
 }
 
 // ===== IF View Switch =====
@@ -2461,7 +3727,1507 @@ function addParam(containerId, nodeCode) {
   <div class="param-ref">${nodeCode}.参数名</div>`;
   container.appendChild(card);
 }
+
+// ===== 开始节点参数卡片交互逻辑 =====
+
+// 从 <select> 选项文本中提取类型标签（如 "短文本 → String" → "String"）
+function _extractTypeBadge(selectEl) {
+  const text = selectEl.options[selectEl.selectedIndex].text;
+  const m = text.match(/→\s*(\S+)/);
+  return m ? m[1] : text;
+}
+
+// 绑定表单联动：变量名 / 字段类型 / 必填 → 实时更新 header
+function bindTparamSync(card) {
+  const header = card.querySelector('.tparam-card-header');
+  const body   = card.querySelector('.tparam-body');
+  if (!header || !body) return;
+
+  // 找到各表单字段（按 label 文本定位）
+  const fields   = body.querySelectorAll('.tparam-field');
+  let varInput   = null;   // 变量名
+  let typeSelect = null;   // 字段类型
+  let reqCheck   = null;   // 必填 checkbox
+  fields.forEach(f => {
+    const lbl = f.querySelector('.tparam-label-text');
+    if (!lbl) return;
+    const txt = lbl.textContent.trim();
+    if (txt.includes('变量名'))   varInput   = f.querySelector('input');
+    if (txt.includes('字段类型')) typeSelect = f.querySelector('select');
+  });
+  reqCheck = body.querySelector('input[type="checkbox"]');
+
+  // 找 header 中的目标元素
+  const labelEl  = header.querySelector('.tparam-label');
+  const badgeEl  = header.querySelector('.badge');
+
+  function syncHeader() {
+    // 1. 同步变量名
+    if (varInput && labelEl) {
+      const v = varInput.value.trim();
+      if (v) {
+        labelEl.textContent = v;
+        labelEl.style.color = '';
+      } else {
+        labelEl.textContent = '新参数';
+        labelEl.style.color = 'var(--text-muted)';
+      }
+    }
+    // 2. 同步类型 badge
+    if (typeSelect && badgeEl) {
+      badgeEl.textContent = _extractTypeBadge(typeSelect);
+    }
+    // 3. 同步必填标签（每次动态查找，避免闭包缓存问题）
+    if (reqCheck) {
+      const existingTag = header.querySelector('.tparam-required-tag');
+      if (reqCheck.checked) {
+        if (!existingTag) {
+          const tag = document.createElement('span');
+          tag.className = 'tparam-required-tag';
+          tag.textContent = '必填';
+          if (badgeEl) badgeEl.insertAdjacentElement('afterend', tag);
+          else labelEl.insertAdjacentElement('afterend', tag);
+        }
+      } else {
+        if (existingTag) existingTag.remove();
+      }
+    }
+  }
+
+  if (varInput)   varInput.addEventListener('input', syncHeader);
+  if (typeSelect) typeSelect.addEventListener('change', syncHeader);
+  if (reqCheck)   reqCheck.addEventListener('change', syncHeader);
+}
+
+// 点击 header 切换展开/折叠，同时管理卡片边框状态
+function toggleTparam(header) {
+  const card    = header.closest('.tparam-card');
+  const body    = card.querySelector('.tparam-body');
+  const chevron = header.querySelector('.tparam-chevron');
+  if (!body) return;
+
+  const isOpen = body.style.display !== 'none';
+  body.style.display = isOpen ? 'none' : 'block';
+
+  if (isOpen) {
+    // 折叠：同步显示名称和变量名到 header
+    const labelEl = header.querySelector('.tparam-label');
+    const varnameEl = header.querySelector('.tparam-varname');
+    const displayNameInput = body.querySelector('.tparam-field input.config-input');
+    const varNameInput = body.querySelector('input.config-input[style*="font-mono"]');
+    if (labelEl && displayNameInput && displayNameInput.value.trim()) {
+      labelEl.textContent = displayNameInput.value.trim();
+      labelEl.style.color = '';
+    }
+    if (varnameEl && varNameInput) {
+      varnameEl.textContent = varNameInput.value.trim();
+    }
+    card.classList.remove('tparam-card-new');
+    card.style.borderColor = '';
+    card.style.borderStyle = '';
+  } else {
+    // 展开：始终高亮实线
+    card.classList.remove('tparam-card-new');
+    card.style.borderColor = 'var(--primary)';
+    card.style.borderStyle = 'solid';
+  }
+
+  if (chevron) chevron.style.transform = isOpen ? '' : 'rotate(90deg)';
+}
+
+// 显示名称输入时实时同步到 header label
+function _syncTparamHeaderLabel(input) {
+  const header = input.closest('.tparam-card').querySelector('.tparam-card-header');
+  const labelEl = header ? header.querySelector('.tparam-label') : null;
+  if (labelEl) {
+    const val = input.value.trim();
+    labelEl.textContent = val || '新参数';
+    labelEl.style.color = val ? '' : 'var(--text-muted)';
+  }
+  // 同时实时同步变量名到 header
+  const varnameEl = header ? header.querySelector('.tparam-varname') : null;
+  if (varnameEl) {
+    const body = input.closest('.tparam-body');
+    const varNameInput = body ? body.querySelector('input.config-input[style*="font-mono"]') : null;
+    if (varNameInput) varnameEl.textContent = varNameInput.value.trim();
+  }
+}
+
+function removeTriggerParam(btn) {
+  btn.closest('.tparam-card').remove();
+  document.querySelectorAll('#triggerParamList .tparam-card').forEach((c, i) => {
+    const idx = c.querySelector('.tparam-index');
+    if (idx) idx.textContent = i + 1;
+  });
+}
+
+function addTriggerParamCard() {
+  const list = document.getElementById('triggerParamList');
+  if (!list) return;
+  const idx = list.querySelectorAll('.tparam-card').length + 1;
+  const card = document.createElement('div');
+  card.className = 'tparam-card tparam-card-new';
+  card.style.borderColor = 'var(--primary)';
+  card.innerHTML = `
+    <div class="tparam-card-header" onclick="toggleTparam(this)" style="cursor:pointer;user-select:none">
+      <div style="display:flex;align-items:center;gap:6px">
+        <span class="tparam-index">${idx}</span>
+        <span class="tparam-label" style="color:var(--text-muted)">新参数</span>
+        <span class="badge badge-primary" style="font-size:10px">String</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:4px">
+        <span class="tparam-chevron" style="font-size:10px;color:var(--text-muted);transition:transform 0.2s;display:inline-block;transform:rotate(90deg)">▶</span>
+        <button onclick="event.stopPropagation();removeTriggerParam(this)" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:14px;line-height:1;padding:2px 4px">×</button>
+      </div>
+    </div>
+    <div class="tparam-body" style="display:block;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
+      <div class="tparam-row">
+        <div class="tparam-field">
+          <label class="tparam-label-text">显示名称</label>
+          <input class="config-input" placeholder="如：客户姓名" style="font-size:11px">
+        </div>
+        <div class="tparam-field">
+          <label class="tparam-label-text">字段类型</label>
+          <select class="config-input" style="font-size:11px" onchange="onTparamTypeChange(this)">
+            <option>短文本 → String</option><option>长文本 → String</option>
+            <option>数字 → Integer</option><option>开关 → Boolean</option>
+            <option>日期时间 → DateTime</option><option>文件 → File</option>
+            <option>JSON 对象 → Object</option><option>数组（字符串）→ Array[String]</option><option>数组（对象）→ Array[Object]</option>
+          </select>
+        </div>
+      </div>
+      <!-- 结构定义行：仅 Object / Array[Object] 时显示 -->
+      <div class="tparam-schema-row">
+        <div class="tparam-schema-head">
+          <span class="tparam-schema-label">对象结构</span>
+          <button class="tparam-schema-btn" onclick="openSchemaModal(this)">定义结构</button>
+        </div>
+        <div class="tparam-schema-fields">
+          <span class="tparam-schema-summary-text">未定义，下游可通过 .字段名 自由引用</span>
+        </div>
+      </div>
+      <div class="tparam-row">
+        <div class="tparam-field">
+          <label class="tparam-label-text">变量名 <span style="color:#e53935">*</span></label>
+          <input class="config-input" placeholder="如：customer_name" style="font-size:11px;font-family:var(--font-mono)">
+        </div>
+        <div class="tparam-field">
+          <label class="tparam-label-text">占位提示</label>
+          <input class="config-input" placeholder="输入框的提示文字" style="font-size:11px">
+        </div>
+      </div>
+      <div class="tparam-row">
+        <div class="tparam-field" style="flex:1">
+          <label class="tparam-label-text">参数说明</label>
+          <input class="config-input" placeholder="对这个参数的用途做简要说明" style="font-size:11px">
+        </div>
+      </div>
+      <div class="tparam-row tparam-default-row">
+        <div class="tparam-field" style="flex:1">
+          <label class="tparam-label-text">\u9ed8\u8ba4\u503c <span style="font-size:10px;color:var(--text-muted);font-weight:400">\uff08\u53ef\u9009\uff09</span></label>
+          <input class="config-input tparam-default-input" placeholder="\u65e0\u9ed8\u8ba4\u503c" style="font-size:11px">
+          <label class="tparam-default-toggle" style="display:none;align-items:center;gap:6px;font-size:11px;cursor:pointer">
+            <input type="checkbox" class="tparam-default-bool" style="accent-color:var(--primary);width:13px;height:13px">
+            <span>\u9ed8\u8ba4\u5f00\u542f</span>
+          </label>
+        </div>
+      </div>
+      <div style="margin-top:6px">
+        <label style="display:inline-flex;align-items:center;gap:4px;font-size:11px;cursor:pointer">
+          <input type="checkbox" style="accent-color:var(--primary);width:12px;height:12px"> \u5fc5\u586b
+        </label>
+      </div>
+    </div>`;
+  list.appendChild(card);
+  bindTparamSync(card);
+  // 新增后自动 focus 变量名输入框
+  setTimeout(() => {
+    const varInputs = card.querySelectorAll('.tparam-field');
+    varInputs.forEach(f => {
+      const lbl = f.querySelector('.tparam-label-text');
+      if (lbl && lbl.textContent.includes('变量名')) {
+        const inp = f.querySelector('input');
+        if (inp) inp.focus();
+      }
+    });
+  }, 50);
+}
+
+// 页面就绪后为已有静态卡片绑定联动
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('#triggerParamList .tparam-card').forEach(bindTparamSync);
+});
+
+// ===== 结构定义弹窗逻辑 =====
+
+let _schemaTargetRow = null;  // 当前正在编辑的结构行元素
+
+// 类型 select 切换时联动显/隐结构定义行 + 默认值控件
+function onTparamTypeChange(selectEl) {
+  const card = selectEl.closest('.tparam-card');
+  if (!card) return;
+  // 结构定义行显隐
+  const schemaRow = card.querySelector('.tparam-schema-row');
+  if (schemaRow) {
+    const val = selectEl.value;
+    const needSchema = val.includes('Object');
+    schemaRow.classList.toggle('visible', needSchema);
+    const labelEl = schemaRow.querySelector('.tparam-schema-label');
+    if (labelEl) labelEl.textContent = val.includes('Array') ? '\u5143\u7d20\u7ed3\u6784' : '\u5bf9\u8c61\u7ed3\u6784';
+  }
+  // 默认值控件联动
+  const defaultRow = card.querySelector('.tparam-default-row');
+  const defaultInput = card.querySelector('.tparam-default-input');
+  const defaultToggle = card.querySelector('.tparam-default-toggle');
+  if (!defaultRow) return;
+  const typeVal = selectEl.value;
+  // 不支持默认值的类型：File / Object / Array
+  const noDefault = typeVal.includes('\u6587\u4ef6') || typeVal.includes('Object') || typeVal.includes('Array');
+  defaultRow.style.display = noDefault ? 'none' : '';
+  if (!noDefault) {
+    const isBool = typeVal.includes('\u5f00\u5173');
+    if (defaultInput) {
+      defaultInput.style.display = isBool ? 'none' : '';
+      if (!isBool) {
+        // 按类型调整 input 的 type 属性、placeholder、step
+        if (typeVal.includes('\u6570\u5b57')) {
+          // 数字
+          defaultInput.type = 'number';
+          defaultInput.placeholder = '\u5982\uff1a0';
+          defaultInput.removeAttribute('step');
+        } else if (typeVal.includes('\u65e5\u671f')) {
+          // 日期时间
+          defaultInput.type = 'datetime-local';
+          defaultInput.placeholder = '';
+        } else {
+          // 短文本 / 长文本
+          defaultInput.type = 'text';
+          defaultInput.placeholder = '\u65e0\u9ed8\u8ba4\u503c';
+        }
+      }
+    }
+    if (defaultToggle) defaultToggle.style.display = isBool ? 'inline-flex' : 'none';
+  }
+}
+
+// 打开结构定义弹窗
+function openSchemaModal(btn) {
+  _schemaTargetRow = btn.closest('.tparam-schema-row');
+  const selectEl = _schemaTargetRow.closest('.tparam-body').querySelector('select.config-input');
+  const isArray = selectEl && selectEl.value.includes('Array');
+  document.getElementById('schemaModalTitle').textContent =
+    (isArray ? '📋 定义元素结构' : '📋 定义对象结构') ;
+  // 导入已有字段
+  const stored = _schemaTargetRow.dataset.fields;
+  const fields = stored ? JSON.parse(stored) : [];
+  renderSchemaFields(fields);
+  document.getElementById('schemaQuickInput').value = '';
+  document.getElementById('schemaModalOverlay').classList.add('open');
+}
+
+function closeSchemaModal(e) {
+  if (e && e.target !== document.getElementById('schemaModalOverlay')) return;
+  document.getElementById('schemaModalOverlay').classList.remove('open');
+  _schemaTargetRow = null;
+}
+
+// 渲染字段列表（支持嵌套 children）
+function renderSchemaFields(fields) {
+  const list = document.getElementById('schemaFieldList');
+  list.innerHTML = '';
+  fields.forEach(f => addSchemaFieldRow(f.name, f.type, f.children || null));
+}
+
+// 添加一行字段
+function addSchemaField(name, type) {
+  addSchemaFieldRow(name || '', type || 'String');
+}
+function addSchemaFieldRow(name, type, children, container) {
+  const list = container || document.getElementById('schemaFieldList');
+  const isNested = !!container; // 是否嵌套在子级内
+  const row = document.createElement('div');
+  row.className = isNested ? 'schema-field-child-row' : 'schema-field-row';
+
+  // 内容层
+  const inner = document.createElement('div');
+  inner.className = isNested ? '' : 'schema-field-row-inner';
+  inner.style.cssText = isNested ? 'display:flex;align-items:center;gap:8px;flex:1' : '';
+
+  const nameInput = document.createElement('input');
+  nameInput.className = 'schema-field-name';
+  nameInput.placeholder = isNested ? '如：name' : '如：orderId';
+  nameInput.value = name || '';
+
+  const typeSelect = document.createElement('select');
+  typeSelect.className = 'schema-field-type';
+  const typeOptions = ['String','Integer','Double','Boolean','DateTime','Object','Array[String]','Array[Object]'];
+  typeOptions.forEach(t => {
+    const o = document.createElement('option');
+    o.textContent = t;
+    if (t === (type || 'String')) o.selected = true;
+    typeSelect.appendChild(o);
+  });
+
+  const delBtn = document.createElement('button');
+  delBtn.className = 'schema-field-del';
+  delBtn.textContent = '×';
+  delBtn.onclick = () => {
+    row.remove();
+    if (!isNested) {
+      // 如果有子级容器也删除
+      if (row._childrenEl) row._childrenEl.remove();
+    }
+  };
+
+  inner.appendChild(nameInput);
+  inner.appendChild(typeSelect);
+  inner.appendChild(delBtn);
+
+  // 嵌套展开按钞（仅第一层显示）
+  if (!isNested) {
+    const expandBtn = document.createElement('button');
+    expandBtn.className = 'schema-expand-btn';
+    expandBtn.title = '展开定义子字段';
+    expandBtn.textContent = '+';
+
+    // 子字段容器
+    const childrenEl = document.createElement('div');
+    childrenEl.className = 'schema-field-children';
+    row._childrenEl = childrenEl;
+
+    // 加字按钞（用 data 标记方便查找）
+    const addChildBtn = document.createElement('button');
+    addChildBtn.dataset.addChild = '1';
+    addChildBtn.style.cssText = 'font-size:11px;color:var(--primary);background:none;border:none;cursor:pointer;font-weight:600;padding:3px 0;margin-top:2px';
+    addChildBtn.textContent = '+ 添加子字段';
+    addChildBtn.onclick = () => addSchemaFieldRow('', 'String', null, childrenEl);
+    childrenEl.appendChild(addChildBtn);
+
+    // 加入已有子字段（插入到按钞前面）
+    if (children && children.length) {
+      children.forEach(c => addSchemaFieldRow(c.name, c.type, null, childrenEl));
+    }
+
+    // 类型切换时控制展开按钞显隐
+    function onTypeChange() {
+      const isObj = typeSelect.value === 'Object' || typeSelect.value === 'Array[Object]';
+      expandBtn.classList.toggle('show', isObj);
+      if (!isObj) {
+        // 非 Object 类型时自动折叠并隐藏按钞
+        childrenEl.classList.remove('open');
+        expandBtn.classList.remove('expanded');
+        expandBtn.textContent = '+';
+      }
+    }
+    typeSelect.addEventListener('change', onTypeChange);
+    onTypeChange(); // 初始化状态
+
+    expandBtn.onclick = () => {
+      const isOpen = childrenEl.classList.toggle('open');
+      expandBtn.classList.toggle('expanded', isOpen);
+      expandBtn.textContent = isOpen ? '−' : '+';
+      // 展开时如果内容为空则自动添加一行
+      const existingRows = childrenEl.querySelectorAll('.schema-field-child-row');
+      if (isOpen && existingRows.length === 0) addSchemaFieldRow('', 'String', null, childrenEl);
+    };
+
+    row.appendChild(inner);
+    row.appendChild(expandBtn);
+
+    // 把子字段容器插入到 row 后面（不在 row 内，展开时占整行）
+    list.appendChild(row);
+    row.insertAdjacentElement('afterend', childrenEl);
+  } else {
+    row.appendChild(inner);
+    // 嵌套层不支持再展开，插入到 加子字段按钞前
+    const addBtn = list.querySelector('button[data-add-child]');
+    if (addBtn) list.insertBefore(row, addBtn);
+    else list.insertBefore(row, list.lastChild);
+  }
+
+  if (!isNested) {
+    // focus 名称输入框
+    setTimeout(() => nameInput.focus(), 20);
+  }
+  return row;
+}
+
+// 没有占位函数了
+
+// 识别粘贴内容并生成字段
+function parseSchemaInput() {
+  const raw = document.getElementById('schemaQuickInput').value.trim();
+  if (!raw) return;
+  try {
+    const obj = JSON.parse(raw);
+    let fields = [];
+    // 如果是 JSON Schema
+    if (obj.properties) {
+      fields = _flattenSchema(obj.properties, '');
+    } else if (obj.type === 'object' && !obj.properties) {
+      alert('未找到 properties 字段，请检查 JSON Schema 格式');
+      return;
+    } else {
+      // JSON 样本 → 自动嵌套展开：首层保持层级结构，深层展平
+      fields = _flattenJson(obj, '');
+    }
+    renderSchemaFields(fields);
+    document.getElementById('schemaQuickInput').value = '';
+  } catch(e) {
+    alert('格式错误，请粘贴有效的 JSON 样本或 JSON Schema');
+  }
+}
+
+// 展平 JSON 样本：首层字段保持嵌套（带 children），子层以上展平为 path.key 格式
+function _flattenJson(obj, prefix) {
+  const result = [];
+  Object.entries(obj).forEach(([k, v]) => {
+    const fullKey = prefix ? prefix + '.' + k : k;
+    if (v !== null && typeof v === 'object' && !Array.isArray(v)) {
+      if (prefix === '') {
+        // 首层嵌套对象：保持为 Object 类型，附带 children
+        const children = _flattenJson(v, '');
+        result.push({ name: k, type: 'Object', children });
+      } else {
+        // 已是嵌套内层，展平为字符串路径
+        result.push({ name: fullKey, type: _inferType(v) });
+      }
+    } else {
+      result.push({ name: k, type: _inferType(v) });
+    }
+  });
+  return result;
+}
+
+// 展平 JSON Schema properties
+function _flattenSchema(props, prefix) {
+  const result = [];
+  Object.entries(props).forEach(([k, v]) => {
+    if (v.properties) {
+      // 嵌套对象
+      const children = _flattenSchema(v.properties, '');
+      result.push({ name: k, type: 'Object', children });
+    } else {
+      result.push({ name: k, type: _jsTypeToFieldType(v.type) });
+    }
+  });
+  return result;
+}
+function _jsTypeToFieldType(t) {
+  const m = {string:'String',integer:'Integer',number:'Double',boolean:'Boolean'};
+  return m[t] || 'String';
+}
+function _inferType(v) {
+  if (v === null) return 'String';
+  const t = typeof v;
+  if (t === 'string') return 'String';
+  if (t === 'number') return Number.isInteger(v) ? 'Integer' : 'Double';
+  if (t === 'boolean') return 'Boolean';
+  if (Array.isArray(v)) return v.length && typeof v[0]==='object' ? 'Array[Object]' : 'Array[String]';
+  if (t === 'object') return 'Object';
+  return 'String';
+}
+
+// 确定：将字段（含嵌套）保存到 schemaRow.dataset.fields 并更新摘要
+function confirmSchema() {
+  if (!_schemaTargetRow) return;
+  const list = document.getElementById('schemaFieldList');
+  const fields = [];
+  // 只遇历顶层 .schema-field-row，并递归收集子级
+  list.querySelectorAll(':scope > .schema-field-row').forEach(r => {
+    const inner = r.querySelector('.schema-field-row-inner');
+    const nameInput = inner ? inner.querySelector('.schema-field-name') : r.querySelector('.schema-field-name');
+    const typeSelect = inner ? inner.querySelector('.schema-field-type') : r.querySelector('.schema-field-type');
+    const name = nameInput ? nameInput.value.trim() : '';
+    const type = typeSelect ? typeSelect.value : 'String';
+    if (!name) return;
+    const field = {name, type};
+    // 收集子字段
+    if (r._childrenEl) {
+      const childRows = r._childrenEl.querySelectorAll('.schema-field-child-row');
+      if (childRows.length > 0) {
+        field.children = [];
+        childRows.forEach(cr => {
+          const cn = cr.querySelector('.schema-field-name');
+          const ct = cr.querySelector('.schema-field-type');
+          const cname = cn ? cn.value.trim() : '';
+          if (cname) field.children.push({name: cname, type: ct ? ct.value : 'String'});
+        });
+      }
+    }
+    fields.push(field);
+  });
+  _schemaTargetRow.dataset.fields = JSON.stringify(fields);
+  // 更新回显区域：渲染字段 Tag
+  const fieldsEl = _schemaTargetRow.querySelector('.tparam-schema-fields');
+  if (fieldsEl) {
+    if (fields.length === 0) {
+      fieldsEl.innerHTML = '<span class="tparam-schema-summary-text">未定义，下游可通过 .字段名 自由引用</span>';
+    } else {
+      let html = '';
+      const MAX_TAGS = 6; // 最多展示 6 个 tag
+      let count = 0;
+      let total = 0;
+      // 统计总字段数
+      fields.forEach(f => { total++; if (f.children) total += f.children.length; });
+      fields.forEach(f => {
+        if (count >= MAX_TAGS) return;
+        html += `<span class="tparam-schema-field-tag" data-field="${f.name}">`
+              + `<span class="tag-name">${f.name}</span>`
+              + `<span class="tag-type">${f.type}</span>`
+              + `<button class="tag-del" onclick="deleteSchemaTag(this,'${f.name}',null)" title="删除字段 ${f.name}">×</button>`
+              + `</span>`;
+        count++;
+        if (f.children && f.children.length) {
+          f.children.forEach(c => {
+            if (count >= MAX_TAGS) return;
+            html += `<span class="tparam-schema-field-tag tag-child" data-field="${f.name}.${c.name}">`
+                  + `<span class="tag-parent">${f.name}.</span>`
+                  + `<span class="tag-name">${c.name}</span>`
+                  + `<span class="tag-type">${c.type}</span>`
+                  + `<button class="tag-del" onclick="deleteSchemaTag(this,'${f.name}','${c.name}')" title="删除子字段 ${f.name}.${c.name}">×</button>`
+                  + `</span>`;
+            count++;
+          });
+        }
+      });
+      if (total > MAX_TAGS) {
+        html += `<span class="tparam-schema-more">+${total - MAX_TAGS} 个字段</span>`;
+      }
+      fieldsEl.innerHTML = html;
+    }
+  }
+  document.getElementById('schemaModalOverlay').classList.remove('open');
+  _schemaTargetRow = null;
+}
+
+// 从回显区直接删除字段 tag
+function deleteSchemaTag(btn, parentName, childName) {
+  const tag = btn.closest('.tparam-schema-field-tag');
+  const fieldsEl = btn.closest('.tparam-schema-fields');
+  const schemaRow = btn.closest('.tparam-schema-row');
+  if (!tag || !schemaRow) return;
+  // 动画
+  tag.classList.add('tag-removing');
+  setTimeout(() => {
+    tag.remove();
+    // 更新 data-fields
+    let fields = [];
+    try { fields = JSON.parse(schemaRow.dataset.fields || '[]'); } catch(e) {}
+    if (childName) {
+      // 删子字段
+      fields = fields.map(f => {
+        if (f.name === parentName && f.children) {
+          f.children = f.children.filter(c => c.name !== childName);
+        }
+        return f;
+      });
+    } else {
+      // 删父字段（含其所有子字段 tag）
+      fields = fields.filter(f => f.name !== parentName);
+      // 同时移除所有属于该父字段的子 tag
+      if (fieldsEl) {
+        fieldsEl.querySelectorAll('.tag-child').forEach(ct => {
+          const parentEl = ct.querySelector('.tag-parent');
+          if (parentEl && parentEl.textContent.replace('.','') === parentName) ct.remove();
+        });
+      }
+    }
+    schemaRow.dataset.fields = JSON.stringify(fields);
+    // 若全部删完，恢复空提示
+    if (fieldsEl && fieldsEl.querySelectorAll('.tparam-schema-field-tag').length === 0) {
+      fieldsEl.innerHTML = '<span class="tparam-schema-summary-text">未定义，下游可通过 .字段名 自由引用</span>';
+    }
+  }, 180);
+}
+
+/* ===== 开始节点 AI 引导 JS ===== */
+
+// 引导条显/隐状态切换
+function showTriggerAiGuide() {
+  document.getElementById('triggerAiGuideBar').classList.remove('hidden');
+  document.getElementById('triggerAiFillingBar').classList.add('hidden');
+  document.getElementById('triggerAiConfiguredBar').classList.add('hidden');
+  // 展开引导条后自动聚焦输入框
+  setTimeout(() => {
+    const inp = document.getElementById('triggerAiInput');
+    if (inp) inp.focus();
+  }, 80);
+}
+
+function skipTriggerAiGuide() {
+  document.getElementById('triggerAiGuideBar').classList.add('hidden');
+}
+
+// 模拟解析用户描述生成参数列表
+function triggerAiFill() {
+  const input = document.getElementById('triggerAiInput').value.trim();
+  if (!input) return;
+  // 切换到「生成中」状态
+  document.getElementById('triggerAiGuideBar').classList.add('hidden');
+  document.getElementById('triggerAiFillingBar').classList.remove('hidden');
+
+  // 模拟 AI 推断参数（基于关键词匹配）
+  const inferredParams = _inferParamsFromText(input);
+
+  // 延迟 1.2s 后逐条生成卡片
+  setTimeout(() => {
+    document.getElementById('triggerAiFillingBar').classList.add('hidden');
+    document.getElementById('triggerAiConfiguredBar').classList.remove('hidden');
+    // 清除现有参数列表内的「新参数」占位卡（保留已有实际展开的卡）
+    const list = document.getElementById('triggerParamList');
+    list.querySelectorAll('.tparam-card-new').forEach(c => c.remove());
+    // 逐条生成
+    inferredParams.forEach((p, i) => {
+      setTimeout(() => _insertAiParamCard(p), i * 260);
+    });
+  }, 1200);
+}
+
+// 模拟自然语言推断参数
+function _inferParamsFromText(text) {
+  const params = [];
+  // 按中文顿号/递进号/「、」分割
+  const parts = text.split(/[，,、。\n]+/).map(s => s.trim()).filter(Boolean);
+  const typeMap = [
+    { keys: ['金额','价格','数量','价','频率','年龄','数字','次数','天数','公里','重量'], type: '数字 → Integer', badge: 'Integer' },
+    { keys: ['是否','开关','激活','启用','禁用','允许','拒绝','加急','已确认'], type: '开关 → Boolean', badge: 'Boolean' },
+    { keys: ['日期','时间','时刻','预约时间','创建时间'], type: '日期时间 → DateTime', badge: 'DateTime' },
+    { keys: ['内容','备注','描述','评论','理由','文本','地址','内容详情'], type: '长文本 → String', badge: 'String' },
+  ];
+  parts.forEach(part => {
+    // 提取「（必填）」标记
+    const required = /（必填）|（必需）|必填/.test(part);
+    // 去除「（必填）」标注再提取名称
+    const cleanPart = part.replace(/[（(]必填[）)]/g, '').replace(/[（(]必需[）)]/g, '').trim();
+    // 提取中文名称
+    const cnMatch = cleanPart.match(/[\u4e00-\u9fa5「」《》‘’]{1,10}/);
+    const enMatch = cleanPart.match(/[a-zA-Z][a-zA-Z0-9_]{0,29}/);
+    const label = cnMatch ? cnMatch[0].replace(/[「」《》‘’]/g,'') : (enMatch ? enMatch[0] : cleanPart.slice(0,8));
+    // 推断字段名（英文或拼音模拟）
+    const varName = enMatch ? enMatch[0] : _cnToVarName(label);
+    // 推断类型
+    let typeOpt = '短文本 → String';
+    let typeBadge = 'String';
+    for (const tm of typeMap) {
+      if (tm.keys.some(k => part.includes(k))) { typeOpt = tm.type; typeBadge = tm.badge; break; }
+    }
+    // 推断占位提示
+    const phMap = { 'Integer': '请输入数字', 'Boolean': null, 'DateTime': null, 'String': '请输入' + label };
+    const placeholder = phMap[typeBadge] || '';
+    // 推断参数说明
+    const description = label ? ('传入的' + label + '信息') : '';
+    params.push({ label, varName, typeOpt, typeBadge, required, placeholder, description });
+  });
+  return params;
+}
+
+function _cnToVarName(cn) {
+  const map = { '用户':'user','订单':'order','金额':'amount','手机':'phone','姓名':'name','名字':'name',
+    '地址':'address','备注':'remark','描述':'description','日期':'date','时间':'time',
+    '数量':'quantity','价格':'price','状态':'status','类型':'type','标题':'title','内容':'content' };
+  for (const k of Object.keys(map)) { if (cn.includes(k)) return map[k] + '_' + Math.random().toString(36).slice(2,4); }
+  return 'param_' + Math.random().toString(36).slice(2,5);
+}
+
+function _insertAiParamCard(p) {
+  const list = document.getElementById('triggerParamList');
+  if (!list) return;
+  const idx = list.querySelectorAll('.tparam-card').length + 1;
+  const card = document.createElement('div');
+  card.className = 'tparam-card tparam-card-new';
+  card.style.cssText = 'border-color:var(--primary);animation:fadeSlideIn 0.25s ease';
+  // header 显示名称：优先显示显示名称
+  const headerLabel = p.label || p.varName;
+  const reqBadge = p.required ? '<span class="tparam-required-tag">必填</span>' : '';
+  const phVal = (p.placeholder && p.typeBadge !== 'Boolean') ? p.placeholder : '';
+  const descVal = p.description || '';
+  const isReq = p.required ? 'checked' : '';
+  card.innerHTML = `
+    <div class="tparam-card-header" onclick="toggleTparam(this)" style="cursor:pointer;user-select:none">
+      <div style="display:flex;align-items:center;gap:6px">
+        <span class="tparam-index">${idx}</span>
+        <span class="tparam-label">${headerLabel}</span>
+        <span class="tparam-varname">${p.varName}</span>
+        <span class="badge badge-primary" style="font-size:10px">${p.typeBadge}</span>
+        ${reqBadge}
+      </div>
+      <div style="display:flex;align-items:center;gap:4px">
+        <span class="tparam-chevron" style="font-size:10px;color:var(--text-muted);transition:transform 0.2s;display:inline-block;transform:rotate(90deg)">▶</span>
+        <button onclick="event.stopPropagation();removeTriggerParam(this)" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:14px;line-height:1;padding:2px 4px">×</button>
+      </div>
+    </div>
+    <div class="tparam-body" style="display:block;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
+      <div class="tparam-row">
+        <div class="tparam-field">
+          <label class="tparam-label-text">显示名称</label>
+          <input class="config-input" value="${p.label}" style="font-size:11px" oninput="_syncTparamHeaderLabel(this)">
+        </div>
+        <div class="tparam-field">
+          <label class="tparam-label-text">字段类型</label>
+          <select class="config-input" style="font-size:11px" onchange="onTparamTypeChange(this)">
+            <option ${p.typeOpt.startsWith('短') ? 'selected' : ''}>短文本 → String</option>
+            <option ${p.typeOpt.startsWith('长') ? 'selected' : ''}>长文本 → String</option>
+            <option ${p.typeOpt.startsWith('数字') ? 'selected' : ''}>数字 → Integer</option>
+            <option ${p.typeOpt.startsWith('开关') ? 'selected' : ''}>开关 → Boolean</option>
+            <option ${p.typeOpt.startsWith('日期') ? 'selected' : ''}>日期时间 → DateTime</option>
+            <option>文件 → File</option>
+            <option>JSON 对象 → Object</option>
+            <option>数组（字符串）→ Array[String]</option>
+            <option>数组（对象）→ Array[Object]</option>
+          </select>
+        </div>
+      </div>
+      <div class="tparam-schema-row">
+        <div class="tparam-schema-head"><span class="tparam-schema-label">对象结构</span><button class="tparam-schema-btn" onclick="openSchemaModal(this)">定义结构</button></div>
+        <div class="tparam-schema-fields"><span class="tparam-schema-summary-text">未定义，下游可通过 .字段名 自由引用</span></div>
+      </div>
+      <div class="tparam-row">
+        <div class="tparam-field">
+          <label class="tparam-label-text">变量名 <span style="color:#e53935">*</span></label>
+          <input class="config-input" value="${p.varName}" style="font-size:11px;font-family:var(--font-mono)">
+        </div>
+        <div class="tparam-field">
+          <label class="tparam-label-text">占位提示</label>
+          <input class="config-input" value="${phVal}" placeholder="输入框的提示文字" style="font-size:11px">
+        </div>
+      </div>
+      <div class="tparam-row">
+        <div class="tparam-field" style="flex:1">
+          <label class="tparam-label-text">参数说明</label>
+          <input class="config-input" value="${descVal}" placeholder="对这个参数的用途做简要说明" style="font-size:11px">
+        </div>
+      </div>
+      <div class="tparam-row tparam-default-row">
+        <div class="tparam-field" style="flex:1">
+          <label class="tparam-label-text">默认值 <span style="font-size:10px;color:var(--text-muted);font-weight:400">（可选）</span></label>
+          <input class="config-input tparam-default-input" placeholder="无默认值" style="font-size:11px">
+          <label class="tparam-default-toggle" style="display:none;align-items:center;gap:6px;font-size:11px;cursor:pointer">
+            <input type="checkbox" class="tparam-default-bool" style="accent-color:var(--primary);width:13px;height:13px">
+            <span>默认开启</span>
+          </label>
+        </div>
+      </div>
+      <div style="margin-top:6px">
+        <label style="display:inline-flex;align-items:center;gap:4px;font-size:11px;cursor:pointer">
+          <input type="checkbox" ${isReq} style="accent-color:var(--primary);width:12px;height:12px"> 必填
+        </label>
+      </div>
+    </div>`;
+  list.appendChild(card);
+  bindTparamSync(card);
+  // 初始化默认值控件状态
+  const sel = card.querySelector('select.config-input');
+  if (sel) onTparamTypeChange(sel);
+}
+
+/* ===== 定时触发配置器 JS ===== */
+function parseCronToText(expr) {
+  if (!expr || typeof expr !== 'string') return '';
+  const parts = expr.trim().split(/\s+/);
+  // 支持6字段（秒 分 时 日 月 周）和5字段
+  let sec, min, hour, dom, month, dow;
+  if (parts.length === 6) {
+    [sec, min, hour, dom, month, dow] = parts;
+  } else if (parts.length === 5) {
+    sec = '0';
+    [min, hour, dom, month, dow] = parts;
+  } else {
+    return '\u65e0\u6cd5\u8bc6\u522b\u7684 Cron \u8868\u8fbe\u5f0f';
+  }
+  const weekNames = ['\u5468\u65e5','\u5468\u4e00','\u5468\u4e8c','\u5468\u4e09','\u5468\u56db','\u5468\u4e94','\u5468\u516d','\u5468\u65e5'];
+  function fmtSec(s) {
+    if (s === '*') return '\u6bcf\u79d2';
+    if (s === '0') return '';
+    if (s && s.startsWith('*/')) return '\u6bcf ' + s.slice(2) + ' \u79d2';
+    return parseInt(s, 10) + ' \u79d2';
+  }
+  function fmtTime(h, m, s) {
+    const hh = h === '*' ? null : parseInt(h, 10);
+    const mm = m === '*' ? null : parseInt(m, 10);
+    const ss = (!s || s === '0' || s === '*') ? null : (s.startsWith('*/') ? null : parseInt(s, 10));
+    if (hh === null && mm === null) return '\u6bcf\u5206\u949f';
+    if (hh === null) return '\u6bcf\u5c0f\u65f6\u7b2c ' + mm + ' \u5206';
+    if (mm === null) return hh + ' \u70b9\u6574';
+    const secStr = ss !== null ? ' ' + ss + ' \u79d2' : '';
+    return hh + ' \u70b9 ' + mm + ' \u5206' + secStr;
+  }
+  // 每\u79d2
+  if (sec==='*'&&min==='*'&&hour==='*'&&dom==='*'&&month==='*'&&dow==='*') return '\u6bcf\u79d2\u6267\u884c\u4e00\u6b21';
+  // 每\u5206钟
+  if (min==='*'&&hour==='*'&&dom==='*'&&month==='*'&&dow==='*') {
+    const secStr = sec && sec !== '0' && sec !== '*' ? (' \u7b2c ' + sec + ' \u79d2') : '';
+    return '\u6bcf\u5206\u949f' + secStr + '\u6267\u884c';
+  }
+  // 每\u5c0f\u65f6
+  if (hour==='*'&&dom==='*'&&month==='*'&&dow==='*') {
+    const mm = min==='*'?0:parseInt(min,10);
+    const secDesc = fmtSec(sec);
+    return '\u6bcf\u5c0f\u65f6\u7b2c ' + mm + ' \u5206' + (secDesc?' '+secDesc:'') + '\u6267\u884c';
+  }
+  const timeStr = fmtTime(hour, min, sec);
+  if (dom==='*'&&month==='*'&&dow==='*') return '\u6bcf\u5929 ' + timeStr + ' \u6267\u884c';
+  if (dom==='*'&&month==='*'&&dow!=='*') {
+    if (/^\d$/.test(dow)) return '\u6bcf' + (weekNames[parseInt(dow,10)]||('\u5468'+dow)) + ' ' + timeStr + ' \u6267\u884c';
+    if (dow.includes(',')) {
+      const days = dow.split(',').map(d=>weekNames[parseInt(d,10)]||('\u5468'+d)).join('\u3001');
+      return '\u6bcf\u5468' + days + ' ' + timeStr + ' \u6267\u884c';
+    }
+    if (dow.includes('-')) {
+      const [s,e]=dow.split('-').map(Number);
+      return '\u6bcf\u5468' + weekNames[s] + '\u81f3' + weekNames[e] + ' ' + timeStr + ' \u6267\u884c';
+    }
+    return '\u6bcf\u5468\u7b2c ' + dow + ' \u5929 ' + timeStr + ' \u6267\u884c';
+  }
+  if (dom!=='*'&&month==='*'&&dow==='*') {
+    return '\u6bcf\u6708 ' + (dom==='L'?'\u672b\u65e5':dom+'\u65e5') + ' ' + timeStr + ' \u6267\u884c';
+  }
+  return '\u5b9a\u65f6\uff1a' + expr;
+}
+
+function switchSchedMode(mode) {
+  const simpleBtn = document.getElementById('schedModeSimple');
+  const advBtn = document.getElementById('schedModeAdvanced');
+  const simplePanel = document.getElementById('schedSimplePanel');
+  const advPanel = document.getElementById('schedAdvancedPanel');
+  if (!simpleBtn) return;
+  if (mode === 'simple') {
+    simpleBtn.classList.add('active'); advBtn.classList.remove('active');
+    simplePanel.style.display = ''; advPanel.style.display = 'none';
+  } else {
+    advBtn.classList.add('active'); simpleBtn.classList.remove('active');
+    advPanel.style.display = ''; simplePanel.style.display = 'none';
+    syncSchedCronToInput();
+  }
+}
+
+function onSchedFreqChange(freq) {
+  const hourlyPanel = document.getElementById('schedHourlyPanel');
+  const timePanel = document.getElementById('schedTimePanel');
+  const weekPanel = document.getElementById('schedWeekPanel');
+  const monthPanel = document.getElementById('schedMonthPanel');
+  if (!hourlyPanel) return;
+  hourlyPanel.style.display = freq === 'hourly' ? '' : 'none';
+  timePanel.style.display = freq === 'hourly' ? 'none' : '';
+  weekPanel.style.display = freq === 'weekly' ? '' : 'none';
+  monthPanel.style.display = freq === 'monthly' ? '' : 'none';
+  syncSchedCron();
+}
+
+function toggleSchedDay(el) {
+  el.classList.toggle('active');
+  syncSchedCron();
+}
+
+function syncSchedCron() {
+  const freq = document.getElementById('schedFreqSelect')?.value || 'daily';
+  const h = parseInt(document.getElementById('schedHour')?.value || 8, 10);
+  const m = parseInt(document.getElementById('schedMinute')?.value || 0, 10);
+  const s = parseInt(document.getElementById('schedSecond')?.value || 0, 10);
+  const mOnly = parseInt(document.getElementById('schedMinuteOnly')?.value || 0, 10);
+  const sHourly = parseInt(document.getElementById('schedSecondHourly')?.value || 0, 10);
+  const monthDay = parseInt(document.getElementById('schedMonthDay')?.value || 1, 10);
+  const activeDays = Array.from(document.querySelectorAll('.sched-week-chip.active')).map(el => el.dataset.day);
+  let cron = '0 0 8 * * *';
+  if (freq === 'hourly') cron = sHourly + ' ' + mOnly + ' * * * *';
+  else if (freq === 'daily') cron = s + ' ' + m + ' ' + h + ' * * *';
+  else if (freq === 'weekly') cron = s + ' ' + m + ' ' + h + ' * * ' + (activeDays.join(',') || '1');
+  else if (freq === 'monthly') cron = s + ' ' + m + ' ' + h + ' ' + monthDay + ' * *';
+  const text = parseCronToText(cron);
+  const descEl = document.getElementById('schedSimpleDescText');
+  if (descEl) descEl.textContent = text || cron;
+  refreshNextRuns(cron, 'schedNextRunsList');
+}
+
+function syncSchedCronToInput() {
+  const freq = document.getElementById('schedFreqSelect')?.value || 'daily';
+  const h = parseInt(document.getElementById('schedHour')?.value || 8, 10);
+  const m = parseInt(document.getElementById('schedMinute')?.value || 0, 10);
+  const s = parseInt(document.getElementById('schedSecond')?.value || 0, 10);
+  const mOnly = parseInt(document.getElementById('schedMinuteOnly')?.value || 0, 10);
+  const sHourly = parseInt(document.getElementById('schedSecondHourly')?.value || 0, 10);
+  const monthDay = parseInt(document.getElementById('schedMonthDay')?.value || 1, 10);
+  const activeDays = Array.from(document.querySelectorAll('.sched-week-chip.active')).map(el => el.dataset.day);
+  let cron = '0 0 8 * * *';
+  if (freq === 'hourly') cron = sHourly + ' ' + mOnly + ' * * * *';
+  else if (freq === 'daily') cron = s + ' ' + m + ' ' + h + ' * * *';
+  else if (freq === 'weekly') cron = s + ' ' + m + ' ' + h + ' * * ' + (activeDays.join(',') || '1');
+  else if (freq === 'monthly') cron = s + ' ' + m + ' ' + h + ' ' + monthDay + ' * *';
+  const input = document.getElementById('cronExprInput');
+  if (input) { input.value = cron; onCronInput(cron); }
+}
+
+function onCronInput(val) {
+  const text = parseCronToText(val);
+  const descEl = document.getElementById('schedAdvancedDescText');
+  const descBox = document.getElementById('schedAdvancedDesc');
+  if (descEl && descBox) {
+    if (text && !text.startsWith('\u65e0\u6cd5')) {
+      descEl.textContent = text;
+      descBox.style.borderLeftColor = 'var(--primary)';
+      descBox.style.color = '';
+    } else {
+      descEl.textContent = '\u8bf7\u8f93\u5165\u6b63\u786e\u7684 Cron \u8868\u8fbe\u5f0f\uff08\u683c\u5f0f\uff1a\u79d2 \u5206 \u65f6 \u65e5 \u6708 \u5468\uff09';
+      descBox.style.borderLeftColor = '#e53935';
+      descBox.style.color = '#e53935';
+    }
+  }
+  document.querySelectorAll('.cron-preset-chip').forEach(chip => {
+    const onclick = chip.getAttribute('onclick') || '';
+    chip.classList.toggle('active', onclick.includes("'" + val + "'"));
+  });
+  // 反向同步到可视化构建器
+  cronBuilderFromExpr(val);
+  // 刷新近10次执行时间
+  refreshAllNextRuns(val);
+}
+
+function setCronPreset(val) {
+  const input = document.getElementById('cronExprInput');
+  if (input) { input.value = val; onCronInput(val); }
+}
+
+// 可视化构建器 → Cron 文本框实时同步
+function cronBuilderSync() {
+  function getVal(selId, customId) {
+    const sel = document.getElementById(selId);
+    if (!sel) return '*';
+    if (sel.value === 'custom') {
+      const c = document.getElementById(customId);
+      return c ? (c.value || '*') : '*';
+    }
+    return sel.value;
+  }
+  function toggleCustom(selId, customId) {
+    const sel = document.getElementById(selId);
+    const c = document.getElementById(customId);
+    if (sel && c) c.style.display = sel.value === 'custom' ? '' : 'none';
+  }
+  toggleCustom('cronBuilderSec','cronBuilderSecCustom');
+  toggleCustom('cronBuilderMin','cronBuilderMinCustom');
+  toggleCustom('cronBuilderHour','cronBuilderHourCustom');
+  toggleCustom('cronBuilderDay','cronBuilderDayCustom');
+  toggleCustom('cronBuilderMonth','cronBuilderMonthCustom');
+  toggleCustom('cronBuilderDow','cronBuilderDowCustom');
+  const s = getVal('cronBuilderSec','cronBuilderSecCustom');
+  const m = getVal('cronBuilderMin','cronBuilderMinCustom');
+  const h = getVal('cronBuilderHour','cronBuilderHourCustom');
+  const d = getVal('cronBuilderDay','cronBuilderDayCustom');
+  const mo = getVal('cronBuilderMonth','cronBuilderMonthCustom');
+  const dw = getVal('cronBuilderDow','cronBuilderDowCustom');
+  const cron = s + ' ' + m + ' ' + h + ' ' + d + ' ' + mo + ' ' + dw;
+  const input = document.getElementById('cronExprInput');
+  if (input) {
+    input.value = cron;
+    const text = parseCronToText(cron);
+    const descEl = document.getElementById('schedAdvancedDescText');
+    const descBox = document.getElementById('schedAdvancedDesc');
+    if (descEl && descBox) {
+      descEl.textContent = text || cron;
+      descBox.style.borderLeftColor = 'var(--primary)';
+      descBox.style.color = '';
+    }
+    document.querySelectorAll('.cron-preset-chip').forEach(chip => {
+      const onclick = chip.getAttribute('onclick') || '';
+      chip.classList.toggle('active', onclick.includes("'" + cron + "'"));
+    });
+  }
+}
+
+// Cron 文本框 → 反向更新可视化构建器（旧内联构建器已移除，保留空函数兼容调用）
+function cronBuilderFromExpr(expr) {
+  // 旧内联构建器已移除，现改为 Popover 方案；此处保留空函数避免报错
+}
+
+// ─── Cron Popover JS ──────────────────────────────────────────────
+
+/** 获取指定字段当前选中值（chip.active 优先，否则读 custom input） */
+function _cpGetVal(field) {
+  const container = document.getElementById('cp' + field);
+  if (!container) return '*';
+  const activeChip = container.querySelector('.cron-chip.active');
+  if (activeChip) return activeChip.dataset.val || '*';
+  const customInput = document.getElementById('cp' + field + 'Custom');
+  return (customInput && customInput.value.trim()) ? customInput.value.trim() : '*';
+}
+
+/** Update Popover preview text */
+function _cpUpdatePreview() {
+  const expr = [_cpGetVal('Sec'), _cpGetVal('Min'), _cpGetVal('Hour'),
+                _cpGetVal('Day'), _cpGetVal('Month'), _cpGetVal('Dow')].join(' ');
+  const previewEl = document.getElementById('cronPopoverPreviewText');
+  if (previewEl) previewEl.textContent = parseCronToText(expr) || expr;
+}
+
+/** chip 单选：清除同行其他 active，设自身 active，清空 custom input，更新预览 */
+function cpSelect(field, el) {
+  const container = document.getElementById('cp' + field);
+  if (!container) return;
+  container.querySelectorAll('.cron-chip').forEach(function(c) { c.classList.remove('active'); });
+  el.classList.add('active');
+  const customInput = document.getElementById('cp' + field + 'Custom');
+  if (customInput) customInput.value = '';
+  _cpUpdatePreview();
+}
+
+/** 自定义输入框变化：清除同行 chip active，更新预览 */
+function cpCustomInput(field, el) {
+  const container = document.getElementById('cp' + field);
+  if (!container) return;
+  container.querySelectorAll('.cron-chip').forEach(function(c) { c.classList.remove('active'); });
+  _cpUpdatePreview();
+}
+
+/** Cron 表达式反向回填 Popover 各字段 */
+function _cpFillFromCron(expr) {
+  if (!expr) return;
+  const parts = expr.trim().split(/\s+/);
+  var vals;
+  if (parts.length === 6) vals = parts;
+  else if (parts.length === 5) vals = ['0'].concat(parts);
+  else return;
+  var fields = ['Sec', 'Min', 'Hour', 'Day', 'Month', 'Dow'];
+  fields.forEach(function(field, i) {
+    var val = vals[i];
+    var container = document.getElementById('cp' + field);
+    if (!container) return;
+    var chips = container.querySelectorAll('.cron-chip');
+    var customInput = document.getElementById('cp' + field + 'Custom');
+    var matched = false;
+    chips.forEach(function(c) {
+      c.classList.remove('active');
+      if (c.dataset.val === val) { c.classList.add('active'); matched = true; }
+    });
+    if (!matched && customInput) {
+      customInput.value = val;
+    } else if (customInput) {
+      customInput.value = '';
+    }
+  });
+  _cpUpdatePreview();
+}
+
+/** 打开 Popover：定位到按钮旁边，回填当前 Cron */
+function openCronPopover() {
+  var popover = document.getElementById('cronPopover');
+  var overlay = document.getElementById('cronPopoverOverlay');
+  var btn = document.querySelector('button[onclick="openCronPopover()"]');
+  if (!popover) return;
+  var input = document.getElementById('cronExprInput');
+  var expr = (input && input.value.trim()) ? input.value.trim() : '0 0 8 * * *';
+  _cpFillFromCron(expr);
+  popover.style.display = 'block';
+  if (overlay) overlay.style.display = 'block';
+  if (btn) {
+    var rect = btn.getBoundingClientRect();
+    var pw = 420, ph = 460;
+    var left = rect.left;
+    var top = rect.bottom + 6;
+    if (left + pw > window.innerWidth - 12) left = window.innerWidth - pw - 12;
+    if (left < 12) left = 12;
+    if (top + ph > window.innerHeight - 12) top = rect.top - ph - 6;
+    if (top < 12) top = 12;
+    popover.style.left = left + 'px';
+    popover.style.top = top + 'px';
+    popover.style.transform = 'none';
+  } else {
+    popover.style.left = '50%';
+    popover.style.top = '50%';
+    popover.style.transform = 'translate(-50%,-50%)';
+  }
+}
+
+/** 关闭 Popover（overlay 点击时只在点中 overlay 本身时关闭） */
+function closeCronPopover(e) {
+  if (e && e.target !== document.getElementById('cronPopoverOverlay')) return;
+  var popover = document.getElementById('cronPopover');
+  var overlay = document.getElementById('cronPopoverOverlay');
+  if (popover) popover.style.display = 'none';
+  if (overlay) overlay.style.display = 'none';
+}
+
+/** 确认：读各字段值拼 Cron → 写回文本框 → 关闭 */
+function confirmCronPopover() {
+  var cron = [_cpGetVal('Sec'), _cpGetVal('Min'), _cpGetVal('Hour'),
+              _cpGetVal('Day'), _cpGetVal('Month'), _cpGetVal('Dow')].join(' ');
+  var input = document.getElementById('cronExprInput');
+  if (input) { input.value = cron; onCronInput(cron); }
+  var popover = document.getElementById('cronPopover');
+  var overlay = document.getElementById('cronPopoverOverlay');
+  if (popover) popover.style.display = 'none';
+  if (overlay) overlay.style.display = 'none';
+}
+
+// ─── 定时触发启用开关 ──────────────────────────────────────────────────
+
+var _schedEnabled = false;
+
+/** 切换启用开关：控制配置项激活/禁用，折叠展开由 toggleAdvanced 统一处理 */
+function toggleScheduleEnabled(event) {
+  if (event) event.stopPropagation();
+  _schedEnabled = !_schedEnabled;
+  var knob = document.getElementById('schedToggleKnob');
+  var track = document.getElementById('schedToggleSwitch');
+  var label = document.getElementById('schedEnabledLabel');
+  var dot = document.getElementById('dotTrigger');
+  var inner = document.getElementById('schedInnerConfig');
+  var nextRuns = document.getElementById('schedNextRunsPanel');
+  if (_schedEnabled) {
+    if (knob) knob.style.left = '18px';
+    if (track) track.style.background = 'var(--primary)';
+    if (label) { label.textContent = '已启用'; label.style.color = 'var(--primary)'; }
+    if (dot) dot.classList.add('show');
+    if (inner) { inner.style.opacity = '1'; inner.style.pointerEvents = ''; }
+    if (nextRuns) nextRuns.style.display = '';
+    // 触发一次预览刷新
+    var cronInput = document.getElementById('cronExprInput');
+    if (cronInput && document.getElementById('schedAdvancedPanel').style.display !== 'none') {
+      refreshAllNextRuns(cronInput.value);
+    } else {
+      syncSchedCron();
+    }
+  } else {
+    if (knob) knob.style.left = '2px';
+    if (track) track.style.background = '#D0D5E8';
+    if (label) { label.textContent = '未启用'; label.style.color = 'var(--text-muted)'; }
+    if (dot) dot.classList.remove('show');
+    if (inner) { inner.style.opacity = '0.35'; inner.style.pointerEvents = 'none'; }
+    if (nextRuns) nextRuns.style.display = 'none';
+  }
+}
+
+// ─── 近10次执行时间计算 ───────────────────────────────────────────────
+
+/**
+ * Parse cron field: *, n, *\/n, a-b, a-b\/n, comma-separated
+ */
+function _cparsField(val, min, max) {
+  if (!val || val === '*' || val === '?') {
+    var r = []; for (var i = min; i <= max; i++) r.push(i); return r;
+  }
+  var result = [];
+  var parts = val.split(',');
+  for (var p = 0; p < parts.length; p++) {
+    var part = parts[p].trim();
+    if (/^\d+$/.test(part)) {
+      var n = parseInt(part, 10);
+      if (n >= min && n <= max) result.push(n);
+    } else if (/^\*\/(\d+)$/.test(part)) {
+      var step = parseInt(part.slice(2), 10);
+      for (var i = min; i <= max; i += step) result.push(i);
+    } else if (/^(\d+)-(\d+)$/.test(part)) {
+      var m = part.match(/^(\d+)-(\d+)$/);
+      for (var i = parseInt(m[1], 10); i <= parseInt(m[2], 10); i++) if (i >= min && i <= max) result.push(i);
+    } else if (/^(\d+)-(\d+)\/(\d+)$/.test(part)) {
+      var m = part.match(/^(\d+)-(\d+)\/(\d+)$/);
+      for (var i = parseInt(m[1], 10); i <= parseInt(m[2], 10); i += parseInt(m[3], 10)) if (i >= min && i <= max) result.push(i);
+    }
+  }
+  // 去重排序
+  result = result.filter(function(v,i,a){ return a.indexOf(v)===i; });
+  result.sort(function(a,b){ return a-b; });
+  return result;
+}
+
+/** Calculate next N trigger times from baseDate for a 6-field Cron expression */
+function calcNextRuns(expr, count, baseDate) {
+  count = count || 5;
+  var parts = (expr || '').trim().split(/\s+/);
+  if (parts.length < 5) return [];
+
+  var secStr, minStr, hourStr, domStr, monthStr, dowStr;
+  if (parts.length === 6) {
+    secStr = parts[0]; minStr = parts[1]; hourStr = parts[2];
+    domStr = parts[3]; monthStr = parts[4]; dowStr = parts[5];
+  } else {
+    secStr = '0'; minStr = parts[0]; hourStr = parts[1];
+    domStr = parts[2]; monthStr = parts[3]; dowStr = parts[4];
+  }
+
+  var secs   = _cparsField(secStr,   0, 59);
+  var mins   = _cparsField(minStr,   0, 59);
+  var hours  = _cparsField(hourStr,  0, 23);
+  var months = _cparsField(monthStr, 1, 12);
+  var domWild = (domStr === '*' || domStr === '?');
+  var dowWild = (dowStr === '*' || dowStr === '?');
+  var doms = domWild ? null : _cparsField(domStr, 1, 31);
+  var dows = dowWild ? null : _cparsField(dowStr, 0, 7).map(function(d){ return d === 7 ? 0 : d; });
+
+  if (!secs.length || !mins.length || !hours.length || !months.length) return [];
+
+  var results = [];
+  // start from next second
+  var cur = baseDate ? new Date(baseDate.getTime()) : new Date();
+  cur.setMilliseconds(0);
+  cur = new Date(cur.getTime() + 1000);
+
+  // helper: first value in arr >= v, or undefined
+  function nextGte(arr, v) {
+    for (var i = 0; i < arr.length; i++) if (arr[i] >= v) return arr[i];
+    return undefined;
+  }
+
+  var maxDays = 366 * 4; // safety cap
+  var dayTries = 0;
+
+  outer:
+  while (results.length < count && dayTries < maxDays) {
+    // --- check month ---
+    var mo = cur.getMonth() + 1; // 1-12
+    var nmo = nextGte(months, mo);
+    if (nmo === undefined) {
+      // roll to next year, first valid month
+      cur = new Date(cur.getFullYear() + 1, months[0] - 1, 1, 0, 0, 0, 0);
+      dayTries++;
+      continue;
+    }
+    if (nmo !== mo) {
+      cur = new Date(cur.getFullYear(), nmo - 1, 1, 0, 0, 0, 0);
+      dayTries++;
+      continue;
+    }
+
+    // --- check day ---
+    var dayOk;
+    if (!doms && !dows) {
+      dayOk = true;
+    } else if (doms && dows) {
+      // Cron standard: either matches
+      dayOk = doms.indexOf(cur.getDate()) >= 0 || dows.indexOf(cur.getDay()) >= 0;
+    } else if (doms) {
+      dayOk = doms.indexOf(cur.getDate()) >= 0;
+    } else {
+      dayOk = dows.indexOf(cur.getDay()) >= 0;
+    }
+    if (!dayOk) {
+      cur = new Date(cur.getFullYear(), cur.getMonth(), cur.getDate() + 1, 0, 0, 0, 0);
+      dayTries++;
+      continue;
+    }
+
+    // --- iterate hours ---
+    var curH = cur.getHours();
+    var nh = nextGte(hours, curH);
+    if (nh === undefined) {
+      cur = new Date(cur.getFullYear(), cur.getMonth(), cur.getDate() + 1, 0, 0, 0, 0);
+      dayTries++;
+      continue;
+    }
+    if (nh !== curH) {
+      cur = new Date(cur.getFullYear(), cur.getMonth(), cur.getDate(), nh, 0, 0, 0);
+    }
+
+    // --- iterate minutes within this hour ---
+    for (var hi = hours.indexOf(cur.getHours()); hi < hours.length; hi++) {
+      var hv = hours[hi];
+      var startM = (hv === cur.getHours()) ? cur.getMinutes() : 0;
+      var nm = nextGte(mins, startM);
+      if (nm === undefined) continue; // no matching minute in this hour
+
+      for (var mi = mins.indexOf(nm); mi < mins.length; mi++) {
+        var mv = mins[mi];
+        var startS = (hv === cur.getHours() && mv === cur.getMinutes()) ? cur.getSeconds() : 0;
+        var ns = nextGte(secs, startS);
+        if (ns === undefined) continue; // no matching second in this minute
+
+        for (var si = secs.indexOf(ns); si < secs.length; si++) {
+          var sv = secs[si];
+          results.push(new Date(cur.getFullYear(), cur.getMonth(), cur.getDate(), hv, mv, sv, 0));
+          if (results.length >= count) break outer;
+        }
+      }
+    }
+
+    // exhausted this day, move to next
+    cur = new Date(cur.getFullYear(), cur.getMonth(), cur.getDate() + 1, 0, 0, 0, 0);
+    dayTries++;
+  }
+
+  return results;
+}
+
+function _fmtRunDate(dt) {
+  var y = dt.getFullYear();
+  var mo = String(dt.getMonth()+1).padStart(2,'0');
+  var da = String(dt.getDate()).padStart(2,'0');
+  var h = String(dt.getHours()).padStart(2,'0');
+  var m = String(dt.getMinutes()).padStart(2,'0');
+  var s = String(dt.getSeconds()).padStart(2,'0');
+  return y + '-' + mo + '-' + da + ' ' + h + ':' + m + ':' + s;
+}
+
+/** Refresh the next-runs container with count=5 */
+function refreshNextRuns(expr, containerId) {
+  var el = document.getElementById(containerId);
+  if (!el) return;
+  if (!expr || expr.trim() === '') { el.innerHTML = '<span style="color:var(--text-muted)">Please enter a Cron expression</span>'; return; }
+  try {
+    var runs = calcNextRuns(expr, 5, new Date());
+    if (runs.length === 0) {
+      el.innerHTML = '<span style="color:var(--danger)">No matching time, please check expression</span>';
+      return;
+    }
+    el.innerHTML = runs.map(function(dt, i) {
+      return '<span style="color:var(--text-muted);user-select:none">' + (i+1) + '. </span>' + _fmtRunDate(dt);
+    }).join('<br>');
+  } catch(e) {
+    el.innerHTML = '<span style="color:var(--danger)">Parse error: ' + e.message + '</span>';
+  }
+}
+
+/** Refresh main panel next-runs only */
+function refreshAllNextRuns(expr) {
+  refreshNextRuns(expr, 'schedNextRunsList');
+}
 </script>
+<!-- Cron 可视化构建器 Popover -->
+<div class="cron-popover-overlay" id="cronPopoverOverlay" onclick="closeCronPopover(event)"></div>
+<div class="cron-popover" id="cronPopover" style="display:none">
+  <div class="cron-popover-head">
+    <span class="cron-popover-title">📅 可视化 Cron 构建器</span>
+    <button onclick="closeCronPopover()" style="background:none;border:none;cursor:pointer;font-size:18px;color:var(--text-muted);line-height:1;padding:0">×</button>
+  </div>
+  <div class="cron-popover-body">
+    <!-- 实时预览 -->
+    <div class="cron-popover-preview" id="cronPopoverPreview">
+      <span style="font-size:14px">🕐</span>
+      <span id="cronPopoverPreviewText">每天 8 点 0 分 0 秒执行</span>
+    </div>
+    <!-- 秒 -->
+    <div class="cron-field-row">
+      <span class="cron-field-label">秒</span>
+      <div class="cron-chips" id="cpSec">
+        <span class="cron-chip active" data-val="0" onclick="cpSelect('Sec',this)">整秒(0)</span>
+        <span class="cron-chip" data-val="*" onclick="cpSelect('Sec',this)">每秒(*)</span>
+        <span class="cron-chip" data-val="*/5" onclick="cpSelect('Sec',this)">每5秒</span>
+        <span class="cron-chip" data-val="*/10" onclick="cpSelect('Sec',this)">每10秒</span>
+        <span class="cron-chip" data-val="*/15" onclick="cpSelect('Sec',this)">每15秒</span>
+        <span class="cron-chip" data-val="*/30" onclick="cpSelect('Sec',this)">每30秒</span>
+        <span class="cron-chip" data-val="0-30" onclick="cpSelect('Sec',this)" title="周期：第0-30秒">周期 0-30</span>
+        <input class="cron-chip-custom" id="cpSecCustom" placeholder="自定义 如:0-30/5" title="支持：整数、*/n、a-b、a-b/n 等" oninput="cpCustomInput('Sec',this)" style="width:90px">
+      </div>
+    </div>
+    <!-- 分 -->
+    <div class="cron-field-row">
+      <span class="cron-field-label">分</span>
+      <div class="cron-chips" id="cpMin">
+        <span class="cron-chip active" data-val="0" onclick="cpSelect('Min',this)">整分(0)</span>
+        <span class="cron-chip" data-val="*" onclick="cpSelect('Min',this)">每分(*)</span>
+        <span class="cron-chip" data-val="*/5" onclick="cpSelect('Min',this)">每5分</span>
+        <span class="cron-chip" data-val="*/15" onclick="cpSelect('Min',this)">每15分</span>
+        <span class="cron-chip" data-val="*/30" onclick="cpSelect('Min',this)">每30分</span>
+        <span class="cron-chip" data-val="30" onclick="cpSelect('Min',this)">30分</span>
+        <span class="cron-chip" data-val="0-30" onclick="cpSelect('Min',this)" title="周期：第0-30分">周期 0-30</span>
+        <input class="cron-chip-custom" id="cpMinCustom" placeholder="自定义 如:10-50/5" title="支持：整数、*/n、a-b、a-b/n 等" oninput="cpCustomInput('Min',this)" style="width:90px">
+      </div>
+    </div>
+    <!-- 时 -->
+    <div class="cron-field-row">
+      <span class="cron-field-label">时</span>
+      <div class="cron-chips" id="cpHour">
+        <span class="cron-chip" data-val="*">每小时</span>
+        <span class="cron-chip active" data-val="8" onclick="cpSelect('Hour',this)">8时</span>
+        <span class="cron-chip" data-val="9" onclick="cpSelect('Hour',this)">9时</span>
+        <span class="cron-chip" data-val="12" onclick="cpSelect('Hour',this)">12时</span>
+        <span class="cron-chip" data-val="18" onclick="cpSelect('Hour',this)">18时</span>
+        <span class="cron-chip" data-val="0" onclick="cpSelect('Hour',this)">凌晨(0)</span>
+        <input class="cron-chip-custom" id="cpHourCustom" type="number" min="0" max="23" placeholder="0-23" title="自定义时" oninput="cpCustomInput('Hour',this)">
+      </div>
+    </div>
+    <!-- 日 -->
+    <div class="cron-field-row">
+      <span class="cron-field-label">日</span>
+      <div class="cron-chips" id="cpDay">
+        <span class="cron-chip active" data-val="*" onclick="cpSelect('Day',this)">每天</span>
+        <span class="cron-chip" data-val="1" onclick="cpSelect('Day',this)">1日</span>
+        <span class="cron-chip" data-val="15" onclick="cpSelect('Day',this)">15日</span>
+        <span class="cron-chip" data-val="L" onclick="cpSelect('Day',this)">末日</span>
+        <input class="cron-chip-custom" id="cpDayCustom" placeholder="1-31" title="自定义日" oninput="cpCustomInput('Day',this)" style="width:52px">
+      </div>
+    </div>
+    <!-- 月 -->
+    <div class="cron-field-row">
+      <span class="cron-field-label">月</span>
+      <div class="cron-chips" id="cpMonth">
+        <span class="cron-chip active" data-val="*" onclick="cpSelect('Month',this)">每月</span>
+        <span class="cron-chip" data-val="1" onclick="cpSelect('Month',this)">1月</span>
+        <span class="cron-chip" data-val="3" onclick="cpSelect('Month',this)">3月</span>
+        <span class="cron-chip" data-val="6" onclick="cpSelect('Month',this)">6月</span>
+        <span class="cron-chip" data-val="12" onclick="cpSelect('Month',this)">12月</span>
+        <span class="cron-chip" data-val="1,4,7,10" onclick="cpSelect('Month',this)">每季度</span>
+        <input class="cron-chip-custom" id="cpMonthCustom" placeholder="1-12" title="自定义月" oninput="cpCustomInput('Month',this)" style="width:52px">
+      </div>
+    </div>
+    <!-- 周 -->
+    <div class="cron-field-row" style="margin-bottom:0">
+      <span class="cron-field-label">周</span>
+      <div class="cron-chips" id="cpDow">
+        <span class="cron-chip active" data-val="*" onclick="cpSelect('Dow',this)">不限</span>
+        <span class="cron-chip" data-val="1-5" onclick="cpSelect('Dow',this)">周一至五</span>
+        <span class="cron-chip" data-val="1" onclick="cpSelect('Dow',this)">周一</span>
+        <span class="cron-chip" data-val="2" onclick="cpSelect('Dow',this)">周二</span>
+        <span class="cron-chip" data-val="3" onclick="cpSelect('Dow',this)">周三</span>
+        <span class="cron-chip" data-val="4" onclick="cpSelect('Dow',this)">周四</span>
+        <span class="cron-chip" data-val="5" onclick="cpSelect('Dow',this)">周五</span>
+        <span class="cron-chip" data-val="6" onclick="cpSelect('Dow',this)">周六</span>
+        <span class="cron-chip" data-val="0" onclick="cpSelect('Dow',this)">周日</span>
+      </div>
+    </div>
+  </div>
+  <div class="cron-popover-footer">
+    <button onclick="closeCronPopover()" style="padding:6px 14px;font-size:12px;border:1px solid var(--border);border-radius:6px;background:var(--surface);cursor:pointer;color:var(--text-secondary)">取消</button>
+    <button onclick="confirmCronPopover()" style="padding:6px 14px;font-size:12px;border:none;border-radius:6px;background:var(--primary);color:#fff;cursor:pointer;font-weight:600">确认</button>
+  </div>
+</div>
+
+<!-- 结构定义弹窗（全局单例） -->
+<div class="schema-modal-overlay" id="schemaModalOverlay" onclick="closeSchemaModal(event)">
+  <div class="schema-modal" onclick="event.stopPropagation()">
+    <div class="schema-modal-head">
+      <span class="schema-modal-title" id="schemaModalTitle">📋 定义对象结构</span>
+      <button onclick="closeSchemaModal()" style="background:none;border:none;cursor:pointer;font-size:18px;color:var(--text-muted);line-height:1">×</button>
+    </div>
+    <div class="schema-modal-body">
+      <div style="margin-bottom:12px">
+        <div style="font-size:12px;color:var(--text-secondary);font-weight:500;margin-bottom:6px">✨ 粘贴 JSON 样本或 Schema，快速生成</div>
+        <textarea id="schemaQuickInput" rows="4" placeholder='{
+  &quot;orderId&quot;: &quot;ORD-001&quot;,
+  &quot;amount&quot;: 99.0
+}
+— 或直接填写 JSON Schema 文本' style="width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:var(--font-mono);resize:vertical;outline:none;color:var(--text)"></textarea>
+        <button onclick="parseSchemaInput()" style="margin-top:6px;padding:5px 14px;font-size:12px;font-weight:600;border:none;border-radius:6px;background:var(--primary);color:#fff;cursor:pointer">识别并生成字段 →</button>
+      </div>
+      <div style="font-size:12px;color:var(--text-secondary);font-weight:500;margin-bottom:6px">―― 或手动添加字段 ――</div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--border)">
+        <span style="font-size:11px;color:var(--text-muted);flex:1">字段名</span>
+        <span style="font-size:11px;color:var(--text-muted);width:110px">类型</span>
+        <span style="width:28px"></span>
+      </div>
+      <div id="schemaFieldList"></div>
+      <button onclick="addSchemaField()" style="margin-top:4px;font-size:12px;color:var(--primary);background:none;border:none;cursor:pointer;font-weight:600;padding:4px 0">+ 添加字段</button>
+    </div>
+    <div class="schema-modal-footer">
+      <button onclick="closeSchemaModal()" style="padding:6px 16px;font-size:13px;border:1px solid var(--border);border-radius:7px;background:var(--surface);color:var(--text-secondary);cursor:pointer">取消</button>
+      <button onclick="confirmSchema()" style="padding:6px 16px;font-size:13px;border:none;border-radius:7px;background:var(--primary);color:#fff;cursor:pointer;font-weight:600">确定</button>
+    </div>
+  </div>
+</div>
+
+<!-- 节点类型转换 Modal -->
+<div id="nodeConvertOverlay" onclick="closeNodeConvertModal()" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.28);align-items:center;justify-content:center">
+  <div onclick="event.stopPropagation()" style="background:#fff;border-radius:12px;width:360px;max-height:520px;box-shadow:0 8px 32px rgba(0,0,0,0.18);overflow:hidden;display:flex;flex-direction:column">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px 12px;border-bottom:1px solid var(--border);flex-shrink:0">
+      <span style="font-size:15px;font-weight:700;color:var(--text)">🔄 转换节点类型</span>
+      <button onclick="closeNodeConvertModal()" style="background:none;border:none;cursor:pointer;font-size:18px;color:var(--text-muted);line-height:1">×</button>
+    </div>
+    <div style="padding:8px 16px 4px;font-size:11px;color:var(--text-muted);flex-shrink:0">当前类型：<span id="nodeConvertCurrentName" style="font-weight:600;color:var(--text)"></span></div>
+    <div id="nodeConvertList" style="overflow-y:auto;padding:4px 0 12px;flex:1"></div>
+  </div>
+</div>
+
+<!-- 切换节点 Toast -->
+<div id="nodeConvertToast" style="position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(8px);background:rgba(30,30,30,0.88);color:#fff;padding:9px 20px;border-radius:20px;font-size:13px;pointer-events:none;opacity:0;transition:opacity 0.3s,transform 0.3s;z-index:10000;white-space:nowrap"></div>
+
 </body>
 </html>
 
