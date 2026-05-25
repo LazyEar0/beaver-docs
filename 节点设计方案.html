@@ -1898,6 +1898,161 @@ body {
 .code-fs-result-title.success { color: #22c55e; }
 .code-fs-result-title.error { color: #ef4444; }
 .code-fs-result-body { color: #CDD6F4; white-space: pre-wrap; }
+
+/* ========== Toggle Switch (挂起等待回调 等开关) ========== */
+.cb-toggle { display: inline-flex; align-items: center; cursor: pointer; gap: 8px; }
+.cb-toggle input[type="checkbox"] {
+  -webkit-appearance: none; appearance: none;
+  width: 32px; height: 18px; border-radius: 9px;
+  background: var(--border-strong); position: relative;
+  cursor: pointer; transition: background 0.2s; flex-shrink: 0;
+}
+.cb-toggle input[type="checkbox"]::after {
+  content: ''; position: absolute; top: 2px; left: 2px;
+  width: 14px; height: 14px; border-radius: 50%;
+  background: #fff; transition: left 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+}
+.cb-toggle input[type="checkbox"]:checked { background: var(--primary); }
+.cb-toggle input[type="checkbox"]:checked::after { left: 16px; }
+
+/* ========== KV Row (Query Params / Headers 键值对行) ========== */
+.kv-row { display: flex; align-items: center; gap: 4px; margin-bottom: 5px; }
+.kv-row .config-input { font-size: 12px; }
+.kv-row-del { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 18px; line-height: 1; padding: 0 3px; flex-shrink: 0; }
+.kv-row-del:hover { color: var(--danger); }
+
+/* ========== Callback Expand Box ========== */
+.callback-expand-box {
+  margin-top: 10px; padding: 12px; background: var(--surface-dim);
+  border-radius: 8px; border: 1px solid var(--border);
+}
+.callback-expand-box .config-field { margin-bottom: 8px; }
+.callback-expand-box .config-field:last-child { margin-bottom: 0; }
+
+/* ========== Debug Simulation Panel ========== */
+.debug-status-banner {
+  margin: 14px 18px 10px;
+  padding: 12px 14px;
+  background: linear-gradient(135deg, #FFF8E1 0%, #FFECB3 100%);
+  border: 1px solid #FFD54F;
+  border-radius: var(--radius-md);
+}
+.debug-status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+.debug-status-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--warning); flex-shrink: 0;
+  animation: pausePulse 1.5s ease-in-out infinite;
+}
+.debug-status-indicator.state-success .debug-status-dot {
+  background: var(--success);
+  animation: none;
+}
+.debug-status-indicator.state-failed .debug-status-dot {
+  background: var(--danger);
+  animation: none;
+}
+.debug-status-text {
+  font-size: 13px; font-weight: 600; color: var(--text);
+}
+.debug-status-meta {
+  font-size: 11px; color: var(--text-secondary);
+  padding-left: 20px;
+}
+
+.debug-section {
+  margin: 0 18px 12px;
+  padding: 12px 14px;
+  background: var(--surface-dim);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+.debug-section-title {
+  font-size: 12px; font-weight: 600; color: var(--text);
+  margin-bottom: 10px;
+  display: flex; align-items: center; gap: 6px;
+}
+
+.debug-scene-chips {
+  display: flex; gap: 8px; flex-wrap: wrap;
+}
+.debug-scene-chip {
+  padding: 5px 12px; font-size: 11px;
+  border: 1px solid var(--border); border-radius: 6px;
+  background: var(--surface); color: var(--text-secondary);
+  cursor: pointer; transition: var(--transition);
+  user-select: none;
+}
+.debug-scene-chip:hover {
+  border-color: var(--primary); color: var(--primary);
+  background: var(--primary-light);
+}
+.debug-scene-chip.active {
+  border-color: var(--primary); color: var(--primary);
+  background: var(--primary-light); font-weight: 500;
+}
+
+.debug-actions {
+  margin: 0 18px 14px;
+  display: flex; gap: 8px; flex-wrap: wrap;
+}
+.debug-btn {
+  padding: 7px 16px; font-size: 12px; border-radius: 6px;
+  cursor: pointer; font-weight: 500; border: 1px solid transparent;
+  transition: var(--transition); display: inline-flex; align-items: center; gap: 5px;
+}
+.debug-btn-primary {
+  background: rgba(22,163,74,0.08); color: var(--success);
+  border-color: var(--success);
+}
+.debug-btn-primary:hover {
+  background: var(--success); color: #fff;
+}
+.debug-btn-warning {
+  background: rgba(245,158,11,0.08); color: var(--warning);
+  border-color: var(--warning);
+}
+.debug-btn-warning:hover {
+  background: var(--warning); color: #fff;
+}
+.debug-btn-danger {
+  background: rgba(220,38,38,0.08); color: var(--danger);
+  border-color: var(--danger);
+}
+.debug-btn-danger:hover {
+  background: var(--danger); color: #fff;
+}
+
+.debug-log-preview {
+  max-height: 180px; overflow-y: auto;
+  background: #1a1a2e; border-radius: 6px;
+  padding: 10px 12px; font-family: var(--font-mono); font-size: 11px;
+}
+.debug-log-entry {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 4px 0; line-height: 1.5;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.debug-log-entry:last-child { border-bottom: none; }
+.debug-log-time {
+  color: #6c7086; flex-shrink: 0; min-width: 64px;
+}
+.debug-log-level {
+  flex-shrink: 0; min-width: 42px; text-align: center;
+  padding: 0 4px; border-radius: 3px; font-size: 10px; font-weight: 600;
+}
+.debug-log-level.level-info { color: #74c7ec; }
+.debug-log-level.level-debug { color: #a6e3a1; }
+.debug-log-level.level-warn { color: #f9e2af; }
+.debug-log-level.level-error { color: #f38ba8; }
+.debug-log-msg {
+  color: #cdd6f4; word-break: break-all;
+}
 </style>
 </head>
 <body>
@@ -1957,10 +2112,15 @@ body {
       <span class="cpn-nav-icon" style="background:var(--node-data);color:var(--node-data-fg)">💻</span>
       <span class="cpn-nav-name">代码节点</span>
     </a>
-    <a class="cpn-nav-item" data-cpn="cpn-integration" onclick="cpnNav(this)">
+    <a class="cpn-nav-item" data-cpn="cpn-http-examples" onclick="cpnNav(this)">
       <span class="cpn-nav-icon" style="background:var(--node-integration);color:var(--node-integration-fg)">🌐</span>
-      <span class="cpn-nav-name">集成扩展</span>
+      <span class="cpn-nav-name">HTTP 请求</span>
     </a>
+    <a class="cpn-nav-item" data-cpn="cpn-mq-examples" onclick="cpnNav(this)">
+      <span class="cpn-nav-icon" style="background:var(--node-integration);color:var(--node-integration-fg)">📨</span>
+      <span class="cpn-nav-name">MQ 节点</span>
+    </a>
+
     <div class="cpn-group-label">交互规范</div>
     <a class="cpn-nav-item" data-cpn="cpn-title-edit" onclick="cpnNav(this)">
       <span class="cpn-nav-icon" style="background:var(--surface);color:var(--text-muted);border:1px solid var(--border)">✏️</span>
@@ -1979,50 +2139,6 @@ body {
   <!-- 右侧内容区 -->
   <div class="canvas-content-area" id="canvasContentArea">
 
-<div id="cpn-flow" class="cpn-anchor"></div>
-<div class="category-label">流程控制类节点</div>
-<div class="canvas-bg">
-<div class="nodes-row">
-
-  <!-- Loop -->
-  <div class="node-wrap">
-    <div class="canvas-node">
-      <div class="canvas-node-header">
-        <div class="canvas-node-icon" style="background:var(--node-logic);color:var(--node-logic-fg)">🔄</div>
-        <div class="canvas-node-title" contenteditable="false" onclick="startEditTitle(this)">循环</div>
-      </div>
-      <div class="canvas-node-body">
-        <div class="node-code-tag">loop_1</div>
-        <div class="node-summary-text">ForEach 遍历 订单列表</div>
-      </div>
-      <div class="port port-in"></div>
-      <div class="port" style="position:absolute;right:-7px;top:33%"></div>
-      <div class="port-label-r" style="top:29%;color:var(--text-muted)">完成</div>
-      <div class="port" style="position:absolute;right:-7px;top:60%"></div>
-      <div class="port-label-r" style="top:56%;color:var(--warning)">中断</div>
-      <div class="port" style="position:absolute;bottom:-7px;left:50%;margin-left:-6px;width:12px;height:12px;border-radius:50%;background:var(--surface);border:2px solid var(--info)"></div>
-      <div class="port-label-b">循环体</div>
-    </div>
-  </div>
-
-  <!-- Delay -->
-  <div class="node-wrap">
-    <div class="canvas-node">
-      <div class="canvas-node-header">
-        <div class="canvas-node-icon" style="background:var(--node-logic);color:var(--node-logic-fg)">⏱️</div>
-        <div class="canvas-node-title" contenteditable="false" onclick="startEditTitle(this)">延迟</div>
-      </div>
-      <div class="canvas-node-body">
-        <div class="node-code-tag">delay_1</div>
-        <div class="node-summary-text">等待 30 分钟</div>
-      </div>
-      <div class="port port-in"></div>
-      <div class="port port-out"></div>
-    </div>
-  </div>
-
-</div><!-- nodes-row end -->
-</div><!-- canvas-bg end -->
 
 <div id="cpn-trigger-examples" class="cpn-anchor"></div>
 <div class="category-label" style="margin-top:24px">开始节点 — 画布卡片摘要场景示例</div>
@@ -2738,30 +2854,6 @@ body {
 
 </div><!-- nodes-row end -->
 </div><!-- canvas-bg end -->
-<div id="cpn-data" class="cpn-anchor"></div>
-<div class="category-label">数据与执行类节点</div>
-<div class="canvas-bg">
-<div class="nodes-row">
-
-  <!-- Assign -->
-  <div class="node-wrap">
-    <div class="canvas-node">
-      <div class="canvas-node-header">
-        <div class="canvas-node-icon" style="background:var(--node-data);color:var(--node-data-fg)">📝</div>
-        <div class="canvas-node-title" contenteditable="false" onclick="startEditTitle(this)">赋值</div>
-      </div>
-      <div class="canvas-node-body">
-        <div class="node-code-tag">assign_1</div>
-        <div class="node-summary-text">totalAmount = 金额 × 数量</div>
-      </div>
-      <div class="port port-in"></div>
-      <div class="port port-out"></div>
-    </div>
-  </div>
-
-
-</div>
-</div>
 
 <div id="cpn-output-examples" class="cpn-anchor"></div>
 <div class="category-label" style="margin-top:24px">输出节点 — 画布卡片摘要场景示例</div>
@@ -3037,78 +3129,316 @@ body {
 
 </div><!-- nodes-row end -->
 </div><!-- canvas-bg end -->
-<div id="cpn-integration" class="cpn-anchor"></div>
-<div class="category-label">集成 &amp; 扩展类节点</div>
+
+<div id="cpn-http-examples" class="cpn-anchor"></div>
+<div class="category-label" style="margin-top:24px">HTTP 请求 — 画布卡片摘要场景示例</div>
+<p class="section-desc" style="margin-top:-4px">卡片摘要显示 <strong>请求方法 + URL</strong>；启用挂起等待回调时附加橙色标签。调试态下卡片边框变色并预览响应状态码。</p>
 <div class="canvas-bg">
-<div class="nodes-row">
+<div class="nodes-row" style="flex-wrap:wrap;gap:16px 12px">
 
-  <!-- HTTP -->
-  <div class="node-wrap">
-    <div class="canvas-node">
-      <div class="canvas-node-header">
-        <div class="canvas-node-icon" style="background:var(--node-integration);color:var(--node-integration-fg)">🌐</div>
-        <div class="canvas-node-title" contenteditable="false" onclick="startEditTitle(this)">HTTP 请求</div>
+  <!-- 场景 1：未配置 -->
+  <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+    <div class="node-wrap">
+      <div class="canvas-node">
+        <div class="canvas-node-header">
+          <div class="canvas-node-icon" style="background:var(--node-integration);color:var(--node-integration-fg)">🌐</div>
+          <div class="canvas-node-title">HTTP 请求</div>
+        </div>
+        <div class="canvas-node-body">
+          <div class="node-code-tag">http_1</div>
+          <div class="node-summary-err">⚠ 未完成配置</div>
+        </div>
+        <div class="port port-in"></div>
+        <div class="port port-out"></div>
       </div>
-      <div class="canvas-node-body">
-        <div class="node-code-tag">http_1</div>
-        <div class="node-summary-text">GET /api/orders/{id}</div>
-      </div>
-      <div class="port port-in"></div>
-      <div class="port port-out"></div>
     </div>
+    <div style="font-size:11px;color:var(--text-muted);text-align:center">未配置<br>警告摘要</div>
   </div>
 
-  <!-- MQ -->
-  <div class="node-wrap">
-    <div class="canvas-node">
-      <div class="canvas-node-header">
-        <div class="canvas-node-icon" style="background:var(--node-integration);color:var(--node-integration-fg)">📨</div>
-        <div class="canvas-node-title" contenteditable="false" onclick="startEditTitle(this)">MQ 发送</div>
+  <!-- 场景 2：GET 请求（已配置） -->
+  <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+    <div class="node-wrap">
+      <div class="canvas-node">
+        <div class="canvas-node-header">
+          <div class="canvas-node-icon" style="background:var(--node-integration);color:var(--node-integration-fg)">🌐</div>
+          <div class="canvas-node-title">查询用户信息</div>
+        </div>
+        <div class="canvas-node-body">
+          <div class="node-code-tag">http_1</div>
+          <div class="node-summary-text"><span style="font-family:var(--font-mono);font-size:10px;background:rgba(22,163,74,0.1);color:var(--success);border-radius:3px;padding:0 4px;font-weight:600">GET</span> api.example.com/users</div>
+        </div>
+        <div class="port port-in"></div>
+        <div class="port port-out"></div>
       </div>
-      <div class="canvas-node-body">
-        <div class="node-code-tag">mq_1</div>
-        <div class="node-summary-text">Topic: order-events</div>
-      </div>
-      <div class="port port-in"></div>
-      <div class="port port-out"></div>
     </div>
+    <div style="font-size:11px;color:var(--text-muted);text-align:center">GET 请求已配置<br>摘要 = 方法 + URL</div>
   </div>
 
-  <!-- Workflow -->
-  <div class="node-wrap">
-    <div class="canvas-node">
-      <div class="canvas-node-header">
-        <div class="canvas-node-icon" style="background:var(--node-flow);color:var(--node-flow-fg)">🔗</div>
-        <div class="canvas-node-title" contenteditable="false" onclick="startEditTitle(this)">工作流</div>
+  <!-- 场景 3：POST 请求（已配置） -->
+  <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+    <div class="node-wrap">
+      <div class="canvas-node">
+        <div class="canvas-node-header">
+          <div class="canvas-node-icon" style="background:var(--node-integration);color:var(--node-integration-fg)">🌐</div>
+          <div class="canvas-node-title">提交订单到 ERP</div>
+        </div>
+        <div class="canvas-node-body">
+          <div class="node-code-tag">http_2</div>
+          <div class="node-summary-text"><span style="font-family:var(--font-mono);font-size:10px;background:rgba(37,99,235,0.1);color:var(--info);border-radius:3px;padding:0 4px;font-weight:600">POST</span> api.erp.com/orders</div>
+        </div>
+        <div class="port port-in"></div>
+        <div class="port port-out"></div>
       </div>
-      <div class="canvas-node-body">
-        <div class="node-code-tag">workflow_1</div>
-        <div class="node-summary-text">调用 发送通知流程 (v2)</div>
-      </div>
-      <div class="port port-in"></div>
-      <div class="port port-out"></div>
     </div>
+    <div style="font-size:11px;color:var(--text-muted);text-align:center">POST 请求已配置</div>
   </div>
 
-  <!-- Placeholder -->
-  <div class="node-wrap">
-    <div class="canvas-node placeholder-node">
-      <div class="canvas-node-header">
-        <div class="canvas-node-icon" style="background:var(--node-placeholder);color:var(--node-placeholder-fg)">⬜</div>
-        <div class="canvas-node-title" contenteditable="false" onclick="startEditTitle(this)">占位节点</div>
-        <div class="canvas-node-warning">!</div>
+  <!-- 场景 4：挂起等待回调 -->
+  <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+    <div class="node-wrap">
+      <div class="canvas-node">
+        <div class="canvas-node-header">
+          <div class="canvas-node-icon" style="background:var(--node-integration);color:var(--node-integration-fg)">🌐</div>
+          <div class="canvas-node-title">提交审批并等待回调</div>
+        </div>
+        <div class="canvas-node-body">
+          <div class="node-code-tag">http_3</div>
+          <div class="node-summary-text"><span style="font-family:var(--font-mono);font-size:10px;background:rgba(37,99,235,0.1);color:var(--info);border-radius:3px;padding:0 4px;font-weight:600">POST</span> api.erp.com/approve</div>
+          <div class="node-summary-text" style="margin-top:2px;color:var(--warning);font-size:10px">⏸ 挂起等待回调</div>
+        </div>
+        <div class="port port-in"></div>
+        <div class="port port-out"></div>
       </div>
-      <div class="canvas-node-body">
-        <div class="node-code-tag">placeholder_1</div>
-        <div class="node-summary-warn">⚠ 未完成配置</div>
-      </div>
-      <div class="port port-in"></div>
-      <div class="port port-out"></div>
     </div>
+    <div style="font-size:11px;color:var(--text-muted);text-align:center">挂起等待回调模式<br>橙色附加标签</div>
   </div>
 
-</div>
-</div>
+  <!-- 场景 5：URL 含变量引用 -->
+  <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+    <div class="node-wrap">
+      <div class="canvas-node">
+        <div class="canvas-node-header">
+          <div class="canvas-node-icon" style="background:var(--node-integration);color:var(--node-integration-fg)">🌐</div>
+          <div class="canvas-node-title">查询订单状态</div>
+        </div>
+        <div class="canvas-node-body">
+          <div class="node-code-tag">http_4</div>
+          <div class="node-summary-text"><span style="font-family:var(--font-mono);font-size:10px;background:rgba(22,163,74,0.1);color:var(--success);border-radius:3px;padding:0 4px;font-weight:600">GET</span> api.example.com/orders/…</div>
+        </div>
+        <div class="port port-in"></div>
+        <div class="port port-out"></div>
+      </div>
+    </div>
+    <div style="font-size:11px;color:var(--text-muted);text-align:center">URL 含变量<br>截断省略号显示</div>
+  </div>
+
+  <!-- 场景 6：调试-执行成功 -->
+  <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+    <div class="node-wrap">
+      <div class="canvas-node state-success">
+        <div class="canvas-node-header">
+          <div class="canvas-node-icon" style="background:var(--node-integration);color:var(--node-integration-fg)">🌐</div>
+          <div class="canvas-node-title">提交订单到 ERP</div>
+        </div>
+        <div class="canvas-node-body">
+          <div class="node-code-tag">http_2</div>
+          <div class="node-summary-text"><span style="font-family:var(--font-mono);font-size:10px;background:rgba(37,99,235,0.1);color:var(--info);border-radius:3px;padding:0 4px;font-weight:600">POST</span> api.erp.com/orders</div>
+          <div class="node-summary-text" style="margin-top:2px;color:var(--success);font-size:10px">↳ 200 OK · {"code":0}</div>
+        </div>
+        <div class="port port-in"></div>
+        <div class="port port-out"></div>
+      </div>
+    </div>
+    <div style="font-size:11px;color:var(--text-muted);text-align:center">调试-执行成功<br>绿色边框 + 状态码预览</div>
+  </div>
+
+  <!-- 场景 7：调试-挂起中（等待回调） -->
+  <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+    <div class="node-wrap">
+      <div class="canvas-node" style="border-color:var(--warning);animation:pausePulse 1.5s ease-in-out infinite">
+        <div class="canvas-node-header">
+          <div class="canvas-node-icon" style="background:var(--node-integration);color:var(--node-integration-fg)">🌐</div>
+          <div class="canvas-node-title">提交审批并等待回调</div>
+        </div>
+        <div class="canvas-node-body">
+          <div class="node-code-tag">http_3</div>
+          <div class="node-summary-text" style="color:var(--warning);font-size:10px">⏸ 挂起中，等待外部回调…</div>
+        </div>
+        <div class="port port-in"></div>
+        <div class="port port-out"></div>
+      </div>
+    </div>
+    <div style="font-size:11px;color:var(--text-muted);text-align:center">调试-挂起中<br>黄色脉冲边框</div>
+  </div>
+
+  <!-- 场景 8：调试-执行失败 -->
+  <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+    <div class="node-wrap">
+      <div class="canvas-node state-failed">
+        <div style="position:absolute;top:-6px;right:-6px;background:#e53935;color:#fff;font-size:10px;font-weight:700;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:2">!</div>
+        <div class="canvas-node-header">
+          <div class="canvas-node-icon" style="background:var(--node-integration);color:var(--node-integration-fg)">🌐</div>
+          <div class="canvas-node-title">查询用户信息</div>
+        </div>
+        <div class="canvas-node-body">
+          <div class="node-code-tag">http_1</div>
+          <div class="node-summary-text" style="color:var(--danger)">↳ 404 Not Found</div>
+        </div>
+        <div class="port port-in"></div>
+        <div class="port port-out"></div>
+      </div>
+    </div>
+    <div style="font-size:11px;color:var(--text-muted);text-align:center">调试-执行失败<br>红色边框 + 状态码</div>
+  </div>
+
+</div><!-- nodes-row end -->
+</div><!-- canvas-bg end -->
+
+<div id="cpn-mq-examples" class="cpn-anchor"></div>
+<div class="category-label" style="margin-top:24px">MQ 节点 — 画布卡片摘要场景示例</div>
+<p class="section-desc" style="margin-top:-4px">卡片摘要显示 <strong>发送目标（MQ 实例 + 队列/Topic）</strong>；启用挂起等待回调时附加橙色标签。调试态下显示发送结果或挂起/超时状态。</p>
+<div class="canvas-bg">
+<div class="nodes-row" style="flex-wrap:wrap;gap:16px 12px">
+
+  <!-- 场景 1：未配置 -->
+  <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+    <div class="node-wrap">
+      <div class="canvas-node">
+        <div class="canvas-node-header">
+          <div class="canvas-node-icon" style="background:var(--node-integration);color:var(--node-integration-fg)">📨</div>
+          <div class="canvas-node-title">MQ 节点</div>
+        </div>
+        <div class="canvas-node-body">
+          <div class="node-code-tag">mq_1</div>
+          <div class="node-summary-err">⚠ 未完成配置</div>
+        </div>
+        <div class="port port-in"></div>
+        <div class="port port-out"></div>
+      </div>
+    </div>
+    <div style="font-size:11px;color:var(--text-muted);text-align:center">未配置<br>警告摘要</div>
+  </div>
+
+  <!-- 场景 2：RabbitMQ 已配置 -->
+  <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+    <div class="node-wrap">
+      <div class="canvas-node">
+        <div class="canvas-node-header">
+          <div class="canvas-node-icon" style="background:var(--node-integration);color:var(--node-integration-fg)">📨</div>
+          <div class="canvas-node-title">通知库存系统</div>
+        </div>
+        <div class="canvas-node-body">
+          <div class="node-code-tag">mq_1</div>
+          <div class="node-summary-text">发送消息到 订单中心MQ</div>
+          <div class="node-summary-text" style="margin-top:1px;font-size:10px;color:var(--text-secondary)">· order.created</div>
+        </div>
+        <div class="port port-in"></div>
+        <div class="port port-out"></div>
+      </div>
+    </div>
+    <div style="font-size:11px;color:var(--text-muted);text-align:center">RabbitMQ 已配置<br>实例 + 路由键</div>
+  </div>
+
+  <!-- 场景 3：Kafka 已配置 -->
+  <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+    <div class="node-wrap">
+      <div class="canvas-node">
+        <div class="canvas-node-header">
+          <div class="canvas-node-icon" style="background:var(--node-integration);color:var(--node-integration-fg)">📨</div>
+          <div class="canvas-node-title">广播订单事件</div>
+        </div>
+        <div class="canvas-node-body">
+          <div class="node-code-tag">mq_2</div>
+          <div class="node-summary-text">发送消息到 订单中心 Kafka 集群</div>
+        </div>
+        <div class="port port-in"></div>
+        <div class="port port-out"></div>
+      </div>
+    </div>
+    <div style="font-size:11px;color:var(--text-muted);text-align:center">Kafka 已配置<br>只显示实例名</div>
+  </div>
+
+  <!-- 场景 4：挂起等待回调（配置态） -->
+  <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+    <div class="node-wrap">
+      <div class="canvas-node">
+        <div class="canvas-node-header">
+          <div class="canvas-node-icon" style="background:var(--node-integration);color:var(--node-integration-fg)">📨</div>
+          <div class="canvas-node-title">通知库存并等待回调</div>
+        </div>
+        <div class="canvas-node-body">
+          <div class="node-code-tag">mq_3</div>
+          <div class="node-summary-text">发送消息到 order.created</div>
+          <div class="node-summary-text" style="margin-top:2px;color:var(--warning);font-size:10px">⏸ 挂起等待回调</div>
+        </div>
+        <div class="port port-in"></div>
+        <div class="port port-out"></div>
+      </div>
+    </div>
+    <div style="font-size:11px;color:var(--text-muted);text-align:center">挂起等待回调模式<br>橙色附加标签</div>
+  </div>
+
+  <!-- 场景 5：调试-执行成功（即发即走） -->
+  <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+    <div class="node-wrap">
+      <div class="canvas-node state-success">
+        <div class="canvas-node-header">
+          <div class="canvas-node-icon" style="background:var(--node-integration);color:var(--node-integration-fg)">📨</div>
+          <div class="canvas-node-title">通知库存系统</div>
+        </div>
+        <div class="canvas-node-body">
+          <div class="node-code-tag">mq_1</div>
+          <div class="node-summary-text">发送消息到 order.created</div>
+          <div class="node-summary-text" style="margin-top:2px;color:var(--success);font-size:10px">↳ 发送成功</div>
+        </div>
+        <div class="port port-in"></div>
+        <div class="port port-out"></div>
+      </div>
+    </div>
+    <div style="font-size:11px;color:var(--text-muted);text-align:center">调试-执行成功<br>绿色边框 + 结果预览</div>
+  </div>
+
+  <!-- 场景 6：调试-挂起中 -->
+  <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+    <div class="node-wrap">
+      <div class="canvas-node" style="border-color:var(--warning);animation:pausePulse 1.5s ease-in-out infinite">
+        <div class="canvas-node-header">
+          <div class="canvas-node-icon" style="background:var(--node-integration);color:var(--node-integration-fg)">📨</div>
+          <div class="canvas-node-title">通知库存并等待回调</div>
+        </div>
+        <div class="canvas-node-body">
+          <div class="node-code-tag">mq_3</div>
+          <div class="node-summary-text" style="color:var(--warning);font-size:10px">⏸ 挂起中，等待消费方回调…</div>
+        </div>
+        <div class="port port-in"></div>
+        <div class="port port-out"></div>
+      </div>
+    </div>
+    <div style="font-size:11px;color:var(--text-muted);text-align:center">调试-挂起中<br>黄色脉冲边框</div>
+  </div>
+
+  <!-- 场景 7：调试-回调超时 -->
+  <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+    <div class="node-wrap">
+      <div class="canvas-node state-failed">
+        <div style="position:absolute;top:-6px;right:-6px;background:#e53935;color:#fff;font-size:10px;font-weight:700;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:2">!</div>
+        <div class="canvas-node-header">
+          <div class="canvas-node-icon" style="background:var(--node-integration);color:var(--node-integration-fg)">📨</div>
+          <div class="canvas-node-title">通知库存并等待回调</div>
+        </div>
+        <div class="canvas-node-body">
+          <div class="node-code-tag">mq_3</div>
+          <div class="node-summary-text" style="color:var(--danger)">↳ 回调超时</div>
+        </div>
+        <div class="port port-in"></div>
+        <div class="port port-out"></div>
+      </div>
+    </div>
+    <div style="font-size:11px;color:var(--text-muted);text-align:center">调试-回调超时<br>红色边框 + 超时状态</div>
+  </div>
+
+</div><!-- nodes-row end -->
+</div><!-- canvas-bg end -->
 
 <div id="cpn-title-edit" class="cpn-anchor"></div>
 <div class="category-label">节点名称交互说明（悬浮即可编辑，无需打开配置面板）</div>
@@ -3242,9 +3572,112 @@ body {
     <div class="state-desc">border: danger</div>
   </div>
   <div class="state-card" style="border-color:var(--warning)">
-    <div class="state-card-label">暂停/断点</div>
+    <div class="state-card-label">挂起/暂停</div>
     <div class="state-node" style="border-color:var(--warning);animation:pausePulse 1.5s ease-in-out infinite"><div class="canvas-node-header"><div class="canvas-node-icon" style="background:var(--node-integration);color:var(--node-integration-fg)">🌐</div><div class="canvas-node-title" style="cursor:default">HTTP 请求</div></div></div>
     <div class="state-desc">border: warning + pulse</div>
+  </div>
+</div>
+
+<!-- 底部调试面板 — 挂起操作卡片示例 -->
+<div class="category-label" style="margin-top:32px">底部调试面板 — HTTP 挂起操作卡片</div>
+<p class="section-desc">调试模式下，HTTP 节点挂起时，底部「调试日志」面板自动插入操作卡片，用户在查看日志的同时可直接模拟回调。</p>
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:20px;margin-bottom:24px">
+  <!-- 模拟底部面板 Tab 栏 -->
+  <div style="display:flex;border-bottom:1px solid var(--border);margin-bottom:12px">
+    <div style="padding:6px 14px;font-size:12px;color:var(--text-muted)">问题 <span style="background:var(--surface-dim);padding:1px 5px;border-radius:3px;font-size:10px">0</span></div>
+    <div style="padding:6px 14px;font-size:12px;font-weight:600;border-bottom:2px solid var(--primary);color:var(--primary);margin-bottom:-1px">调试日志 <span style="background:var(--primary-light);padding:1px 5px;border-radius:3px;font-size:10px">12</span></div>
+    <div style="padding:6px 14px;font-size:12px;color:var(--text-muted)">全局变量 <span style="background:var(--primary-light);padding:1px 5px;border-radius:3px;font-size:10px">5</span></div>
+  </div>
+  <!-- 日志列表 -->
+  <div style="font-family:var(--font-mono);font-size:11px;line-height:1.6">
+    <div style="display:flex;gap:10px;padding:4px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text-muted);min-width:64px">14:32:05</span><span style="color:#74c7ec;min-width:42px;font-weight:600">INFO</span><span style="color:var(--text)">开始节点执行完成，耗时 2ms</span></div>
+    <div style="display:flex;gap:10px;padding:4px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text-muted);min-width:64px">14:32:05</span><span style="color:#74c7ec;min-width:42px;font-weight:600">INFO</span><span style="color:var(--text)">HTTP 请求已发送，等待外部回调…</span></div>
+    <div style="display:flex;gap:10px;padding:4px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text-muted);min-width:64px">14:32:05</span><span style="color:#a6e3a1;min-width:42px;font-weight:600">DEBUG</span><span style="color:var(--text)">GET https://api.erp.com/orders/123</span></div>
+    <div style="display:flex;gap:10px;padding:4px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text-muted);min-width:64px">14:32:05</span><span style="color:#a6e3a1;min-width:42px;font-weight:600">DEBUG</span><span style="color:var(--text)">回调地址已生成: https://beaver.example.com/callback/abc123</span></div>
+    <div style="display:flex;gap:10px;padding:4px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text-muted);min-width:64px">14:32:05</span><span style="color:#f9e2af;min-width:42px;font-weight:600">WARN</span><span style="color:var(--text)">节点进入挂起状态，等待回调数据</span></div>
+  </div>
+  <!-- 挂起操作卡片 -->
+  <div style="margin-top:12px;padding:14px;background:linear-gradient(135deg,#FFF8E1 0%,#FFECB3 100%);border:1px solid #FFD54F;border-radius:var(--radius-md)">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+      <span style="width:10px;height:10px;border-radius:50%;background:var(--warning);animation:pausePulse 1.5s ease-in-out infinite;display:inline-block"></span>
+      <span style="font-size:13px;font-weight:600;color:var(--text)">⏸ HTTP 请求 挂起中 — 等待外部回调</span>
+      <span style="font-size:11px;color:var(--text-secondary);margin-left:auto">已等待 00:02:35</span>
+    </div>
+    <div style="font-size:11px;color:var(--text-secondary);margin-bottom:12px;padding-left:20px">回调 URL: https://beaver.example.com/callback/abc123</div>
+    <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:8px">模拟回调响应</div>
+    <div style="margin-bottom:10px">
+      <div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px">HTTP 状态码</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <span style="padding:4px 10px;font-size:11px;border-radius:5px;background:var(--primary);color:#fff;font-weight:500">200 OK</span>
+        <span style="padding:4px 10px;font-size:11px;border-radius:5px;background:var(--surface);color:var(--text-secondary);border:1px solid var(--border)">201</span>
+        <span style="padding:4px 10px;font-size:11px;border-radius:5px;background:var(--surface);color:var(--text-secondary);border:1px solid var(--border)">400</span>
+        <span style="padding:4px 10px;font-size:11px;border-radius:5px;background:var(--surface);color:var(--text-secondary);border:1px solid var(--border)">401</span>
+        <span style="padding:4px 10px;font-size:11px;border-radius:5px;background:var(--surface);color:var(--text-secondary);border:1px solid var(--border)">404</span>
+        <span style="padding:4px 10px;font-size:11px;border-radius:5px;background:var(--surface);color:var(--text-secondary);border:1px solid var(--border)">500</span>
+        <span style="padding:4px 10px;font-size:11px;border-radius:5px;background:var(--surface);color:var(--text-secondary);border:1px solid var(--border)">503</span>
+      </div>
+    </div>
+    <div style="margin-bottom:10px">
+      <div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px">响应头（JSON）</div>
+      <textarea style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--surface);font-family:var(--font-mono);font-size:11px;min-height:50px" placeholder='{"Content-Type": "application/json"}'></textarea>
+    </div>
+    <div style="margin-bottom:12px">
+      <div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px">响应体 / 回调数据（JSON）</div>
+      <textarea style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--surface);font-family:var(--font-mono);font-size:11px;min-height:80px" placeholder='{"result": "approved", "data": {"orderId": "123"}}'></textarea>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+      <span style="padding:5px 12px;font-size:11px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text-secondary);cursor:default">✅ 成功回调</span>
+      <span style="padding:5px 12px;font-size:11px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text-secondary);cursor:default">📄 空响应</span>
+      <span style="padding:5px 12px;font-size:11px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text-secondary);cursor:default">🔄 需要重试</span>
+      <span style="padding:5px 12px;font-size:11px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text-secondary);cursor:default">❌ 业务错误</span>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button style="padding:7px 16px;font-size:12px;border-radius:6px;background:rgba(22,163,74,0.08);color:var(--success);border:1px solid var(--success);font-weight:500;cursor:default">✓ 提交回调</button>
+      <button style="padding:7px 16px;font-size:12px;border-radius:6px;background:rgba(245,158,11,0.08);color:var(--warning);border:1px solid var(--warning);font-weight:500;cursor:default">⏱ 模拟超时</button>
+    </div>
+  </div>
+</div>
+
+<!-- 底部调试面板 — MQ 挂起操作卡片示例 -->
+<div class="category-label" style="margin-top:32px">底部调试面板 — MQ 挂起操作卡片</div>
+<p class="section-desc">调试模式下，MQ 节点挂起时，底部「调试日志」面板自动插入操作卡片。与 HTTP 节点共用同一套交互框架，仅去掉 HTTP 状态码和响应头字段。</p>
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:20px;margin-bottom:24px">
+  <!-- 模拟底部面板 Tab 栏 -->
+  <div style="display:flex;border-bottom:1px solid var(--border);margin-bottom:12px">
+    <div style="padding:6px 14px;font-size:12px;color:var(--text-muted)">问题 <span style="background:var(--surface-dim);padding:1px 5px;border-radius:3px;font-size:10px">0</span></div>
+    <div style="padding:6px 14px;font-size:12px;font-weight:600;border-bottom:2px solid var(--primary);color:var(--primary);margin-bottom:-1px">调试日志 <span style="background:var(--primary-light);padding:1px 5px;border-radius:3px;font-size:10px">8</span></div>
+    <div style="padding:6px 14px;font-size:12px;color:var(--text-muted)">全局变量 <span style="background:var(--primary-light);padding:1px 5px;border-radius:3px;font-size:10px">5</span></div>
+  </div>
+  <!-- 日志列表 -->
+  <div style="font-family:var(--font-mono);font-size:11px;line-height:1.6">
+    <div style="display:flex;gap:10px;padding:4px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text-muted);min-width:64px">14:32:05</span><span style="color:#74c7ec;min-width:42px;font-weight:600">INFO</span><span style="color:var(--text)">赋值节点执行完成，耗时 1ms</span></div>
+    <div style="display:flex;gap:10px;padding:4px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text-muted);min-width:64px">14:32:05</span><span style="color:#74c7ec;min-width:42px;font-weight:600">INFO</span><span style="color:var(--text)">MQ 节点开始执行，目标队列: order.created</span></div>
+    <div style="display:flex;gap:10px;padding:4px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text-muted);min-width:64px">14:32:05</span><span style="color:#a6e3a1;min-width:42px;font-weight:600">DEBUG</span><span style="color:var(--text)">消息已发送到 RabbitMQ Broker</span></div>
+    <div style="display:flex;gap:10px;padding:4px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text-muted);min-width:64px">14:32:05</span><span style="color:#a6e3a1;min-width:42px;font-weight:600">DEBUG</span><span style="color:var(--text)">回调地址已生成: https://beaver.example.com/callback/mq789</span></div>
+    <div style="display:flex;gap:10px;padding:4px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text-muted);min-width:64px">14:32:05</span><span style="color:#f9e2af;min-width:42px;font-weight:600">WARN</span><span style="color:var(--text)">节点进入挂起状态，等待消费方回调</span></div>
+  </div>
+  <!-- 挂起操作卡片 -->
+  <div style="margin-top:12px;padding:14px;background:linear-gradient(135deg,#FFF8E1 0%,#FFECB3 100%);border:1px solid #FFD54F;border-radius:var(--radius-md)">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+      <span style="width:10px;height:10px;border-radius:50%;background:var(--warning);animation:pausePulse 1.5s ease-in-out infinite;display:inline-block"></span>
+      <span style="font-size:13px;font-weight:600;color:var(--text)">⏸ MQ 节点 挂起中 — 等待消费方回调</span>
+      <span style="font-size:11px;color:var(--text-secondary);margin-left:auto">已等待 00:05:12</span>
+    </div>
+    <div style="font-size:11px;color:var(--text-secondary);margin-bottom:12px;padding-left:20px">回调 URL: https://beaver.example.com/callback/mq789</div>
+    <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:8px">模拟回调数据</div>
+    <div style="margin-bottom:12px">
+      <div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px">回调数据（JSON）</div>
+      <textarea style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--surface);font-family:var(--font-mono);font-size:11px;min-height:80px" placeholder='{"result": "processed", "orderId": "123"}'></textarea>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+      <span style="padding:5px 12px;font-size:11px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text-secondary);cursor:default">✅ 成功回调</span>
+      <span style="padding:5px 12px;font-size:11px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text-secondary);cursor:default">📄 空响应</span>
+      <span style="padding:5px 12px;font-size:11px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text-secondary);cursor:default">❌ 业务错误</span>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button style="padding:7px 16px;font-size:12px;border-radius:6px;background:rgba(22,163,74,0.08);color:var(--success);border:1px solid var(--success);font-weight:500;cursor:default">✓ 提交回调</button>
+      <button style="padding:7px 16px;font-size:12px;border-radius:6px;background:rgba(245,158,11,0.08);color:var(--warning);border:1px solid var(--warning);font-weight:500;cursor:default">⏱ 模拟超时</button>
+    </div>
   </div>
 </div>
 
@@ -3580,6 +4013,20 @@ body {
         <div class="method-chip" onclick="selectMethod(this,'PATCH')">PATCH</div>
       </div>
     </div>
+    <!-- Query Params 字段：始终显示 -->
+    <div class="config-field">
+      <div class="config-label">Query Params</div>
+      <div id="demoQueryParamsList">
+        <div class="kv-row">
+          <input class="config-input" placeholder="Key" style="flex:1;min-width:0">
+          <span style="color:var(--text-muted);font-size:11px;padding:0 2px">=</span>
+          <input class="config-input" placeholder="Value 或 ${变量}" style="flex:2;min-width:0">
+          <button class="kv-row-del" onclick="this.closest('.kv-row').remove()" title="删除">×</button>
+        </div>
+      </div>
+      <div class="add-link" onclick="addKvRow('demoQueryParamsList')">+ 添加参数</div>
+      <div class="config-help">运行时自动拼接到 URL 后，无需手动写 ? 和 &amp;</div>
+    </div>
     <div class="config-field">
       <div class="config-label">Headers</div>
       <div class="expr-editor">
@@ -3614,18 +4061,45 @@ body {
       </div>
       <div class="config-help">支持 JSON / 表单 / 原始文本；仅 POST / PUT / PATCH 请求可用</div>
     </div>
+    <!-- 挂起等待回调：基础配置中的执行模式开关 -->
+    <div class="config-field">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <span class="config-label" style="margin-bottom:0">挂起等待回调</span>
+        <label class="cb-toggle">
+          <input type="checkbox" id="demoCallbackToggle" onchange="toggleCallbackFields('demoCallbackFields',this.checked)">
+          <span style="font-size:12px;color:var(--text-secondary)">开启</span>
+        </label>
+      </div>
+      <div class="config-help" style="margin-top:2px">开启后节点发完请求立即挂起，等外部系统回调后继续执行</div>
+      <div id="demoCallbackFields" class="callback-expand-box" style="display:none">
+        <div class="config-field">
+          <div class="config-label">回调 URL <span style="font-size:10px;font-weight:400;color:var(--text-muted)">（只读，自动生成）</span></div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <input class="config-input" value="https://beaver.example.com/callback/abc123..." readonly style="background:var(--surface);color:var(--text-secondary);font-family:var(--font-mono);font-size:11px;flex:1">
+            <button style="padding:5px 10px;font-size:11px;border:1px solid var(--border);border-radius:6px;background:var(--surface);cursor:pointer;color:var(--text-muted)">复制</button>
+          </div>
+          <div class="config-help">外部系统需 POST 到此地址以恢复流程执行</div>
+        </div>
+        <div class="config-field">
+          <div class="config-label">回调超时时间（小时）</div>
+          <input class="config-input" type="number" value="24" min="1" max="720" style="width:100px">
+          <div class="config-help">超时未收到回调，触发高级配置中的异常策略，默认 24 小时</div>
+        </div>
+      </div>
+    </div>
+    <!-- 超时时间：基础配置末尾，接口速度差异大，用户需要根据实际接口调整 -->
+    <div class="config-field">
+      <div class="config-label">超时时间（秒）</div>
+      <input class="config-input" type="number" value="30" min="1" max="3600" style="width:100px">
+      <div class="config-help">HTTP 请求的最大等待时间，默认 30 秒；慢接口（如 ERP、文件上传）建议适当调大</div>
+    </div>
   </div>
   </div>
 
   <!-- 高级配置内容 -->
   <div id="demoAdvBody" style="display:none">
   <div class="config-section">
-    <div class="config-section-title">执行策略</div>
-    <div class="config-field">
-      <div class="config-label">超时时间（秒）</div>
-      <input class="config-input" type="number" value="30" min="1" max="3600" style="width:100px">
-      <div class="config-help">HTTP 请求的最大等待时间（默认 30 秒）</div>
-    </div>
+    <div class="config-section-title">异常策略</div>
     <div class="config-field">
       <div class="config-label">异常策略</div>
       <select class="config-input" style="font-size:12px" onchange="toggleErrorStrategy('http',this.value)">
@@ -3755,6 +4229,16 @@ body {
       <span class="node-nav-name">循环</span>
       <span class="node-nav-code">loop</span>
     </div>
+    <div class="node-nav-item" data-node="break" onclick="switchNodePanel('break',this)">
+      <span class="node-nav-icon" style="background:var(--node-logic);color:var(--node-logic-fg)">⏹️</span>
+      <span class="node-nav-name">Break</span>
+      <span class="node-nav-code">break</span>
+    </div>
+    <div class="node-nav-item" data-node="continue" onclick="switchNodePanel('continue',this)">
+      <span class="node-nav-icon" style="background:var(--node-logic);color:var(--node-logic-fg)">⏭️</span>
+      <span class="node-nav-name">Continue</span>
+      <span class="node-nav-code">continue</span>
+    </div>
     <div class="node-nav-item" data-node="delay" onclick="switchNodePanel('delay',this)">
       <span class="node-nav-icon" style="background:var(--node-logic);color:var(--node-logic-fg)">⏱️</span>
       <span class="node-nav-name">延迟</span>
@@ -3784,7 +4268,7 @@ body {
     </div>
     <div class="node-nav-item" data-node="mq" onclick="switchNodePanel('mq',this)">
       <span class="node-nav-icon" style="background:var(--node-integration);color:var(--node-integration-fg)">📨</span>
-      <span class="node-nav-name">MQ 发送</span>
+      <span class="node-nav-name">MQ 节点</span>
       <span class="node-nav-code">mq</span>
     </div>
     <div class="node-nav-item" data-node="workflow" onclick="switchNodePanel('workflow',this)">
@@ -4767,18 +5251,20 @@ body {
     <button onclick="toggleNodeDesc2('loopDesc')" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:16px;padding:4px">?</button>
   </div>
   <div class="node-desc-box" id="loopDesc">
-      <div style="margin-bottom:6px"><strong>定义：</strong>支持 ForEach（遍历数组）和 While（条件循环）两种模式，对一组数据重复执行相同操作，或在条件满足时持续执行。</div>
+      <div style="margin-bottom:6px"><strong>定义：</strong>循环执行节点，用于对集合进行批量处理或根据条件重复执行一段逻辑。支持遍历列表、条件循环、按次数循环三种模式，并通过 Break（中断）和 Continue（跳过）两种专用节点实现循环流程控制。</div>
       <div style="margin-bottom:4px"><strong>适用场景：</strong></div>
       <ul style="margin:0 0 6px 16px;padding:0;list-style:disc">
-        <li>遍历数组逐条处理，如对订单列表中每个订单执行审批</li>
-        <li>条件满足时持续执行，如轮询等待外部状态就绪</li>
-        <li>需要对一批数据做相同处理的批量操作场景</li>
+        <li>对订单列表中的每一条记录执行发送通知的操作（遍历列表）</li>
+        <li>持续轮询任务状态，直到任务完成或超过最大等待次数（条件循环）</li>
+        <li>先执行一次操作，再判断是否需要继续循环（条件循环 · 至少执行一次）</li>
+        <li>对某个接口重试固定次数，超过次数视为失败（按次数循环）</li>
       </ul>
       <div style="margin-bottom:4px"><strong>使用规则：</strong></div>
       <ul style="margin:0 0 2px 16px;padding:0;list-style:disc">
-        <li>循环体通过底部蓝色端口连接，循环正常结束走「完成」出口</li>
-        <li>条件满足时可走「中断」出口跳出循环</li>
-        <li>While 循环需设置合理的退出条件，避免死循环</li>
+        <li>「循环体」端口必须连接，否则循环内没有任何操作</li>
+        <li>Break 和 Continue 节点只能放在循环体内，不能单独使用</li>
+        <li>条件循环模式必须设置最大循环次数，防止无限循环</li>
+        <li>最大循环次数上限为 100,000,000（1 亿），超过按失败处理</li>
       </ul>
     </div>
   <div id="aiGuideContainer-loop"></div>
@@ -4790,11 +5276,12 @@ body {
   <div id="tabBasicBody-loop">
     <div class="config-section">
       <div class="method-chips">
-        <div class="method-chip active" onclick="switchLoopMode('foreach',this)">ForEach</div>
-        <div class="method-chip" onclick="switchLoopMode('while',this)">While</div>
+        <div class="method-chip active" onclick="switchLoopMode('foreach',this)">遍历列表</div>
+        <div class="method-chip" onclick="switchLoopMode('while',this)">条件循环</div>
+        <div class="method-chip" onclick="switchLoopMode('for',this)">按次数</div>
       </div>
     </div>
-    <!-- ForEach 模式 -->
+    <!-- 遍历列表 模式 -->
     <div id="loopForeachFields" class="config-section">
       <div class="config-field">
         <div class="config-label">集合变量 <span class="req">*</span></div>
@@ -4811,16 +5298,32 @@ body {
             <button class="expr-editor-insert-btn" title="插入变量" onclick="insertVarToExprEditor(this)">T</button>
           </div>
         </div>
-        <div class="config-help">必须是数组类型的变量</div>
+        <div class="config-help">待遍历的数组变量，循环将逐个处理其中每个元素</div>
       </div>
       <div class="config-field">
-        <div class="config-label">迭代变量名 <span class="req">*</span></div>
+        <div class="config-label">当前元素变量名 <span class="req">*</span></div>
         <input class="config-input" value="item" style="font-family:var(--font-mono);font-size:12px">
-        <div class="config-help">每次迭代通过 <code>${loop_1.item}</code> 引用当前元素</div>
+        <div class="config-help">每次迭代中，当前元素会赋值到此变量，循环体内节点可直接引用，如 <code>${loop_1.item}</code></div>
+      </div>
+      <div class="config-field">
+        <div class="config-label">索引变量名 <span class="req">*</span></div>
+        <input class="config-input" value="index" style="font-family:var(--font-mono);font-size:12px">
+        <div class="config-help">每次迭代的当前下标（从 0 开始），循环体内可引用，如 <code>${loop_1.index}</code></div>
       </div>
     </div>
-    <!-- While 模式 -->
+    <!-- 条件循环 模式 -->
     <div id="loopWhileFields" class="config-section" style="display:none">
+      <div class="config-field" style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--surface-dim);border-radius:6px;border:1px solid var(--border)">
+        <div>
+          <div class="config-label" style="margin-bottom:2px">至少执行一次</div>
+          <div class="config-help" style="margin:0">开启后变为 DoWhile 模式：先执行一次循环体，再判断条件是否继续</div>
+        </div>
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;user-select:none">
+          <div id="loopDoWhileToggle" onclick="var on=this.classList.toggle('on');this.style.background=on?'var(--primary)':'var(--border-strong)';this.querySelector('div').style.left=on?'16px':'2px'" style="width:32px;height:18px;border-radius:9px;background:var(--border-strong);position:relative;cursor:pointer;transition:background .2s" class="">
+            <div style="width:14px;height:14px;background:#fff;border-radius:50%;position:absolute;top:2px;left:2px;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)"></div>
+          </div>
+        </label>
+      </div>
       <div class="config-field">
         <div class="config-label">循环条件 <span class="req">*</span></div>
         <div class="expr-editor">
@@ -4832,11 +5335,64 @@ body {
             <span class="expr-editor-hint">支持 {{变量}} 插入</span>
           </div>
           <div class="expr-editor-body">
-            <textarea class="expr-editor-input" placeholder="${条件表达式}" rows="1">${assign_1.count} &lt; 10</textarea>
+            <textarea class="expr-editor-input" placeholder="${条件表达式}" rows="1">${task.status} != 'done'</textarea>
             <button class="expr-editor-insert-btn" title="插入变量" onclick="insertVarToExprEditor(this)">T</button>
           </div>
         </div>
-        <div class="config-help">布尔表达式，为真时继续循环</div>
+        <div class="config-help">布尔表达式，为 true 时继续执行循环体；每次循环体执行完毕后重新判断</div>
+      </div>
+      <div class="config-field">
+        <div class="config-label">最大循环次数 <span class="req">*</span></div>
+        <input class="config-input" type="number" value="1000" min="1" max="100000000" style="width:140px">
+        <div class="config-help">循环执行的硬性上限，达到此次数后强制结束循环，防止无限循环。最大值 100,000,000（1 亿），超过按失败处理</div>
+      </div>
+    </div>
+    <!-- 按次数 模式 -->
+    <div id="loopForFields" class="config-section" style="display:none">
+      <div class="config-field" style="display:flex;gap:8px">
+        <div style="flex:1">
+          <div class="config-label">起始值</div>
+          <input class="config-input" type="number" value="0" style="font-family:var(--font-mono);font-size:12px">
+        </div>
+        <div style="flex:1">
+          <div class="config-label">结束值 <span class="req">*</span></div>
+          <input class="config-input" type="number" value="5" style="font-family:var(--font-mono);font-size:12px">
+        </div>
+      </div>
+      <div class="config-field" style="display:flex;gap:8px;align-items:flex-end">
+        <div style="flex:1">
+          <div class="config-label">步长</div>
+          <input class="config-input" type="number" value="1" style="font-family:var(--font-mono);font-size:12px">
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;padding:0 8px">
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;user-select:none;font-size:12px">
+            <input type="checkbox" checked style="cursor:pointer"> 包含结束值
+          </label>
+        </div>
+      </div>
+      <div class="config-field">
+        <div class="config-label">当前值变量名 <span style="font-size:10px;font-weight:400;color:var(--text-muted)">（只读）</span></div>
+        <input class="config-input" value="i" readonly style="font-family:var(--font-mono);font-size:12px;background:var(--surface);color:var(--text-secondary)">
+        <div class="config-help">每次迭代的当前计数值会赋值到此变量，循环体内可引用，如 <code>${loop_1.i}</code>。只读，不可修改</div>
+      </div>
+    </div>
+    <!-- 共用配置 -->
+    <div class="config-section">
+      <div class="config-field" style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--surface-dim);border-radius:6px;border:1px solid var(--border)">
+        <div>
+          <div class="config-label" style="margin-bottom:2px">启用结果收集</div>
+          <div class="config-help" style="margin:0">开启后，每次迭代循环体的输出将自动收集到一个数组变量，循环完成后可在「完成」端口的后续节点中引用</div>
+        </div>
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;user-select:none">
+          <div id="loopCollectToggle" onclick="var on=this.classList.toggle('on');this.style.background=on?'var(--primary)':'var(--border-strong)';this.querySelector('div').style.left=on?'16px':'2px';document.getElementById('loopOutputVarField').style.display=on?'':'none';" style="width:32px;height:18px;border-radius:9px;background:var(--primary);position:relative;cursor:pointer;transition:background .2s" class="on">
+            <div style="width:14px;height:14px;background:#fff;border-radius:50%;position:absolute;top:2px;left:16px;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)"></div>
+          </div>
+        </label>
+      </div>
+      <div class="config-field" id="loopOutputVarField">
+        <div class="config-label">输出变量名</div>
+        <input class="config-input" value="loopResult" style="font-family:var(--font-mono);font-size:12px">
+        <div class="config-help">收集所有迭代结果的数组变量名，循环完成后可引用，如 <code>${loop_1.loopResult}</code></div>
       </div>
     </div>
   </div><!-- tabBasicBody-loop end -->
@@ -4848,10 +5404,11 @@ body {
         <div class="config-label">异常策略</div>
         <select class="config-input" style="font-size:12px" onchange="toggleErrorStrategy('loop',this.value)">
           <option value="stop">终止流程（默认）</option>
+          <option value="skip">跳过当前迭代继续</option>
           <option value="retry">自动重试</option>
           <option value="suspend">挂起等待处理</option>
-          <!-- 不支持「忽略并继续」（循环迭代有状态，忽略语义不清） -->
         </select>
+        <div class="config-help">选择「跳过当前迭代继续」时，循环仍会执行完毕并从「完成」端口继续，可在后续节点中读取 loopErrors 处理失败记录。循环节点不支持「忽略并继续」。</div>
       </div>
       <div id="retryFieldsLoop" style="display:none">
         <div class="config-field"><div class="config-label">重试次数</div><input class="config-input" type="number" value="3" min="1" max="10" style="width:100px"></div>
@@ -4884,6 +5441,72 @@ body {
 
 <!-- end config-panel for loop -->
 </div><!-- panel-loop end -->
+
+<!-- ===== Break 节点 ===== -->
+<div class="node-panel" id="panel-break" style="display:none">
+<div class="config-panel">
+  <div class="config-panel-header">
+    <div class="config-panel-icon" style="background:var(--node-logic);color:var(--node-logic-fg)">⏹️</div>
+    <div style="flex:1;min-width:0"><input class="config-node-name-input" value="Break" maxlength="50"><div class="config-panel-code" onclick="startEditCode(this)" title="点击修改节点编码">break_1 <span style="font-size:9px;opacity:0.5">✏️</span></div></div>
+    <button onclick="toggleNodeDesc2('breakDesc')" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:16px;padding:4px" title="折叠说明">?</button>
+  </div>
+  <div class="node-desc-box open" id="breakDesc">
+      <div style="margin-bottom:6px"><strong>定义：</strong>循环中断节点，执行到此处时立即终止整个循环，包括当前迭代和所有后续迭代，流程从循环节点的「中断」端口往下继续执行。</div>
+      <div style="margin-bottom:4px"><strong>适用场景：</strong></div>
+      <ul style="margin:0 0 6px 16px;padding:0;list-style:disc">
+        <li>遍历库存列表时，发现某条库存为 0 就没必要继续处理后面的条目</li>
+        <li>按次数重试时，某次成功后提前结束剩余重试</li>
+        <li>条件循环中遇到特定状态时立刻跳出，不再等待条件自然变为 false</li>
+      </ul>
+      <div style="margin-bottom:4px"><strong>使用规则：</strong></div>
+      <ul style="margin:0 0 2px 16px;padding:0;list-style:disc">
+        <li>只能放在循环体内，通常连接在 IF 节点的某个分支后</li>
+        <li>执行 Break 后，已完成的迭代结果保留在 loopResult 中</li>
+      </ul>
+    </div>
+  <div style="padding:12px 18px 16px">
+    <div style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:color-mix(in srgb,var(--success,#22c55e) 10%,transparent);border:1px solid color-mix(in srgb,var(--success,#22c55e) 30%,transparent);border-radius:6px;color:color-mix(in srgb,var(--success,#22c55e) 80%,var(--text-secondary));font-size:12px">
+      <span style="font-size:14px">✅</span>
+      <span>此节点无需配置，放入循环体后即可生效</span>
+    </div>
+  </div>
+</div>
+
+<!-- end config-panel for break -->
+</div><!-- panel-break end -->
+
+<!-- ===== Continue 节点 ===== -->
+<div class="node-panel" id="panel-continue" style="display:none">
+<div class="config-panel">
+  <div class="config-panel-header">
+    <div class="config-panel-icon" style="background:var(--node-logic);color:var(--node-logic-fg)">⏭️</div>
+    <div style="flex:1;min-width:0"><input class="config-node-name-input" value="Continue" maxlength="50"><div class="config-panel-code" onclick="startEditCode(this)" title="点击修改节点编码">continue_1 <span style="font-size:9px;opacity:0.5">✏️</span></div></div>
+    <button onclick="toggleNodeDesc2('continueDesc')" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:16px;padding:4px" title="折叠说明">?</button>
+  </div>
+  <div class="node-desc-box open" id="continueDesc">
+      <div style="margin-bottom:6px"><strong>定义：</strong>循环跳过节点，执行到此处时跳过循环体内后续所有节点，循环直接进入下一次迭代（条件循环会重新判断循环条件）。本次迭代不计入错误。</div>
+      <div style="margin-bottom:4px"><strong>适用场景：</strong></div>
+      <ul style="margin:0 0 6px 16px;padding:0;list-style:disc">
+        <li>遍历订单列表时，跳过金额为负的异常记录，继续处理其余订单</li>
+        <li>遍历用户列表时，跳过已停用的账号，只对活跃账号执行操作</li>
+        <li>按次数循环时，某次结果不符合预期就跳过，不影响后续次数</li>
+      </ul>
+      <div style="margin-bottom:4px"><strong>使用规则：</strong></div>
+      <ul style="margin:0 0 2px 16px;padding:0;list-style:disc">
+        <li>只能放在循环体内，通常连接在 IF 节点的某个分支后</li>
+        <li>跳过的迭代不产生 loopErrors 记录，也不计入成功结果</li>
+      </ul>
+    </div>
+  <div style="padding:12px 18px 16px">
+    <div style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:color-mix(in srgb,var(--success,#22c55e) 10%,transparent);border:1px solid color-mix(in srgb,var(--success,#22c55e) 30%,transparent);border-radius:6px;color:color-mix(in srgb,var(--success,#22c55e) 80%,var(--text-secondary));font-size:12px">
+      <span style="font-size:14px">✅</span>
+      <span>此节点无需配置，放入循环体后即可生效</span>
+    </div>
+  </div>
+</div>
+
+<!-- end config-panel for continue -->
+</div><!-- panel-continue end -->
 
 <!-- ===== 延迟节点 ===== -->
 <div class="node-panel" id="panel-delay" style="display:none">
@@ -5244,7 +5867,6 @@ body {
 <!-- ===== HTTP 请求节点 ===== -->
 <div class="node-panel" id="panel-http" style="display:none">
 
-<div style="padding:12px 0 4px;font-size:12px;color:var(--text-muted)">HTTP 请求节点完整交互演示已收录于「<strong>配置面板通用</strong>」Tab，以下为独立面板呈现：</div>
 <div class="config-panel">
   <div class="config-panel-header">
     <div class="config-panel-icon" style="background:var(--node-integration);color:var(--node-integration-fg)">🌐</div>
@@ -5290,11 +5912,64 @@ body {
           <button class="expr-editor-insert-btn" title="插入变量" onclick="insertVarToExprEditor(this)">T</button>
         </div>
       </div>
-      <div class="config-help">支持变量引用，如 https://api.example.com/orders/${trigger_1.orderId}</div>
     </div>
-    <div class="config-field"><div class="config-label">请求方法 <span class="req">*</span></div><div class="method-chips"><div class="method-chip" onclick="toggleChip(this)">GET</div><div class="method-chip" onclick="toggleChip(this)">POST</div><div class="method-chip" onclick="toggleChip(this)">PUT</div><div class="method-chip" onclick="toggleChip(this)">DELETE</div><div class="method-chip" onclick="toggleChip(this)">PATCH</div></div></div>
+    <div class="config-field">
+      <div class="config-label">请求方法 <span class="req">*</span></div>
+      <div class="method-chips" id="http2MethodChips">
+        <div class="method-chip" onclick="selectMethod(this,'GET','http2BodyField')">GET</div>
+        <div class="method-chip" onclick="selectMethod(this,'POST','http2BodyField')">POST</div>
+        <div class="method-chip" onclick="selectMethod(this,'PUT','http2BodyField')">PUT</div>
+        <div class="method-chip" onclick="selectMethod(this,'DELETE','http2BodyField')">DELETE</div>
+        <div class="method-chip" onclick="selectMethod(this,'PATCH','http2BodyField')">PATCH</div>
+      </div>
+      <!-- 挂起等待回调：整体卡片，开关与展开内容视觉上强关联 -->
+      <div style="margin-top:10px;border-radius:8px;border:1px solid var(--border);overflow:hidden">
+        <div style="padding:8px 12px;background:rgba(245,246,250,0.6)">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:12px;color:var(--text);font-weight:500">⏸ 挂起等待回调</span>
+            <label class="cb-toggle">
+              <input type="checkbox" id="http2CallbackToggle" onchange="toggleCallbackFields('http2CallbackFields',this.checked)">
+              <span style="font-size:12px;color:var(--text-secondary)">开启</span>
+            </label>
+          </div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:2px">发完请求后立即挂起，等外部系统回调后继续执行</div>
+        </div>
+        <div id="http2CallbackFields" class="callback-expand-box" style="display:none;padding:10px 12px;background:var(--surface);border-top:1px solid var(--border)">
+          <div class="config-field" style="margin-top:0">
+            <div class="config-label">回调 URL <span style="font-size:10px;font-weight:400;color:var(--text-muted)">（只读，自动生成）</span></div>
+            <div style="display:flex;align-items:center;gap:6px">
+              <input class="config-input" value="https://beaver.example.com/callback/abc123..." readonly style="background:var(--surface);color:var(--text-secondary);font-family:var(--font-mono);font-size:11px;flex:1">
+              <button style="padding:5px 10px;font-size:11px;border:1px solid var(--border);border-radius:6px;background:var(--surface);cursor:pointer;color:var(--text-muted)">复制</button>
+            </div>
+            <div class="config-help">外部系统需 POST 到此地址以恢复流程执行</div>
+          </div>
+          <div class="config-field" style="margin-bottom:0">
+            <div class="config-label">回调超时时间（小时）</div>
+            <input class="config-input" type="number" value="24" min="1" max="720" style="width:100px">
+            <div class="config-help">超时未收到回调，触发高级配置中的异常策略，默认 24 小时</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Query Params：默认折叠，无参数时只显示添加链接 -->
+    <div class="config-field">
+      <div class="config-label">Query Params</div>
+      <div id="http2QueryParamsList">
+        <!-- 默认空，点击 + 添加参数 后插入行 -->
+      </div>
+      <div class="add-link" onclick="addKvRow('http2QueryParamsList',true)">+ 添加参数</div>
+      <div class="config-help">运行时自动拼接到 URL 后，无需手动写 ? 和 &amp;</div>
+    </div>
     <div class="config-field">
       <div class="config-label">Headers</div>
+      <div id="http2HeadersList">
+      </div>
+      <div class="add-link" onclick="addKvRow('http2HeadersList',true)">+ 添加 Header</div>
+      <div class="config-help">如 Content-Type、Authorization 等</div>
+    </div>
+    <!-- Body 字段：仅 POST/PUT/PATCH 时显示 -->
+    <div class="config-field" id="http2BodyField" style="display:none">
+      <div class="config-label">Body</div>
       <div class="expr-editor">
         <div class="expr-editor-header">
           <div class="expr-editor-tabs">
@@ -5304,15 +5979,50 @@ body {
           <span class="expr-editor-hint">支持 {{变量}} 插入</span>
         </div>
         <div class="expr-editor-body">
-          <textarea class="expr-editor-input" placeholder="Content-Type: application/json" rows="1">Content-Type: application/json</textarea>
+          <textarea class="expr-editor-input" placeholder='{"orderId": "${trigger_1.orderId}"}' rows="3"></textarea>
           <button class="expr-editor-insert-btn" title="插入变量" onclick="insertVarToExprEditor(this)">T</button>
+        </div>
+      </div>
+      <div class="config-help">支持 JSON / 表单 / 原始文本；仅 POST / PUT / PATCH 请求可用</div>
+    </div>
+    <!-- 超时时间 -->
+    <div class="config-field">
+      <div class="config-label">超时时间（秒）</div>
+      <input class="config-input" type="number" value="30" min="1" max="3600" style="width:100px">
+      <div class="config-help">默认 30 秒，慢接口建议适当调大</div>
+    </div>
+    <!-- 输出变量 -->
+    <div class="config-field" style="background:rgba(59,130,246,0.03);border-radius:8px;padding:12px 14px;border:1px solid rgba(59,130,246,0.1);margin-top:8px">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
+        <span style="font-size:13px;font-weight:600;color:var(--text)">📤 输出变量</span>
+        <span style="font-size:11px;color:var(--text-muted)">下游节点可通过以下路径引用</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px">
+          <code style="background:var(--surface);padding:2px 6px;border-radius:4px;font-family:var(--font-mono);color:var(--primary);font-size:11px">${http_1.response.status_code}</code>
+          <span style="color:var(--text-secondary)">HTTP 响应状态码</span>
+          <span style="font-size:10px;color:var(--text-muted);background:var(--surface);padding:1px 5px;border-radius:3px">Number</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px">
+          <code style="background:var(--surface);padding:2px 6px;border-radius:4px;font-family:var(--font-mono);color:var(--primary);font-size:11px">${http_1.response.body}</code>
+          <span style="color:var(--text-secondary)">响应体（JSON 自动解析为对象，其他为字符串）</span>
+          <span style="font-size:10px;color:var(--text-muted);background:var(--surface);padding:1px 5px;border-radius:3px">String | Object</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px">
+          <code style="background:var(--surface);padding:2px 6px;border-radius:4px;font-family:var(--font-mono);color:var(--primary);font-size:11px">${http_1.response.headers}</code>
+          <span style="color:var(--text-secondary)">响应头键值对</span>
+          <span style="font-size:10px;color:var(--text-muted);background:var(--surface);padding:1px 5px;border-radius:3px">Object</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px">
+          <code style="background:var(--surface);padding:2px 6px;border-radius:4px;font-family:var(--font-mono);color:var(--primary);font-size:11px">${http_1.callback_data}</code>
+          <span style="color:var(--text-secondary)">挂起回调模式下外部系统传入的数据（普通模式为空）</span>
+          <span style="font-size:10px;color:var(--text-muted);background:var(--surface);padding:1px 5px;border-radius:3px">Any</span>
         </div>
       </div>
     </div>
   </div><!-- tabBasicBody-http2 end -->
   <div id="tabAdvBody-http2" style="display:none">
     <div class="config-section">
-      <div class="config-field"><div class="config-label">超时时间（秒）</div><input class="config-input" type="number" value="30" style="width:100px"></div>
       <div class="config-field">
         <div class="config-label">异常策略</div>
         <select class="config-input" style="font-size:12px" onchange="toggleErrorStrategy('http2',this.value)">
@@ -5349,6 +6059,7 @@ body {
       </div>
     </div>
   </div><!-- tabAdvBody-http2 end -->
+
 </div>
 </div><!-- panel-http end -->
 
@@ -5357,24 +6068,27 @@ body {
 <div class="config-panel">
   <div class="config-panel-header">
     <div class="config-panel-icon" style="background:var(--node-integration);color:var(--node-integration-fg)">📨</div>
-    <div style="flex:1;min-width:0"><input class="config-node-name-input" value="MQ 发送" maxlength="50"><div class="config-panel-code" onclick="startEditCode(this)" title="点击修改节点编码">mq_1 <span style="font-size:9px;opacity:0.5">✏️</span></div></div>
-    <button style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:11px;padding:4px" onclick="showNodeConvertModal('mq','MQ 发送')" title="切换节点类型">🔄</button>
+    <div style="flex:1;min-width:0"><input class="config-node-name-input" value="MQ 节点" maxlength="50"><div class="config-panel-code" onclick="startEditCode(this)" title="点击修改节点编码">mq_1 <span style="font-size:9px;opacity:0.5">✏️</span></div></div>
+    <button style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:11px;padding:4px" onclick="showNodeConvertModal('mq','MQ 节点')" title="切换节点类型">🔄</button>
     <button class="ai-guide-recall-btn" style="display:none" onclick="nodeAiRecall('mq')" title="重新展开 AI 引导">✦ AI 引导</button>
     <button onclick="toggleNodeDesc2('mqDesc')" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:16px;padding:4px" title="节点说明">?</button>
   </div>
   <div class="node-desc-box" id="mqDesc">
-      <div style="margin-bottom:6px"><strong>定义：</strong>向消息队列（Message Queue）投递消息，支持配置 Topic、消息内容、消息 Key 和属性，适用于异步解耦和事件通知场景。</div>
+      <div style="margin-bottom:6px"><strong>定义：</strong>消息队列发送节点，用于将消息发布到指定的 Kafka 集群或 RabbitMQ 服务，支持发送后流程继续执行（即发即走）和发送后挂起等待下游回调（挂起模式）两种工作方式。</div>
       <div style="margin-bottom:4px"><strong>适用场景：</strong></div>
       <ul style="margin:0 0 6px 16px;padding:0;list-style:disc">
-        <li>发布业务事件通知，如「订单创建事件」「支付完成事件」</li>
-        <li>推送数据变更通知，如「用户信息变更」「库存更新」</li>
-        <li>异步解耦，将耗时操作异步化，如发送邮件、生成报表</li>
+        <li>订单完成后将"订单已下单"事件发到库存系统的队列，库存系统自行处理扣减（即发即走）</li>
+        <li>流程中需要通知下游多个系统做不同的处理，透过队列广播</li>
+        <li>发送消息后需要等待下游处理完成并回调才继续执行后续流程（挂起模式）</li>
+        <li>将流程结果路由到指定的消费者服务进行异步处理</li>
       </ul>
       <div style="margin-bottom:4px"><strong>使用规则：</strong></div>
       <ul style="margin:0 0 2px 16px;padding:0;list-style:disc">
-        <li>Topic 为必填项，消息内容支持引用上游变量</li>
-        <li>消息 Key 用于分区路由和去重，建议在需要顺序消费或去重时配置</li>
-        <li>投递后不等待消费结果，如需等待请使用 HTTP 请求节点的回调模式</li>
+        <li>MQ 类型、MQ 实例、消息内容是必填项</li>
+        <li>RabbitMQ 类型下，目标队列和路由键也是必填项</li>
+        <li>Kafka 类型下，目标 Topic 由系统配置决定，不需要也不能在此处指定</li>
+        <li>即发即走模式：消息发送后流程立即继续，不等待消费方处理结果</li>
+        <li>挂起模式：消息发送后流程暂停，等待外部系统通过回调 URL 返回结果后才继续</li>
       </ul>
     </div>
   <div id="aiGuideContainer-mq"></div>
@@ -5384,22 +6098,49 @@ body {
     <div id="tabAdv-mq" onclick="nodeTab('mq','adv')" style="padding:6px 14px;font-size:12px;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px">高级配置</div>
   </div>
   <div id="tabBasicBody-mq">
+    <!-- MQ 类型 -->
     <div class="config-field">
-      <div class="config-label">目标队列/Topic <span class="req">*</span></div>
-      <div class="expr-editor">
-        <div class="expr-editor-header">
-          <div class="expr-editor-tabs">
-            <span class="expr-editor-tab active">表达式</span>
-            <span class="expr-editor-tab">高阶</span>
-          </div>
-          <span class="expr-editor-hint">支持 {{变量}} 插入</span>
-        </div>
-        <div class="expr-editor-body">
-          <textarea class="expr-editor-input" placeholder="order-events" rows="1">order-events</textarea>
-          <button class="expr-editor-insert-btn" title="插入变量" onclick="insertVarToExprEditor(this)">T</button>
-        </div>
-      </div>
+      <div class="config-label">MQ 类型 <span class="req">*</span></div>
+      <select class="config-input" style="font-size:12px" id="mqTypeSelect" onchange="onMqTypeChange(this.value)">
+        <option value="" selected>请选择 MQ 类型</option>
+        <option value="kafka">Kafka</option>
+        <option value="rabbitmq">RabbitMQ</option>
+      </select>
     </div>
+    <!-- MQ 实例 -->
+    <div class="config-field">
+      <div class="config-label">MQ 实例 <span class="req">*</span></div>
+      <select class="config-input" style="font-size:12px">
+        <option value="" selected>请选择 MQ 实例</option>
+        <option>订单中心 Kafka 集群</option>
+        <option>通知服务 RabbitMQ</option>
+      </select>
+    </div>
+    <!-- 目标队列（仅 RabbitMQ） -->
+    <div class="config-field" id="mqRabbitQueueField" style="display:none">
+      <div class="config-label">目标队列 <span class="req">*</span></div>
+      <input class="config-input" placeholder="order" value="order">
+      <div class="config-help">RabbitMQ 目标队列名称</div>
+    </div>
+    <!-- 路由键（仅 RabbitMQ） -->
+    <div class="config-field" id="mqRabbitRoutingKeyField" style="display:none">
+      <div class="config-label">路由键 <span class="req">*</span></div>
+      <div style="position:relative">
+        <input class="config-input" placeholder="created" value="created" style="padding-right:30px">
+        <button style="position:absolute;right:6px;top:50%;transform:translateY(-50%);width:22px;height:22px;border:none;background:rgba(79,70,229,0.08);color:var(--primary);border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;padding:0" title="插入变量" onclick="insertVarToInput(this)">T</button>
+      </div>
+      <div class="config-help">与目标队列拼合为完整路由键，如 order.created</div>
+    </div>
+    <!-- 分区键（仅 Kafka） -->
+    <div class="config-field" id="mqKafkaPartitionKeyField" style="display:none">
+      <div class="config-label">分区键</div>
+      <div style="position:relative">
+        <input class="config-input" placeholder="${trigger_1.orderId}" style="padding-right:30px">
+        <button style="position:absolute;right:6px;top:50%;transform:translateY(-50%);width:22px;height:22px;border:none;background:rgba(79,70,229,0.08);color:var(--primary);border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;padding:0" title="插入变量" onclick="insertVarToInput(this)">T</button>
+      </div>
+      <div class="config-help">相同分区键的消息投递到同一分区，不填时自动分配</div>
+    </div>
+    <!-- 消息内容 -->
     <div class="config-field">
       <div class="config-label">消息内容 <span class="req">*</span></div>
       <div class="expr-editor">
@@ -5411,15 +6152,70 @@ body {
           <span class="expr-editor-hint">支持 {{变量}} 插入</span>
         </div>
         <div class="expr-editor-body">
-          <textarea class="expr-editor-input" placeholder='{"orderId": "...", "status": "..."}' rows="3">{"orderId": "${trigger_1.orderId}", "status": "${assign_1.status}"}</textarea>
+          <textarea class="expr-editor-input" placeholder='{"orderId": "...", "status": "..."}' rows="3">{"orderId": "${trigger_1.orderId}", "amount": ${trigger_1.amount}}</textarea>
           <button class="expr-editor-insert-btn" title="插入变量" onclick="insertVarToExprEditor(this)">T</button>
+        </div>
+      </div>
+      <div class="config-help">消费方收到的是包含此内容的消息信封（CloudEvent 格式），具体解包方式请与技术同事确认</div>
+    </div>
+    <!-- 消息属性 -->
+    <div class="config-field">
+      <div class="config-label">消息属性</div>
+      <div id="mqMessageAttrsList">
+      </div>
+      <div class="add-link" onclick="addKvRow('mqMessageAttrsList',true)">+ 添加属性</div>
+      <div class="config-help">附加在消息信封上的元数据，可被消费方用于过滤路由</div>
+    </div>
+    <!-- 挂起等待回调 -->
+    <div style="margin-top:10px;border-radius:8px;border:1px solid var(--border);overflow:hidden">
+      <div style="padding:8px 12px;background:rgba(245,246,250,0.6)">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:12px;color:var(--text);font-weight:500">⏸ 挂起等待回调</span>
+          <label class="cb-toggle">
+            <input type="checkbox" id="mqCallbackToggle" onchange="toggleCallbackFields('mqCallbackFields',this.checked)">
+            <span style="font-size:12px;color:var(--text-secondary)">开启</span>
+          </label>
+        </div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:2px">发送消息后流程暂停，等待消费方通过回调 URL 返回结果后才继续。默认关闭（即发即走）</div>
+      </div>
+      <div id="mqCallbackFields" class="callback-expand-box" style="display:none;padding:10px 12px;background:var(--surface);border-top:1px solid var(--border)">
+        <div class="config-field" style="margin-top:0">
+          <div class="config-label">回调 URL <span style="font-size:10px;font-weight:400;color:var(--text-muted)">（只读，自动生成）</span></div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <input class="config-input" value="https://beaver.example.com/callback/abc123..." readonly style="background:var(--surface);color:var(--text-secondary);font-family:var(--font-mono);font-size:11px;flex:1">
+            <button style="padding:5px 10px;font-size:11px;border:1px solid var(--border);border-radius:6px;background:var(--surface);cursor:pointer;color:var(--text-muted)">复制</button>
+          </div>
+          <div class="config-help">消费方处理完成后需将结果 POST 到此地址，工作流才会恢复执行</div>
+        </div>
+        <div class="config-field" style="margin-bottom:0">
+          <div class="config-label">回调超时时间（小时）</div>
+          <input class="config-input" type="number" value="24" min="1" max="720" style="width:100px">
+          <div class="config-help">超时未收到回调，触发高级配置中的异常策略，默认 24 小时</div>
+        </div>
+      </div>
+    </div>
+    <!-- 输出变量 -->
+    <div class="config-field" style="background:rgba(59,130,246,0.03);border-radius:8px;padding:12px 14px;border:1px solid rgba(59,130,246,0.1);margin-top:8px">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
+        <span style="font-size:13px;font-weight:600;color:var(--text)">📤 输出变量</span>
+        <span style="font-size:11px;color:var(--text-muted)">下游节点可通过以下路径引用</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px">
+          <code style="background:var(--surface);padding:2px 6px;border-radius:4px;font-family:var(--font-mono);color:var(--primary);font-size:11px">${mq_1.send_success}</code>
+          <span style="color:var(--text-secondary)">消息是否成功投递到 MQ Broker</span>
+          <span style="font-size:10px;color:var(--text-muted);background:var(--surface);padding:1px 5px;border-radius:3px">Boolean</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px">
+          <code style="background:var(--surface);padding:2px 6px;border-radius:4px;font-family:var(--font-mono);color:var(--primary);font-size:11px">${mq_1.callback_data}</code>
+          <span style="color:var(--text-secondary)">挂起模式下消费方回调传入的数据（即发即走模式为空）</span>
+          <span style="font-size:10px;color:var(--text-muted);background:var(--surface);padding:1px 5px;border-radius:3px">Any</span>
         </div>
       </div>
     </div>
   </div><!-- tabBasicBody-mq end -->
   <div id="tabAdvBody-mq" style="display:none">
     <div class="config-section">
-      <div class="config-field"><div class="config-label">超时时间（秒）</div><input class="config-input" type="number" value="30" style="width:100px"></div>
       <div class="config-field">
         <div class="config-label">异常策略</div>
         <select class="config-input" style="font-size:12px" onchange="toggleErrorStrategy('mq',this.value)">
@@ -6348,6 +7144,22 @@ function insertVarToExprEditor(btn) {
   }
 }
 
+// ===== Insert variable into plain input (Query Params Value etc.) =====
+function insertVarToInput(btn) {
+  var input = btn.previousElementSibling;
+  if (!input || input.tagName !== 'INPUT') return;
+  showSharedVarPicker(btn, function(path, type) {
+    var start = input.selectionStart || input.value.length;
+    var end = input.selectionEnd || input.value.length;
+    var before = input.value.substring(0, start);
+    var after = input.value.substring(end);
+    input.value = before + path + after;
+    input.focus();
+    var pos = before.length + path.length;
+    input.setSelectionRange(pos, pos);
+  });
+}
+
 // ===== Switch 全局匹配变量同步 =====
 function getSwitchMatchVarDisplay() {
   var globalEditor = document.querySelector('#tabBasicBody-switch .dual-mode-editor');
@@ -6464,7 +7276,7 @@ function specNav(el, anchorId) {
 
 // 内容区滚动时自动高亮对应导航项
 (function() {
-  var anchors = ['cpn-flow','cpn-trigger-examples','cpn-end-examples','cpn-if-examples','cpn-switch-examples','cpn-data','cpn-output-examples','cpn-code-examples','cpn-integration','cpn-title-edit','cpn-error-state','cpn-run-state'];
+  var anchors = ['cpn-trigger-examples','cpn-end-examples','cpn-if-examples','cpn-switch-examples','cpn-output-examples','cpn-code-examples','cpn-http-examples','cpn-title-edit','cpn-error-state','cpn-run-state'];
   function updateCpnActive() {
     var contentArea = document.getElementById('canvasContentArea');
     var nav = document.getElementById('canvasSideNav');
@@ -6722,23 +7534,155 @@ function toggleFallbackMode(el) {
 function nodeTab(nodeId, tab) {
   const basicBody = document.getElementById('tabBasicBody-' + nodeId);
   const advBody = document.getElementById('tabAdvBody-' + nodeId);
+  const debugBody = document.getElementById('tabDebugBody-' + nodeId);
   const tabBasic = document.getElementById('tabBasic-' + nodeId);
   const tabAdv = document.getElementById('tabAdv-' + nodeId);
+  const tabDebug = document.getElementById('tabDebug-' + nodeId);
   if (!basicBody) return;
+
+  // Hide all bodies
+  basicBody.style.display = 'none';
+  if (advBody) advBody.style.display = 'none';
+  if (debugBody) debugBody.style.display = 'none';
+
+  // Reset all tabs
+  if (tabBasic) { tabBasic.style.borderBottomColor = 'transparent'; tabBasic.style.color = 'var(--text-muted)'; tabBasic.style.fontWeight = 'normal'; }
+  if (tabAdv) { tabAdv.style.borderBottomColor = 'transparent'; tabAdv.style.color = 'var(--text-muted)'; tabAdv.style.fontWeight = 'normal'; }
+  if (tabDebug) { tabDebug.style.borderBottomColor = 'transparent'; tabDebug.style.color = 'var(--text-muted)'; tabDebug.style.fontWeight = 'normal'; }
+
+  // Activate selected tab
   if (tab === 'basic') {
     basicBody.style.display = '';
-    if (advBody) advBody.style.display = 'none';
-    tabBasic.style.borderBottomColor = 'var(--primary)';
-    tabBasic.style.color = 'var(--primary)';
-    tabBasic.style.fontWeight = '600';
-    if (tabAdv) { tabAdv.style.borderBottomColor = 'transparent'; tabAdv.style.color = 'var(--text-muted)'; tabAdv.style.fontWeight = 'normal'; }
-  } else {
-    basicBody.style.display = 'none';
+    if (tabBasic) { tabBasic.style.borderBottomColor = 'var(--primary)'; tabBasic.style.color = 'var(--primary)'; tabBasic.style.fontWeight = '600'; }
+  } else if (tab === 'adv') {
     if (advBody) advBody.style.display = '';
     if (tabAdv) { tabAdv.style.borderBottomColor = 'var(--primary)'; tabAdv.style.color = 'var(--primary)'; tabAdv.style.fontWeight = '600'; }
-    tabBasic.style.borderBottomColor = 'transparent';
-    tabBasic.style.color = 'var(--text-muted)';
-    tabBasic.style.fontWeight = 'normal';
+  } else if (tab === 'debug') {
+    if (debugBody) debugBody.style.display = '';
+    if (tabDebug) { tabDebug.style.borderBottomColor = 'var(--primary)'; tabDebug.style.color = 'var(--primary)'; tabDebug.style.fontWeight = '600'; }
+  }
+}
+
+// ===== HTTP 节点模拟调试交互函数 =====
+function selectDebugStatus(el, code) {
+  var chips = el.parentNode.querySelectorAll('.method-chip');
+  chips.forEach(function(c) { c.classList.remove('active'); });
+  el.classList.add('active');
+}
+
+function applyDebugScene(scene) {
+  var headersEl = document.getElementById('http2DebugHeaders');
+  var bodyEl = document.getElementById('http2DebugBody');
+  var chips = document.getElementById('http2DebugStatusChips');
+  if (!headersEl || !bodyEl) return;
+
+  var scenes = {
+    success: {
+      status: 200,
+      headers: '{"Content-Type": "application/json", "X-Request-ID": "req-success-001"}',
+      body: '{"result": "approved", "data": {"orderId": "ORD-2024-001", "status": "confirmed", "timestamp": "2024-05-15T14:32:10Z"}}'
+    },
+    empty: {
+      status: 200,
+      headers: '{"Content-Type": "application/json"}',
+      body: '{}'
+    },
+    retry: {
+      status: 503,
+      headers: '{"Content-Type": "application/json", "Retry-After": "5"}',
+      body: '{"error": "ServiceUnavailable", "message": "服务器繁忙，请稍后重试", "retryable": true}'
+    },
+    error: {
+      status: 400,
+      headers: '{"Content-Type": "application/json", "X-Error-Code": "INVALID_PARAM"}',
+      body: '{"error": "BadRequest", "message": "参数校验失败：orderId 不能为空", "details": [{"field": "orderId", "issue": "required"}]}'
+    }
+  };
+
+  var s = scenes[scene];
+  if (!s) return;
+
+  headersEl.value = s.headers;
+  bodyEl.value = s.body;
+
+  if (chips) {
+    chips.querySelectorAll('.method-chip').forEach(function(c) {
+      c.classList.remove('active');
+      var onclickStr = c.getAttribute('onclick') || '';
+      if (onclickStr.indexOf(',' + s.status + ')') > -1) {
+        c.classList.add('active');
+      }
+    });
+  }
+}
+
+function submitDebugCallback() {
+  var bodyEl = document.getElementById('http2DebugBody');
+  var headersEl = document.getElementById('http2DebugHeaders');
+  var body = bodyEl ? bodyEl.value.trim() : '';
+  var headers = headersEl ? headersEl.value.trim() : '';
+
+  try {
+    if (body) JSON.parse(body);
+    if (headers) JSON.parse(headers);
+  } catch (e) {
+    alert('JSON 格式错误，请检查响应头或响应体：' + e.message);
+    return;
+  }
+
+  var logPreview = document.querySelector('.debug-log-preview');
+  if (logPreview) {
+    var now = new Date();
+    var ts = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0') + ':' + String(now.getSeconds()).padStart(2,'0') + '.' + String(now.getMilliseconds()).padStart(3,'0');
+    var entry = document.createElement('div');
+    entry.className = 'debug-log-entry';
+    entry.innerHTML = '<span class="debug-log-time">' + ts + '</span><span class="debug-log-level level-info">INFO</span><span class="debug-log-msg">✓ 模拟回调已提交，节点恢复执行</span>';
+    logPreview.appendChild(entry);
+    logPreview.scrollTop = logPreview.scrollHeight;
+  }
+
+  var statusBanner = document.querySelector('.debug-status-indicator');
+  if (statusBanner) {
+    statusBanner.className = 'debug-status-indicator state-success';
+    statusBanner.querySelector('.debug-status-text').textContent = '✓ 回调已提交，节点恢复执行';
+  }
+}
+
+function simulateDebugTimeout() {
+  var logPreview = document.querySelector('.debug-log-preview');
+  if (logPreview) {
+    var now = new Date();
+    var ts = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0') + ':' + String(now.getSeconds()).padStart(2,'0') + '.' + String(now.getMilliseconds()).padStart(3,'0');
+    var entry = document.createElement('div');
+    entry.className = 'debug-log-entry';
+    entry.innerHTML = '<span class="debug-log-time">' + ts + '</span><span class="debug-log-level level-error">ERROR</span><span class="debug-log-msg">⏱ 模拟超时：回调等待时间已超过配置的超时阈值</span>';
+    logPreview.appendChild(entry);
+    logPreview.scrollTop = logPreview.scrollHeight;
+  }
+
+  var statusBanner = document.querySelector('.debug-status-indicator');
+  if (statusBanner) {
+    statusBanner.className = 'debug-status-indicator state-failed';
+    statusBanner.querySelector('.debug-status-text').textContent = '⏱ 模拟超时已触发';
+  }
+}
+
+function terminateDebug() {
+  var logPreview = document.querySelector('.debug-log-preview');
+  if (logPreview) {
+    var now = new Date();
+    var ts = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0') + ':' + String(now.getSeconds()).padStart(2,'0') + '.' + String(now.getMilliseconds()).padStart(3,'0');
+    var entry = document.createElement('div');
+    entry.className = 'debug-log-entry';
+    entry.innerHTML = '<span class="debug-log-time">' + ts + '</span><span class="debug-log-level level-error">ERROR</span><span class="debug-log-msg">✕ 调试已终止</span>';
+    logPreview.appendChild(entry);
+    logPreview.scrollTop = logPreview.scrollHeight;
+  }
+
+  var statusBanner = document.querySelector('.debug-status-indicator');
+  if (statusBanner) {
+    statusBanner.className = 'debug-status-indicator state-failed';
+    statusBanner.querySelector('.debug-status-text').textContent = '✕ 调试已终止';
   }
 }
 
@@ -7006,17 +7950,56 @@ function toggleAdvanced(key) {
 
 // ===== HTTP Method Select =====
 let currentMethod = '';
-function selectMethod(el, method) {
-  document.querySelectorAll('#methodChips .method-chip').forEach(c => {
-    c.className = 'method-chip';
-  });
+function selectMethod(el, method, bodyFieldId) {
+  const parent = el.closest('.method-chips');
+  if (parent) {
+    parent.querySelectorAll('.method-chip').forEach(c => c.className = 'method-chip');
+  }
   el.classList.add(method === 'GET' ? 'active-get' : 'active-post');
   currentMethod = method;
-  const bodyField = document.getElementById('bodyField');
+  const bodyField = document.getElementById(bodyFieldId || 'bodyField');
   if (bodyField) {
     bodyField.style.display = ['POST','PUT','PATCH'].includes(method) ? 'block' : 'none';
   }
   updateSummary();
+}
+
+// ===== KV Row Helper (Query Params 添加行) =====
+function addKvRow(listId, withVarBtn) {
+  const list = document.getElementById(listId);
+  if (!list) return;
+  const row = document.createElement('div');
+  row.className = 'kv-row';
+  if (withVarBtn) {
+    row.innerHTML = `<input class="config-input" placeholder="Key" style="flex:1;min-width:0">
+      <span style="color:var(--text-muted);font-size:11px;padding:0 2px">=</span>
+      <div style="flex:2;min-width:0;position:relative">
+        <input class="config-input" placeholder="Value 或 \${变量}" style="width:100%;padding-right:30px">
+        <button style="position:absolute;right:6px;top:50%;transform:translateY(-50%);width:22px;height:22px;border:none;background:rgba(79,70,229,0.08);color:var(--primary);border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;padding:0" title="插入变量" onclick="insertVarToInput(this)">T</button>
+      </div>
+      <button class="kv-row-del" onclick="this.closest('.kv-row').remove()" title="删除">×</button>`;
+  } else {
+    row.innerHTML = `<input class="config-input" placeholder="Key" style="flex:1;min-width:0">
+      <span style="color:var(--text-muted);font-size:11px;padding:0 2px">=</span>
+      <input class="config-input" placeholder="Value 或 \${变量}" style="flex:2;min-width:0">
+      <button class="kv-row-del" onclick="this.closest('.kv-row').remove()" title="删除">×</button>`;
+  }
+  list.appendChild(row);
+}
+
+// ===== Toggle Callback Fields (挂起等待回调展开) =====
+function toggleCallbackFields(fieldsId, show) {
+  const fields = document.getElementById(fieldsId);
+  if (fields) fields.style.display = show ? 'block' : 'none';
+}
+
+function onMqTypeChange(type) {
+  const queueField = document.getElementById('mqRabbitQueueField');
+  const routingKeyField = document.getElementById('mqRabbitRoutingKeyField');
+  const partitionKeyField = document.getElementById('mqKafkaPartitionKeyField');
+  if (queueField) queueField.style.display = type === 'rabbitmq' ? '' : 'none';
+  if (routingKeyField) routingKeyField.style.display = type === 'rabbitmq' ? '' : 'none';
+  if (partitionKeyField) partitionKeyField.style.display = type === 'kafka' ? '' : 'none';
 }
 
 function updateSummary() {
@@ -7906,14 +8889,15 @@ function delBranch(btn) {
 
 // ===== Loop Mode Switch =====
 function switchLoopMode(mode, btn) {
-  document.querySelectorAll('#sec3 .method-chip').forEach(c => {
-    if (c.onclick && c.onclick.toString().includes('switchLoopMode')) c.classList.remove('active');
-  });
+  const chips = btn.closest('.method-chips');
+  if (chips) chips.querySelectorAll('.method-chip').forEach(c => c.classList.remove('active'));
   btn.classList.add('active');
   const fe = document.getElementById('loopForeachFields');
   const wh = document.getElementById('loopWhileFields');
+  const fo = document.getElementById('loopForFields');
   if (fe) fe.style.display = mode === 'foreach' ? 'block' : 'none';
   if (wh) wh.style.display = mode === 'while' ? 'block' : 'none';
+  if (fo) fo.style.display = mode === 'for' ? 'block' : 'none';
 }
 
 // ===== Delay Mode Switch =====
