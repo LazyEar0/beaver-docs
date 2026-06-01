@@ -4119,7 +4119,7 @@ body {
 <!-- ===== 意图识别节点 ===== -->
 <div id="cpn-intent-examples" class="cpn-anchor"></div>
 <div class="category-label" style="margin-top:24px">意图识别节点 — 画布卡片摘要场景示例</div>
-<p class="section-desc" style="margin-top:-4px">摘要显示意图数量和输入文本，格式为 <code>识别 {intent_count} 个意图 · {input_text_short}</code>。</p>
+<p class="section-desc" style="margin-top:-4px">每条意图对应卡片右侧一个输出端口，最底部固定一个兜底端口（灰色）。摘要格式为 <code>识别 {intent_count} 个意图 · {input_text_short}</code>。</p>
 <div class="canvas-bg">
 <div class="nodes-row" style="flex-wrap:wrap;gap:16px 12px">
 
@@ -4135,7 +4135,20 @@ body {
           <div class="node-summary-text" style="color:var(--warning)">⚠ 未完成配置</div>
         </div>
         <div class="port port-in"></div>
-        <div class="port port-out"></div>
+        <div class="switch-branches">
+          <div class="switch-port-row">
+            <span class="switch-port-label" style="opacity:0.45">意图A</span>
+            <div class="port" style="position:relative;right:-7px;border-style:dashed;opacity:0.45"></div>
+          </div>
+          <div class="switch-port-row">
+            <span class="switch-port-label" style="opacity:0.45">意图B</span>
+            <div class="port" style="position:relative;right:-7px;border-style:dashed;opacity:0.45"></div>
+          </div>
+          <div class="switch-port-row">
+            <span class="switch-port-label branch-default" style="opacity:0.45">兜底</span>
+            <div class="port" style="position:relative;right:-7px;border-color:var(--text-muted);border-style:dashed;opacity:0.45"></div>
+          </div>
+        </div>
       </div>
     </div>
     <div style="font-size:11px;color:var(--text-muted);text-align:center">未配置</div>
@@ -4153,7 +4166,24 @@ body {
           <div class="node-summary-text">识别 3 个意图 · 用户输入消息</div>
         </div>
         <div class="port port-in"></div>
-        <div class="port port-out"></div>
+        <div class="switch-branches">
+          <div class="switch-port-row">
+            <span class="switch-port-label">查询订单</span>
+            <div class="port" style="position:relative;right:-7px"></div>
+          </div>
+          <div class="switch-port-row">
+            <span class="switch-port-label">申请退款</span>
+            <div class="port" style="position:relative;right:-7px"></div>
+          </div>
+          <div class="switch-port-row">
+            <span class="switch-port-label">投诉反馈</span>
+            <div class="port" style="position:relative;right:-7px"></div>
+          </div>
+          <div class="switch-port-row">
+            <span class="switch-port-label branch-default">兜底</span>
+            <div class="port" style="position:relative;right:-7px;border-color:var(--text-muted)"></div>
+          </div>
+        </div>
       </div>
     </div>
     <div style="font-size:11px;color:var(--text-muted);text-align:center">已配置 · 3 个意图</div>
@@ -4171,13 +4201,106 @@ body {
           <div class="node-summary-text">识别 3 个意图 · 用户输入消息</div>
         </div>
         <div class="port port-in"></div>
-        <div class="port port-out"></div>
+        <div class="switch-branches">
+          <div class="switch-port-row">
+            <span class="switch-port-label">查询订单</span>
+            <div class="port" style="position:relative;right:-7px"></div>
+          </div>
+          <div class="switch-port-row">
+            <span class="switch-port-label">申请退款</span>
+            <div class="port" style="position:relative;right:-7px"></div>
+          </div>
+          <div class="switch-port-row">
+            <span class="switch-port-label">投诉反馈</span>
+            <div class="port" style="position:relative;right:-7px"></div>
+          </div>
+          <div class="switch-port-row">
+            <span class="switch-port-label branch-default">兜底</span>
+            <div class="port" style="position:relative;right:-7px;border-color:var(--text-muted)"></div>
+          </div>
+        </div>
       </div>
     </div>
     <div style="font-size:11px;color:var(--text-muted);text-align:center">运行中</div>
   </div>
 
+  <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+    <div class="node-wrap">
+      <div class="canvas-node state-success">
+        <div class="canvas-node-header">
+          <div class="canvas-node-icon" style="background:var(--node-logic);color:var(--node-logic-fg)">🎯</div>
+          <div class="canvas-node-title">用户意图</div>
+        </div>
+        <div class="canvas-node-body">
+          <div class="node-code-tag">intent_1</div>
+          <div class="node-summary-text">识别 3 个意图 · 用户输入消息</div>
+          <div class="node-summary-text" style="margin-top:2px;color:var(--success);font-size:10px">→ 走「查询订单」分支</div>
+        </div>
+        <div class="port port-in"></div>
+        <div class="switch-branches">
+          <div class="switch-port-row">
+            <span class="switch-port-label branch-hit">查询订单</span>
+            <div class="port branch-hit" style="position:relative;right:-7px"></div>
+          </div>
+          <div class="switch-port-row">
+            <span class="switch-port-label">申请退款</span>
+            <div class="port" style="position:relative;right:-7px"></div>
+          </div>
+          <div class="switch-port-row">
+            <span class="switch-port-label">投诉反馈</span>
+            <div class="port" style="position:relative;right:-7px"></div>
+          </div>
+          <div class="switch-port-row">
+            <span class="switch-port-label branch-default">兜底</span>
+            <div class="port" style="position:relative;right:-7px;border-color:var(--text-muted)"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="font-size:11px;color:var(--text-muted);text-align:center">执行完成 · 命中「查询订单」</div>
+  </div>
+
 </div></div>
+
+<div class="category-label" style="margin-top:20px">意图识别节点 — 分支连线示意</div>
+<p class="section-desc" style="margin-top:-4px">每条意图端口直接连接对应的下游节点，无需额外 Switch 节点。</p>
+<div class="canvas-bg">
+<div class="flow-demo">
+  <div class="mini-node"><div class="mini-node-icon" style="background:var(--node-trigger);color:var(--node-trigger-fg)">⚡</div>开始节点</div>
+  <div class="flow-arrow"></div>
+  <div class="mini-node"><div class="mini-node-icon" style="background:var(--node-logic);color:var(--node-logic-fg)">🎯</div>用户意图</div>
+  <div class="branch-block">
+    <div class="branch-row">
+      <div class="branch-tag" style="background:rgba(108,99,255,0.12);color:var(--primary)">查询订单</div>
+      <span style="font-size:16px;color:var(--primary)">→</span>
+      <div class="mini-node"><div class="mini-node-icon" style="background:var(--node-integration);color:var(--node-integration-fg)">🌐</div>查询订单详情</div>
+      <div class="flow-arrow"></div>
+      <div class="mini-node"><div class="mini-node-icon" style="background:var(--node-end);color:var(--node-end-fg)">🏁</div>结束</div>
+    </div>
+    <div class="branch-row">
+      <div class="branch-tag" style="background:rgba(108,99,255,0.12);color:var(--primary)">申请退款</div>
+      <span style="font-size:16px;color:var(--primary)">→</span>
+      <div class="mini-node"><div class="mini-node-icon" style="background:var(--node-logic);color:var(--node-logic-fg)">🔗</div>退款子流程</div>
+      <div class="flow-arrow"></div>
+      <div class="mini-node"><div class="mini-node-icon" style="background:var(--node-end);color:var(--node-end-fg)">🏁</div>结束</div>
+    </div>
+    <div class="branch-row">
+      <div class="branch-tag" style="background:rgba(108,99,255,0.12);color:var(--primary)">投诉反馈</div>
+      <span style="font-size:16px;color:var(--primary)">→</span>
+      <div class="mini-node"><div class="mini-node-icon" style="background:var(--node-integration);color:var(--node-integration-fg)">👤</div>转人工客服</div>
+      <div class="flow-arrow"></div>
+      <div class="mini-node"><div class="mini-node-icon" style="background:var(--node-end);color:var(--node-end-fg)">🏁</div>结束</div>
+    </div>
+    <div class="branch-row">
+      <div class="branch-tag" style="background:var(--surface-dim);color:var(--text-muted)">兜底</div>
+      <span style="font-size:16px;color:var(--text-muted)">→</span>
+      <div class="mini-node"><div class="mini-node-icon" style="background:var(--node-ai);color:var(--node-ai-fg)">🤖</div>通用回复</div>
+      <div class="flow-arrow"></div>
+      <div class="mini-node"><div class="mini-node-icon" style="background:var(--node-end);color:var(--node-end-fg)">🏁</div>结束</div>
+    </div>
+  </div>
+</div>
+</div>
 
 <!-- ===== 知识库检索节点 ===== -->
 <div id="cpn-kb-examples" class="cpn-anchor"></div>
@@ -7616,8 +7739,8 @@ body {
     <ul style="margin:0 0 2px 16px;padding:0;list-style:disc">
       <li>至少需要配置一条意图</li>
       <li>每条意图的名称在同一节点内必须唯一，用于标识识别结果</li>
-      <li>识别结果（意图名称）作为参数输出，建议配合下游 Switch 节点按意图做分支路由</li>
-      <li>若输入文本无法匹配任何意图，将触发兜底意图（若未配置则 intent 输出为 null）</li>
+      <li>每条意图对应卡片右侧一个输出端口，运行时识别到该意图后从对应端口流出，可直接连接下游节点</li>
+      <li>若输入文本无法匹配任何意图，从兜底端口流出（未配置兜底意图名称时 intent 输出为 null）</li>
     </ul>
   </div>
   <div class="config-section">
